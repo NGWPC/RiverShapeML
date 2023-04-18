@@ -60,7 +60,7 @@ class FilterADCP:
         lon_point_list = [-127.56, -128.79, -61.47, -69.64, -127.56]
         boundary_geom = Polygon(zip(lon_point_list, lat_point_list))
         adcp_gdf = adcp_gdf[adcp_gdf.geometry.within(boundary_geom)]
-        print('Number of unique stations: {0}\n'.format(len(adcp_gdf.site_no.unique())))
+        print('Number of unique stations: {0}\n'.format(len(adcp_gdf.siteID.unique())))
         adcp_gdf = adcp_gdf[['siteID','lat','long','station_nm']]
 
         # Write 
