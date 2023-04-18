@@ -2,6 +2,8 @@
 import datetime
 import pyarrow.parquet as pq
 import pandas as pd
+import geopandas as gpd
+from shapely.geometry import Polygon
 import numpy as np
 
 class FilterADCP:
@@ -45,13 +47,24 @@ class FilterADCP:
                             'station_nm','dec_lat_va','dec_long_va',
                             'meas_q_va','stream_wdth_va','max_depth_va']]
         print('ADCP shape after filttering time: {0}'.format(adcp_date.shape))
-        print('Number of unique stations: {0}\n'.format(len(adcp_date.site_no.unique())))
 
-        # Groupby and write 
-        agg_adcp = adcp_date.groupby('site_no').min().reset_index().rename(columns={'site_no': 'siteID', 'dec_lat_va': 'lat', 'dec_long_va':'long'})
+        # Groupby 
+        agg_adcp = adcp_date.groupby('site_no').max().reset_index().rename(columns={'site_no': 'siteID', 'dec_lat_va': 'lat', 'dec_long_va':'long'})
         agg_adcp = agg_adcp[['siteID','lat','long','station_nm']]
         print(agg_adcp.head())
-        agg_adcp.to_parquet('data/station_ids.parquet')
+
+        # Just CONUS
+        adcp_gdf = gpd.GeoDataFrame(
+            agg_adcp, geometry=gpd.points_from_xy(agg_adcp.long, agg_adcp.lat))
+        lat_point_list = [22.02, 49.84, 47.75, 23.8, 22.02]
+        lon_point_list = [-127.56, -128.79, -61.47, -69.64, -127.56]
+        boundary_geom = Polygon(zip(lon_point_list, lat_point_list))
+        adcp_gdf = adcp_gdf[adcp_gdf.geometry.within(boundary_geom)]
+        print('Number of unique stations: {0}\n'.format(len(adcp_gdf.site_no.unique())))
+        adcp_gdf = adcp_gdf[['siteID','lat','long','station_nm']]
+
+        # Write 
+        adcp_gdf.to_parquet('data/station_ids.parquet')
         print('wrote to ``station_ids.parquet``')
 
 class RunFiltering:
