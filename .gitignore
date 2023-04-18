@@ -6,6 +6,26 @@ __pycache__/
 # C extensions
 *.so
 
+# Files
+*test*.py
+*test*.ipynb
+*copy.py
+*copy.ipynb
+*Training.png
+*nhd.ipynb
+*.sqlite
+data/SWOT_ADCP_Dataset.xlsx
+Untitled-1
+
+# Folders
+Literature/*
+gbmodel/*
+img/*
+model/*
+cache/**
+**/cache
+test*/*
+
 # Distribution / packaging
 .Python
 build/
@@ -127,3 +147,4 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+.Rproj.user
