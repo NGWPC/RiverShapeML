@@ -26,14 +26,14 @@ class FilterADCP:
 
     def filterData(self):
         # read ADCP and ignor timestamp
-        adcp = pq.read_table('/mnt/d/Lynker/FEMA_HECRAS/bankfull_W_D/data/adcp.parquet').to_pandas(safe=False)
+        adcp = pd.read_parquet('/mnt/d/Lynker/FEMA_HECRAS/bankfull_W_D/data/adcp.parquet', engine='pyarrow')
         print('Number of unique datums: {0}'.format(adcp['coord_datum_cd'].unique()))
         print('Visual check for timestamps: {0}\n'.format( adcp['site_visit_start_dt'].min()))
 
         # Remove NAN
         adcp_nona = adcp.dropna(subset=['site_no','dec_lat_va','dec_long_va','stream_wdth_va','max_depth_va'])
         adcp_nona = adcp_nona[['site_no','site_visit_start_dt',
-                            'q_meas_dt','station_nm','dec_lat_va','dec_long_va',
+                            'station_nm','dec_lat_va','dec_long_va',
                             'coord_datum_cd','meas_q_va','stream_wdth_va','max_depth_va']]
         print('ADCP shape after NAN removal: {0}\n'.format(adcp_nona.shape))
         
