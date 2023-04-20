@@ -8,3 +8,5 @@ A machine learning approach for estimation of bankfull width and depth
 ```shell
 python3 ./preprocess/filter_adcp.py
 ```
+The spatial distribution of these stations is shown below:
+<img src="https://https://github.com/arashmodrad/bankfull_W_D/tree/main/images/stations.png" alt="drawing" width="800"/>
