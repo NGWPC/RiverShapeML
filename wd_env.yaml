@@ -1,4 +1,4 @@
-name: ml-model
+name: WD-model
 channels:
   - conda-forge
   - defaults
@@ -43,6 +43,7 @@ dependencies:
     - llvmlite==0.39.1
     - progressbar==2.5
     - lazypredict==0.2.12
+    - hydrotools-nwis-client==3.2.1
     # - libllvm11==11.1.0
     # - libllvm15==15.0.7
     # - tensorflow==2.3.0
