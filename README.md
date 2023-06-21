@@ -8,6 +8,12 @@ A machine learning approach for estimation of bankfull width and depth
 ```shell
 python3 ./preprocess/filter_adcp.py
 ```
+
+filttering GEE data
+
+```shell
+python3 ./preprocess/gee_exports.py
+```
 The spatial distribution of these stations is shown below:
 
 <img src="https://github.com/arashmodrad/bankfull_W_D/images/raw/main/stations.png" alt="drawing" width="800"/>
