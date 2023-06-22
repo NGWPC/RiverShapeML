@@ -11,6 +11,8 @@ bad$VPUID = vpu_boundaries$VPUID[ind]
 
 pts = bind_rows(filter(pois, !is.na(VPUID)), bad)
 
+sum(duplicated(pts$siteID)) == 0
+
 pattern = '/Volumes/Transcend/ngen/CONUS-hydrofabric/01_reference/reference_{vpu}.gpkg'
 
 v = unique(pts$VPUID)
@@ -25,35 +27,72 @@ for(i in 1:length(v)){
     select(COMID, siteID = Type_Gages) %>% 
     filter(!is.na(siteID)) %>% 
     st_transform(st_crs(fl)) %>% 
-    rename_geometry("geometry")
+    rename_geometry("geometry") %>% 
+    filter(siteID %in% pts$siteID)
+  
+  sum(duplicated(mappedPOI$COMID)) == 0
+  sum(duplicated(mappedPOI$siteID)) == 0
   
   tmp = filter(pts, VPUID == v[i]) %>% 
     st_transform(st_crs(fl))
   
-  left_over = filter(tmp, !siteID %in% mappedPOI$siteID) %>% 
+  need_to_map = filter(tmp, !siteID %in% mappedPOI$siteID) %>% 
     rename_geometry("geometry")
   
-  good_to_go = filter(mappedPOI, siteID %in% tmp$siteID)
-
   mat = get_flowline_index(fl, 
-                           left_over, 
+                           need_to_map, 
                            search_radius = units::set_units(200, "m"))
   
-  mat$siteID = tmp$siteID[mat$id]
+  mat$siteID = need_to_map$siteID[mat$id]
   
-  ll[[i]] = mat %>% 
+  tmp2 = mat %>% 
     select(COMID, siteID) %>% 
     left_join(select(fl, COMID), by = "COMID") %>% 
     st_as_sf() %>% 
     mutate(geom = st_geometry(get_node(.))) %>% 
     rename_geometry("geometry") %>% 
-    bind_rows(good_to_go)
+    bind_rows(mappedPOI)
+
+
+  sum(duplicated(tmp2$siteID)) == 0
+  
+  ll[[i]] = tmp2
   
   message(i)
 }
 
 
 
-xx = bind_rows(ll)
+xx = bind_rows(ll) %>% 
+  st_join(st_transform(vpu_boundaries, 5070)) %>% 
+  select(COMID, siteID, VPUID)
 
-write_sf(xx, "data/indexed_stations.gpkg")
+write_sf(xx, "data/site_index.gpkg", "sites")
+
+
+# Part 2 ------------------------------------------------------------------
+
+sites = read_sf("data/site_index.gpkg", "sites")
+ll = list()
+
+for(i in 1:length(v)){
+  
+  x  = glue(pattern, vpu = v[i])
+  
+  div = read_sf(x, "reference_catchment") %>% 
+    mutate(VPU = v[i])
+  
+  ll[[i]] = filter(div, FEATUREID %in% sites$COMID)
+  
+  message(i)
+}
+
+
+write_sf(bind_rows(ll), "data/site_index.gpkg", "divides")
+
+
+
+
+pts = read_sf("data/indexed_stations.gpkg")
+
+sum(duplicated(xx$siteID))
