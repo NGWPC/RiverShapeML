@@ -59,7 +59,7 @@ class FloodFreq:
         adcp_nona['date'] =  pd.to_datetime(adcp_nona['site_visit_start_dt'], format='%Y-%m-%d')
         adcp_nona['date'] = adcp_nona['date'].dt.date
         adcp_nona['date'] =  pd.to_datetime(adcp_nona['date'], format='%Y-%m-%d')
-        adcp_date = adcp_nona.loc[(adcp_nona['date']>='2010-01-01')].reset_index()
+        adcp_date = adcp_nona.copy()#loc[(adcp_nona['date']>='2010-01-01')].reset_index()
                                 
         adcp_date = adcp_date[['site_no','date',
                             'station_nm','dec_lat_va','dec_long_va',
@@ -108,14 +108,41 @@ class FloodFreq:
             value_time_label="value_time",
             enable_cache=True
         )
-        observations_data = service.get(
-            sites=siteID,
-            startDT='1920-01-01',
-            endDT='2023-01-01'
-            )
-        observations_data['value'] = observations_data['value'].astype(float)
-        observations_data = observations_data.loc[observations_data['value']>= 0]
+
+        def seccondQuery(siteID):
+            url = 'https://waterdata.usgs.gov/nwis/measurements?site_no='+siteID+'&agency_cd=USGS&format=rdb_expanded'
+            response = requests.get(url, allow_redirects=True).content
+            response = response.decode('utf-8')
+            response = response[response.find('\nagency'):]
+            fixed_str = response.replace('\t',',')
+            try:
+                observations_data = pd.read_csv(io.StringIO(fixed_str), sep=',', on_bad_lines='skip')
+            except:
+                # station not available 
+                return None # None, None, None 
+            observations_data.drop(index=observations_data.index[0], axis=0, inplace=True)
+            observations_data = observations_data[['measurement_dt','discharge_va']].rename(columns={'measurement_dt': 'value_time', 'discharge_va': 'value'})
+            observations_data['value_time']= pd.to_datetime(observations_data['value_time'])
+            observations_data['value'] = observations_data['value'].astype(float)
+            observations_data = observations_data.loc[observations_data['value']>= 0]
+            return observations_data
         
+        try:
+            observations_data = service.get(
+                sites=siteID,
+                startDT='1920-01-01',
+                endDT='2023-01-01'
+                )
+            observations_data['value'] = observations_data['value'].astype(float)
+            observations_data = observations_data.loc[observations_data['value']>= 0]
+            flag = 0
+        except:
+            observations_data = seccondQuery(siteID)
+            if observations_data is None:
+                return None, None, None, 4
+            flag = 1
+            unit = ['ft3/s']
+
         # define the true objective function
         def objective(x:float, a:float, b:float, f:float) -> float:
             return (a * x) + (b * x**2) + f
@@ -133,29 +160,18 @@ class FloodFreq:
             return annual_max
 
         # get data if hydrotools fail
-        if len(observations_data) == 0:
+        if len(observations_data) == 0 or flag == 1:
+            observations_data = seccondQuery(siteID)
             flag = 1
-            url = 'https://waterdata.usgs.gov/nwis/measurements?site_no='+siteID+'&agency_cd=USGS&format=rdb_expanded'
-            response = requests.get(url, allow_redirects=True).content
-            response = response.decode('utf-8')
-            response = response[response.find('\nagency'):]
-            fixed_str = response.replace('\t',',')
-            try:
-                observations_data = pd.read_csv(io.StringIO(fixed_str), sep=',', on_bad_lines='skip')
-            except:
-                # station not available 
-                return None, None, None 
-            observations_data.drop(index=observations_data.index[0], axis=0, inplace=True)
             unit = ['ft3/s']
-            observations_data = observations_data[['measurement_dt','discharge_va']].rename(columns={'measurement_dt': 'value_time', 'discharge_va': 'value'})
-            observations_data['value_time']= pd.to_datetime(observations_data['value_time'])
-            observations_data['value'] = observations_data['value'].astype(float)
-            observations_data = observations_data.loc[observations_data['value']>= 0]
+            if observations_data is None:
+                return None, None, None, 4
             annual_max = annualMax(observations_data)
             
             # if it only has 2 year reccord
             if len(annual_max) == 2: 
                 flag = 2 #01053680
+                unit = 'ft3/s'
                 def objective(x, a, b):
                     return (a * x) + b 
                 popt, _ = curve_fit(objective, annual_max['RI'], annual_max['value'])
