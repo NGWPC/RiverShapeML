@@ -54,13 +54,14 @@ class DataLoader:
         custom_name = 'test', x_transform = False, y_transform = False, R2_thresh = 0.0)
         
     """
-    def __init__(self, data_path: str, adcp_data_path: str, rand_state: int, out_feature: str, 
+    def __init__(self, data_path: str, target_data_path: str, rand_state: int, out_feature: str, 
                  custom_name: str, x_transform: bool = False, 
                  y_transform: bool = False, R2_thresh: float = 0.0) -> None:
         pd.options.display.max_columns  = 60
         self.data_path                  = data_path
-        self.adcp_data_path             = adcp_data_path
+        self.target_data_path           = target_data_path
         self.data                       = pd.DataFrame([])
+        self.data_target                       = pd.DataFrame([])
         self.rand_state                 = rand_state
         np.random.seed(self.rand_state)
         self.in_features                = []
@@ -83,9 +84,16 @@ class DataLoader:
         try:
             self.data = pd.read_parquet(self.data_path, engine='pyarrow')
             self.data.astype({'siteID': 'string'})
+            self.data_target = pd.read_parquet(self.target_data_path, engine='pyarrow')
+            self.data_target.astype({'siteID': 'string'})
         except:
             print('Wrong address or data format. Please use parquet file.')   
         
+        # ___________________________________________________
+        # Merge data and prepare targets
+        self.data_target = self.data_target[set(self.data_target) - set(['lat','long'])]
+        self.data = pd.merge(self.data_target, self.data, on='siteID', how = 'inner')
+
         # ___________________________________________________
         # Filter bad stations
         adcp = pd.read_parquet(self.adcp_data_path, engine='pyarrow')
