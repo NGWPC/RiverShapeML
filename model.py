@@ -184,7 +184,9 @@ class MlModel:
         """
         # Check if it is a weighted learning
         if weighted:
-            y_weights = abs(self.train_y - self.train_y.mean())+0.1
+            t_y = pickle.load(open(self.custom_name+'/model/'+'train_y_'+out_features+'_tansformation.pkl', "rb"))
+            temp = t_y.inverse_transform(self.train_y.reshape(-1,1)).ravel()
+            y_weights = abs(temp - temp.mean())+0.1
         else: 
             y_weights = None
         fit_params = dict(sample_weight=y_weights)#, base_margin=np.abs(self.train_x[:, 1]))
@@ -405,7 +407,9 @@ class MlModel:
         # Check witch models are used with weights and fit
         eval_set = [(self.x_train, self.y_train), (self.x_eval, self.y_eval)]
         if weighted:
-            y_weights = abs(self.y_train - self.y_train.mean())+0.1
+            t_y = pickle.load(open(self.custom_name+'/model/'+'train_y_'+out_features+'_tansformation.pkl', "rb"))
+            temp = t_y.inverse_transform(self.y_train.reshape(-1,1)).ravel()
+            y_weights = abs(temp - temp.mean())+0.1
         else: 
             y_weights = None
         fit_params = dict(sample_weight=y_weights)
@@ -461,7 +465,8 @@ class MlModel:
         # base_model.append(('orth', temp))
 
 
-        top_model = RandomForestRegressor(random_state=self.rand_state, n_jobs=nthreads)#ExtraTreesRegressor(random_state=self.rand_state, n_jobs=nthreads)#LinearRegression()
+        top_model = RandomForestRegressor(random_state=self.rand_state, n_jobs=nthreads,
+                                          max_depth=9, max_features='log2', max_samples=0.6, n_estimators=13000)#ExtraTreesRegressor(random_state=self.rand_state, n_jobs=nthreads)#LinearRegression()
         voting_model = VotingRegressor(estimators=base_model, n_jobs=nthreads)
         meta_model = StackingRegressor(estimators=base_model, final_estimator=top_model, cv=5, 
                                        passthrough=True, n_jobs=nthreads)
