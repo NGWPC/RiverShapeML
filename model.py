@@ -5,10 +5,10 @@ def warn(*args, **kwargs):
 import warnings
 warnings.warn = warn
 
-import ml_data_loader as dataloader
-import ml_feature_importance as fimp
-import ml_plot as pml
-import ml_comp_plot as pcml
+import data_loader as dataloader
+import feature_importance as fimp
+# import plot as pml
+# import comp_plot as pcml
 from sklearn.model_selection import train_test_split, RepeatedKFold, GridSearchCV
 from sklearn.ensemble import ExtraTreesRegressor, BaggingRegressor, RandomForestRegressor, HistGradientBoostingRegressor, StackingRegressor, VotingRegressor
 from sklearn.svm import SVR
@@ -132,7 +132,8 @@ class MlModel:
                  sample_type = "Sub")
         """
         # Bulid an instance of DataLoader object
-        data_loader = dataloader.DataLoader(data_path='data/Processed_merged_fhg.parquet',
+        data_loader = dataloader.DataLoader(data_path='data/width_predictor_test.parquet',
+                                            target_data_path='data/width_target.parquet',
                                             rand_state=self.rand_state, 
                                             # in_features=self.in_features, 
                                             out_feature=out_feature, 
@@ -569,96 +570,97 @@ class RunMlModel:
         x_transform = eval(argv[2])
         y_transform = eval(argv[3])
         R2_thresh   = float(argv[4])
-        space       = 'actual_space' # actual_space / test_space
+        space       = 'test_space' # actual_space / test_space
         val_method  = "Fit" # "Fit" / "Observed"
         SI          = False # SI system
-        sample_type = "Sub" #"All", "Sub", "test"
+        sample_type = "All" #"All", "Sub", "test"
         weighted    = False
         # List of traget varaibles
-        temp        = json.load(open('data/ml_model_feature_names.json'))
-        del temp
+        # temp        = json.load(open('data/ml_model_feature_names.json'))
+        # del temp
 
         # ___________________________________________________
         # Bulid an instance of MlModel object and itterate through targets
         model = MlModel(custom_name) 
         # temporary holder
-        target = "TW"
+        target = "TW_bf"
         
         # ___________________________________________________
         # Train models 
         print('\n******************* modeling parameter {0} starts here *******************\n'.format(target))
         model.loadData(out_feature=target, x_transform=x_transform,
                             y_transform=y_transform, R2_thresh=R2_thresh, sample_type=sample_type)     
-        best_model, best_params, best_models = model.findBestParams(out_features=target, nthreads=nthreads, 
-                                                                                space=space, weighted=weighted)
-        ml_model, voting_model, meta_model, train_x, train_y, _, _, = model.runMlModel(best_model=best_model, best_params=best_params, 
-                                            best_models=best_models, weighted=weighted, out_features=target, nthreads=nthreads)
+        print('end')
+        # best_model, best_params, best_models = model.findBestParams(out_features=target, nthreads=nthreads, 
+        #                                                                         space=space, weighted=weighted)
+        # ml_model, voting_model, meta_model, train_x, train_y, _, _, = model.runMlModel(best_model=best_model, best_params=best_params, 
+        #                                     best_models=best_models, weighted=weighted, out_features=target, nthreads=nthreads)
         
-        # print('\n----------------- Results for best model -------------------\n')
+        # # print('\n----------------- Results for best model -------------------\n')
+        # # # ___________________________________________________
+        # # # # plot best model fit
+        # plot_obj = pml.PlotMlFit(train_id=model.train_sub_id, eval_id=model.eval_id, test_id=model.test_id,
+        #                             x_train=model.x_train, x_eval=model.x_eval, test_x=model.test_x,
+        #                             y_train=model.y_train, y_eval=model.y_eval, test_y=model.test_y,
+        #                             best_model=best_model, loaded_model=ml_model, 
+        #                             x_transform=x_transform, y_transform=y_transform,
+        #                             out_features=target, custom_name=custom_name, val_method=val_method, SI=SI)
+        # plot_obj.processData()
+        # adcp = plot_obj.processADCP()
+        # b_metrics, b_pred_df = plot_obj.plotMetrics(adcp, 'Best_Model')
+
+        # print('\n----------------- Results for vote model -------------------\n')
         # # ___________________________________________________
-        # # # plot best model fit
-        plot_obj = pml.PlotMlFit(train_id=model.train_sub_id, eval_id=model.eval_id, test_id=model.test_id,
-                                    x_train=model.x_train, x_eval=model.x_eval, test_x=model.test_x,
-                                    y_train=model.y_train, y_eval=model.y_eval, test_y=model.test_y,
-                                    best_model=best_model, loaded_model=ml_model, 
-                                    x_transform=x_transform, y_transform=y_transform,
-                                    out_features=target, custom_name=custom_name, val_method=val_method, SI=SI)
-        plot_obj.processData()
-        adcp = plot_obj.processADCP()
-        b_metrics, b_pred_df = plot_obj.plotMetrics(adcp, 'Best_Model')
+        # # plot voting model fit
+        # best_model = 'vote'
+        # plot_obj = pml.PlotMlFit(train_id=model.train_sub_id, eval_id=model.eval_id, test_id=model.test_id,
+        #                             x_train=model.x_train, x_eval=model.x_eval, test_x=model.test_x,
+        #                             y_train=model.y_train, y_eval=model.y_eval, test_y=model.test_y,
+        #                             best_model=best_model, loaded_model=voting_model, 
+        #                             x_transform=x_transform, y_transform=y_transform,
+        #                             out_features=target, custom_name=custom_name, val_method=val_method, SI=SI)
+        # plot_obj.processData()
+        # adcp = plot_obj.processADCP()
+        # v_metrics, v_pred_df = plot_obj.plotMetrics(adcp, 'Vote_Model')
 
-        print('\n----------------- Results for vote model -------------------\n')
-        # ___________________________________________________
-        # plot voting model fit
-        best_model = 'vote'
-        plot_obj = pml.PlotMlFit(train_id=model.train_sub_id, eval_id=model.eval_id, test_id=model.test_id,
-                                    x_train=model.x_train, x_eval=model.x_eval, test_x=model.test_x,
-                                    y_train=model.y_train, y_eval=model.y_eval, test_y=model.test_y,
-                                    best_model=best_model, loaded_model=voting_model, 
-                                    x_transform=x_transform, y_transform=y_transform,
-                                    out_features=target, custom_name=custom_name, val_method=val_method, SI=SI)
-        plot_obj.processData()
-        adcp = plot_obj.processADCP()
-        v_metrics, v_pred_df = plot_obj.plotMetrics(adcp, 'Vote_Model')
-
-        print('\n----------------- Results for meta model -------------------\n')
-        # ___________________________________________________
-        # plot meta model fit
-        best_model = 'meta'
-        plot_obj = pml.PlotMlFit(train_id=model.train_sub_id, eval_id=model.eval_id, test_id=model.test_id,
-                                    x_train=model.x_train, x_eval=model.x_eval, test_x=model.test_x,
-                                    y_train=model.y_train, y_eval=model.y_eval, test_y=model.test_y,
-                                    best_model=best_model, loaded_model=meta_model, 
-                                    x_transform=x_transform, y_transform=y_transform,
-                                    out_features=target, custom_name=custom_name, val_method=val_method, SI=SI)
-        plot_obj.processData()
-        adcp = plot_obj.processADCP()
-        m_metrics, m_pred_df = plot_obj.plotMetrics(adcp, 'Meta_Model')
+        # print('\n----------------- Results for meta model -------------------\n')
+        # # ___________________________________________________
+        # # plot meta model fit
+        # best_model = 'meta'
+        # plot_obj = pml.PlotMlFit(train_id=model.train_sub_id, eval_id=model.eval_id, test_id=model.test_id,
+        #                             x_train=model.x_train, x_eval=model.x_eval, test_x=model.test_x,
+        #                             y_train=model.y_train, y_eval=model.y_eval, test_y=model.test_y,
+        #                             best_model=best_model, loaded_model=meta_model, 
+        #                             x_transform=x_transform, y_transform=y_transform,
+        #                             out_features=target, custom_name=custom_name, val_method=val_method, SI=SI)
+        # plot_obj.processData()
+        # adcp = plot_obj.processADCP()
+        # m_metrics, m_pred_df = plot_obj.plotMetrics(adcp, 'Meta_Model')
         
-        print('\n----------------- Comparison plots -------------------\n')
-        # ___________________________________________________
-        # Comparison plots
-        plot_comp_obj = pcml.PlotComp(b_metric=b_metrics, v_metric=v_metrics, m_metric=m_metrics,
-                        b_df=b_pred_df, v_df=v_pred_df, m_df=m_pred_df, 
-                        out_features=target, custom_name=custom_name)
-        plot_comp_obj.processData()
-        plot_comp_obj.plotComparisons()
+        # print('\n----------------- Comparison plots -------------------\n')
+        # # ___________________________________________________
+        # # Comparison plots
+        # plot_comp_obj = pcml.PlotComp(b_metric=b_metrics, v_metric=v_metrics, m_metric=m_metrics,
+        #                 b_df=b_pred_df, v_df=v_pred_df, m_df=m_pred_df, 
+        #                 out_features=target, custom_name=custom_name)
+        # plot_comp_obj.processData()
+        # plot_comp_obj.plotComparisons()
 
-        print('\n----------------- Feature importance -------------------\n')
-        # ___________________________________________________
-        # plot feature importance
-        try:
-            fimp_object = fimp.FeatureImportance(custom_name, best_model)
-            fimp_object.plotImportance(model=ml_model, out_features=target,
-                                        train_x=train_x, train_y=train_y)
-            fimp_object.plotShapImportance(model=ml_model, out_features=target, 
-                                            train_x=train_x)
-        except Exception as e:       
-            print("An exception occurred due to shap internal errors!")  
-            print(e)      
-        print('\n**************** modeling parameter {0} ends here ****************\n'.format(target))
+        # print('\n----------------- Feature importance -------------------\n')
+        # # ___________________________________________________
+        # # plot feature importance
+        # try:
+        #     fimp_object = fimp.FeatureImportance(custom_name, best_model)
+        #     fimp_object.plotImportance(model=ml_model, out_features=target,
+        #                                 train_x=train_x, train_y=train_y)
+        #     fimp_object.plotShapImportance(model=ml_model, out_features=target, 
+        #                                     train_x=train_x)
+        # except Exception as e:       
+        #     print("An exception occurred due to shap internal errors!")  
+        #     print(e)      
+        # print('\n**************** modeling parameter {0} ends here ****************\n'.format(target))
 
 if __name__ == "__main__":
-    # RunMlModel.main(['test2', -1, "True", "True", 0.8])
-    RunMlModel.main(sys.argv[1:])
+    RunMlModel.main(['test2', -1, "False", "False", 0.0])
+    # RunMlModel.main(sys.argv[1:])
 
