@@ -1,4 +1,4 @@
-name: WD-model
+name: WD-env
 channels:
   - conda-forge
   - defaults

@@ -18,8 +18,8 @@ class DataLoader:
     ----------
     data_path : str
         The path to data that is used in ML model
-    adcp_data_path : str
-        The path to processed adcp data that is used in ML model
+    target_data_path : str
+        The path to target widt/depth data that is used in ML model
     rand_state : int
         A random state number
     out_feature : str
@@ -91,16 +91,16 @@ class DataLoader:
         
         # ___________________________________________________
         # Merge data and prepare targets
-        self.data_target = self.data_target[set(self.data_target) - set(['lat','long'])]
+        self.data_target = self.data_target[set(self.data_target) - set(['lat','long','meas_q_va','stream_wdth_va','max_depth_va'])]
         self.data = pd.merge(self.data_target, self.data, on='siteID', how = 'inner')
 
         # ___________________________________________________
         # Filter bad stations
-        adcp = pd.read_parquet(self.adcp_data_path, engine='pyarrow')
-        adcp.astype({'siteID': 'string'})
+        target_df = pd.read_parquet(self.target_data_path, engine='pyarrow')
+        target_df.astype({'siteID': 'string'})
         
         r2_epochs = np.arange(0, 1.05, 0.05)
-        grouped_r2 = adcp.groupby('siteID').agg('mean')
+        grouped_r2 = target_df.groupby('siteID').agg('mean')
         count_list = [len(grouped_r2)]
         for epoch in r2_epochs:
             count_Y = len(grouped_r2.loc[grouped_r2['R2']>=epoch])
@@ -151,8 +151,8 @@ class DataLoader:
             >>> splitData("All")
         """
         if sample_type == "All":
-            temp = json.load(open('data/ml_model_feature_names.json'))
-            model_features = temp.get('out_features')+temp.get('in_features')+temp.get('id_features')+temp.get('in_features_NWM')+temp.get('in_features_flow_freq')
+            temp = json.load(open('data/model_feature_names.json'))
+            model_features = [self.out_feature]+temp.get('in_features')+temp.get('id_features')#+temp.get('in_features_NWM')+temp.get('in_features_flow_freq')
             # ___________________________________________________
             # to dump variables
             # dump_list = ["BFICat","CatAreaSqKm","ElevCat","PctWaterCat","PrecipCat",
@@ -166,7 +166,7 @@ class DataLoader:
             # "slope_ave","elevation_ave"]
             # model_features = list(set(model_features) - set(dump_list))
             self.in_features = model_features.copy()
-            self.in_features = list(set(self.in_features) - set(temp.get('id_features')) - set(temp.get('out_features')))
+            self.in_features = list(set(self.in_features) - set(temp.get('id_features')) - set([self.out_feature]))
         else:
             temp = json.load(open('model_space/feature_space.json'))
             temp = temp.get(sample_type).get(self.out_feature+'_feats')
@@ -176,12 +176,12 @@ class DataLoader:
             model_features += temp.get('out_features')+temp.get('id_features')
 
         # to moderate HydroSwat discharge values
-        model_features.append('nwis_25')
+        # model_features.append('nwis_25')
         # added coordinates for spatial corralations 
-        model_features.append('lat')
-        model_features.append('lng')
-        self.in_features.append('lat')
-        self.in_features.append('lng')
+        # model_features.append('lat')
+        # model_features.append('lng')
+        # self.in_features.append('lat')
+        # self.in_features.append('lng')
         del temp
         df_mask = self.data[model_features]
 
@@ -230,6 +230,7 @@ class DataLoader:
             --------
             >>> train_x, train_y, train_id, test_x, test_y, test_id = transformData("power")
         """
+        dump_list = ['R2', 'exp', 'coe', 'Count', 'siteID']
         if self.x_transform:
             if type=='power':
                 # t_x = MinMaxScaler(feature_range=(0, 1))
@@ -246,20 +247,20 @@ class DataLoader:
             # train_x_pt = scaler_x.fit_transform(train_x_pt)
             train_x = pd.DataFrame(data=train_x_t,
                     columns=train_x.columns)
-            train_id =  self.train[['siteID', 'nwis_25']].reset_index(drop=True)
+            train_id =  self.train[dump_list].reset_index(drop=True)
 
             test_x = self.test[self.in_features].reset_index(drop=True)
             test_x_t = t_x.transform(test_x)
             # test_x_pt = scaler_x.transform(test_x_pt)
             test_x = pd.DataFrame(data=test_x_t,
                     columns=test_x.columns)
-            test_id =  self.test[['siteID', 'nwis_25']].reset_index(drop=True)
+            test_id =  self.test[dump_list].reset_index(drop=True)
 
         else:
             train_x = self.train[self.in_features].reset_index(drop=True)
-            train_id =  self.train[['siteID', 'nwis_25']].reset_index(drop=True)
+            train_id =  self.train[dump_list].reset_index(drop=True)
             test_x = self.test[self.in_features].reset_index(drop=True)
-            test_id =  self.test[['siteID', 'nwis_25']].reset_index(drop=True)
+            test_id =  self.test[dump_list].reset_index(drop=True)
 
         if self.y_transform:
             if type=='power':
