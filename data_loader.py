@@ -172,7 +172,7 @@ class DataLoader:
             temp = temp.get(sample_type).get(self.out_feature+'_feats')
             model_features = temp
             self.in_features = model_features.copy()
-            temp = json.load(open('data/ml_model_feature_names.json'))
+            temp = json.load(open('data/model_feature_names.json'))
             model_features += temp.get('out_features')+temp.get('id_features')
 
         # to moderate HydroSwat discharge values
@@ -230,7 +230,7 @@ class DataLoader:
             --------
             >>> train_x, train_y, train_id, test_x, test_y, test_id = transformData("power")
         """
-        dump_list = ['R2', 'exp', 'coe', 'Count', 'siteID']
+        dump_list = ['R2', 'siteID']
         if self.x_transform:
             if type=='power':
                 # t_x = MinMaxScaler(feature_range=(0, 1))
