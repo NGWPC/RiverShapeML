@@ -7,7 +7,7 @@ warnings.warn = warn
 
 import data_loader as dataloader
 import feature_importance as fimp
-# import plot as pml
+import save_output as sd
 # import comp_plot as pcml
 from sklearn.model_selection import train_test_split, RepeatedKFold, GridSearchCV
 from sklearn.ensemble import ExtraTreesRegressor, BaggingRegressor, RandomForestRegressor, HistGradientBoostingRegressor, StackingRegressor, VotingRegressor
@@ -145,7 +145,7 @@ class MlModel:
         self.train_x, self.train_y, self.train_id, self.test_x, self.test_y, self.test_id = data_loader.transformData()
 
 # --------------------------- Grid Search --------------------------- #
-    def findBestParams(self, out_features: str = 'b', nthreads: int = -1, space: str = 'actual_space',
+    def findBestParams(self, out_features: str = 'TW_bf', nthreads: int = -1, space: str = 'actual_space',
                         weighted: bool = False) -> tuple[str, dict, pd.DataFrame]:
         """ Find the best parameters of the all ML models through k-fold
         cross validation and prevent overfit
@@ -219,27 +219,27 @@ class MlModel:
         models = { 
             'xgb': xgb_reg,
             'rf': rf_reg,
-            'hgb': hgb_reg,
-            'lgb': lgb_reg,
-            'bsvr': bsvr_reg,
-            'knr': knr_reg,
-            'ard': ard_reg,
-            'enet': enet_reg,
-            'mlp': mlp_reg,
-            'bays': bays_reg
+            # 'hgb': hgb_reg,
+            # 'lgb': lgb_reg,
+            # 'bsvr': bsvr_reg,
+            # 'knr': knr_reg,
+            # 'ard': ard_reg,
+            # 'enet': enet_reg,
+            # 'mlp': mlp_reg,
+            # 'bays': bays_reg
             # 'orth': orth_reg
         }
         params = { 
             'xgb': params_space.get(space).get('xgb_params'),
             'rf': params_space.get(space).get('rf_params'),
-            'hgb': params_space.get(space).get('hgb_params'),
-            'lgb': params_space.get(space).get('lgb_params'),
-            'bsvr': params_space.get(space).get('bsvr_params'),
-            'knr': params_space.get(space).get('knr_params'),
-            'ard': params_space.get(space).get('ard_params'),
-            'enet': params_space.get(space).get('enet_params'),
-            'mlp': params_space.get(space).get('mlp_params'),
-            'bays': params_space.get(space).get('bays_params')
+            # 'hgb': params_space.get(space).get('hgb_params'),
+            # 'lgb': params_space.get(space).get('lgb_params'),
+            # 'bsvr': params_space.get(space).get('bsvr_params'),
+            # 'knr': params_space.get(space).get('knr_params'),
+            # 'ard': params_space.get(space).get('ard_params'),
+            # 'enet': params_space.get(space).get('enet_params'),
+            # 'mlp': params_space.get(space).get('mlp_params'),
+            # 'bays': params_space.get(space).get('bays_params')
             # 'orth': params_space.get(space).get('orth_params')
         }
 
@@ -389,20 +389,20 @@ class MlModel:
         # concated_y = pd.concat([self.train_y, self.train_id], axis=1)
         self.x_train, self.x_eval, self.y_train, self.y_eval = train_test_split(concated_x, self.train_y, test_size=0.15,
                                                                 random_state=self.rand_state)
-        self.train_sub_id = self.x_train[['siteID', 'nwis_25']]
-        self.x_train = self.x_train.loc[:, ~self.x_train.columns.isin(['siteID', 'nwis_25'])]
-        self.eval_id = self.x_eval[['siteID', 'nwis_25']]
-        self.x_eval = self.x_eval.loc[:, ~self.x_eval.columns.isin(['siteID', 'nwis_25'])]
+        self.train_sub_id = self.x_train[['siteID', 'R2']]
+        self.x_train = self.x_train.loc[:, ~self.x_train.columns.isin(['siteID', 'R2'])]
+        self.eval_id = self.x_eval[['siteID', 'R2']]
+        self.x_eval = self.x_eval.loc[:, ~self.x_eval.columns.isin(['siteID', 'R2'])]
         
         # ___________________________________________________
         # Out of the box evaluation of models
         # Fit all models
-        reg_models = lazypredict.Supervised.REGRESSORS
-        lazypredict.Supervised.REGRESSORS = [t for t in reg_models if not t[0].startswith('Quantile')]
-        ob_reg = LazyRegressor(predictions=True)
-        models, predictions = ob_reg.fit(self.x_train, self.x_eval, self.y_train, self.y_eval)
-        print('\n out of the box evaluation of models for target: '+str(self.custom_name)+ '\n')
-        print(models)
+        # reg_models = lazypredict.Supervised.REGRESSORS
+        # lazypredict.Supervised.REGRESSORS = [t for t in reg_models if not t[0].startswith('Quantile')]
+        # ob_reg = LazyRegressor(predictions=True)
+        # models, predictions = ob_reg.fit(self.x_train, self.x_eval, self.y_train, self.y_eval)
+        # print('\n out of the box evaluation of models for target: '+str(self.custom_name)+ '\n')
+        # print(models)
 
         # ___________________________________________________
         # Check witch models are used with weights and fit
@@ -446,22 +446,22 @@ class MlModel:
         base_model.append(('xgb', temp))
         temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'rf'])
         base_model.append(('rf', temp))
-        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'hgb'])
-        base_model.append(('hgb', temp))
-        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'lgb'])
-        base_model.append(('lgb', temp))
-        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'bsvr'])
-        base_model.append(('bsvr', temp))
-        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'knr'])
-        base_model.append(('knr', temp))
-        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'ard'])
-        base_model.append(('ard', temp))
-        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'enet'])
-        base_model.append(('enet', temp))
-        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'mlp'])
-        base_model.append(('mlp', temp))
-        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'bays'])
-        base_model.append(('bays', temp))
+        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'hgb'])
+        # base_model.append(('hgb', temp))
+        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'lgb'])
+        # base_model.append(('lgb', temp))
+        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'bsvr'])
+        # base_model.append(('bsvr', temp))
+        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'knr'])
+        # base_model.append(('knr', temp))
+        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'ard'])
+        # base_model.append(('ard', temp))
+        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'enet'])
+        # base_model.append(('enet', temp))
+        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'mlp'])
+        # base_model.append(('mlp', temp))
+        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'bays'])
+        # base_model.append(('bays', temp))
         # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'orth'])
         # base_model.append(('orth', temp))
 
@@ -565,13 +565,13 @@ class RunMlModel:
         argv: list
             taken from bash script
         """
-        custom_name = argv[0] 
+        custom_name = argv[0]
+        # target_name = argv[1] 
         nthreads    = int(argv[1])
         x_transform = eval(argv[2])
         y_transform = eval(argv[3])
         R2_thresh   = float(argv[4])
         space       = 'test_space' # actual_space / test_space
-        val_method  = "Fit" # "Fit" / "Observed"
         SI          = False # SI system
         sample_type = "All" #"All", "Sub", "test"
         weighted    = False
@@ -583,82 +583,71 @@ class RunMlModel:
         # Bulid an instance of MlModel object and itterate through targets
         model = MlModel(custom_name) 
         # temporary holder
-        target = "TW_bf"
-        
-        # ___________________________________________________
-        # Train models 
-        print('\n******************* modeling parameter {0} starts here *******************\n'.format(target))
-        model.loadData(out_feature=target, x_transform=x_transform,
-                            y_transform=y_transform, R2_thresh=R2_thresh, sample_type=sample_type)     
-        print('end')
-        # best_model, best_params, best_models = model.findBestParams(out_features=target, nthreads=nthreads, 
-        #                                                                         space=space, weighted=weighted)
-        # ml_model, voting_model, meta_model, train_x, train_y, _, _, = model.runMlModel(best_model=best_model, best_params=best_params, 
-        #                                     best_models=best_models, weighted=weighted, out_features=target, nthreads=nthreads)
-        
-        # # print('\n----------------- Results for best model -------------------\n')
-        # # # ___________________________________________________
-        # # # # plot best model fit
-        # plot_obj = pml.PlotMlFit(train_id=model.train_sub_id, eval_id=model.eval_id, test_id=model.test_id,
-        #                             x_train=model.x_train, x_eval=model.x_eval, test_x=model.test_x,
-        #                             y_train=model.y_train, y_eval=model.y_eval, test_y=model.test_y,
-        #                             best_model=best_model, loaded_model=ml_model, 
-        #                             x_transform=x_transform, y_transform=y_transform,
-        #                             out_features=target, custom_name=custom_name, val_method=val_method, SI=SI)
-        # plot_obj.processData()
-        # adcp = plot_obj.processADCP()
-        # b_metrics, b_pred_df = plot_obj.plotMetrics(adcp, 'Best_Model')
+        temp        = json.load(open('data/ml_model_feature_names.json'))
+        target_list = temp.get('out_features')
+        del temp
 
-        # print('\n----------------- Results for vote model -------------------\n')
-        # # ___________________________________________________
-        # # plot voting model fit
-        # best_model = 'vote'
-        # plot_obj = pml.PlotMlFit(train_id=model.train_sub_id, eval_id=model.eval_id, test_id=model.test_id,
-        #                             x_train=model.x_train, x_eval=model.x_eval, test_x=model.test_x,
-        #                             y_train=model.y_train, y_eval=model.y_eval, test_y=model.test_y,
-        #                             best_model=best_model, loaded_model=voting_model, 
-        #                             x_transform=x_transform, y_transform=y_transform,
-        #                             out_features=target, custom_name=custom_name, val_method=val_method, SI=SI)
-        # plot_obj.processData()
-        # adcp = plot_obj.processADCP()
-        # v_metrics, v_pred_df = plot_obj.plotMetrics(adcp, 'Vote_Model')
+        for target_name in tqdm(target_list):
+            # ___________________________________________________
+            # Train models 
+            print('\n******************* modeling parameter {0} starts here *******************\n'.format(target_name))
+            model.loadData(out_feature=target_name, x_transform=x_transform,
+                                y_transform=y_transform, R2_thresh=R2_thresh, sample_type=sample_type)     
+            print('end')
+            best_model, best_params, best_models = model.findBestParams(out_features=target_name, nthreads=nthreads, 
+                                                                                    space=space, weighted=weighted)
+            ml_model, voting_model, meta_model, train_x, train_y, _, _, = model.runMlModel(best_model=best_model, best_params=best_params, 
+                                                best_models=best_models, weighted=weighted, out_features=target_name, nthreads=nthreads)
+            
+            print('\n----------------- Results for best model -------------------\n')
+            # # ___________________________________________________
+            # # # save best model fit
+            save_obj = sd.SaveOutput(train_id=model.train_sub_id, eval_id=model.eval_id, test_id=model.test_id,
+                                        x_train=model.x_train, x_eval=model.x_eval, test_x=model.test_x,
+                                        y_train=model.y_train, y_eval=model.y_eval, test_y=model.test_y,
+                                        best_model=best_model, loaded_model=ml_model, 
+                                        x_transform=x_transform, y_transform=y_transform,
+                                        out_feature=target_name, custom_name=custom_name, SI=SI)
+            save_obj.processData()
 
-        # print('\n----------------- Results for meta model -------------------\n')
-        # # ___________________________________________________
-        # # plot meta model fit
-        # best_model = 'meta'
-        # plot_obj = pml.PlotMlFit(train_id=model.train_sub_id, eval_id=model.eval_id, test_id=model.test_id,
-        #                             x_train=model.x_train, x_eval=model.x_eval, test_x=model.test_x,
-        #                             y_train=model.y_train, y_eval=model.y_eval, test_y=model.test_y,
-        #                             best_model=best_model, loaded_model=meta_model, 
-        #                             x_transform=x_transform, y_transform=y_transform,
-        #                             out_features=target, custom_name=custom_name, val_method=val_method, SI=SI)
-        # plot_obj.processData()
-        # adcp = plot_obj.processADCP()
-        # m_metrics, m_pred_df = plot_obj.plotMetrics(adcp, 'Meta_Model')
-        
-        # print('\n----------------- Comparison plots -------------------\n')
-        # # ___________________________________________________
-        # # Comparison plots
-        # plot_comp_obj = pcml.PlotComp(b_metric=b_metrics, v_metric=v_metrics, m_metric=m_metrics,
-        #                 b_df=b_pred_df, v_df=v_pred_df, m_df=m_pred_df, 
-        #                 out_features=target, custom_name=custom_name)
-        # plot_comp_obj.processData()
-        # plot_comp_obj.plotComparisons()
+            print('\n----------------- Results for vote model -------------------\n')
+            # # ___________________________________________________
+            # # save best model fit
+            best_model = 'vote'
+            save_obj = sd.SaveOutput(train_id=model.train_sub_id, eval_id=model.eval_id, test_id=model.test_id,
+                                        x_train=model.x_train, x_eval=model.x_eval, test_x=model.test_x,
+                                        y_train=model.y_train, y_eval=model.y_eval, test_y=model.test_y,
+                                        best_model=best_model, loaded_model=voting_model, 
+                                        x_transform=x_transform, y_transform=y_transform,
+                                        out_feature=target_name, custom_name=custom_name, SI=SI)
+            save_obj.processData()
 
-        # print('\n----------------- Feature importance -------------------\n')
-        # # ___________________________________________________
-        # # plot feature importance
-        # try:
-        #     fimp_object = fimp.FeatureImportance(custom_name, best_model)
-        #     fimp_object.plotImportance(model=ml_model, out_features=target,
-        #                                 train_x=train_x, train_y=train_y)
-        #     fimp_object.plotShapImportance(model=ml_model, out_features=target, 
-        #                                     train_x=train_x)
-        # except Exception as e:       
-        #     print("An exception occurred due to shap internal errors!")  
-        #     print(e)      
-        # print('\n**************** modeling parameter {0} ends here ****************\n'.format(target))
+            print('\n----------------- Results for meta model -------------------\n')
+            # # ___________________________________________________
+            # # plot meta model fit
+            best_model = 'meta'
+            save_obj = sd.SaveOutput(train_id=model.train_sub_id, eval_id=model.eval_id, test_id=model.test_id,
+                                        x_train=model.x_train, x_eval=model.x_eval, test_x=model.test_x,
+                                        y_train=model.y_train, y_eval=model.y_eval, test_y=model.test_y,
+                                        best_model=best_model, loaded_model=meta_model, 
+                                        x_transform=x_transform, y_transform=y_transform,
+                                        out_feature=target_name, custom_name=custom_name, SI=SI)
+            save_obj.processData()
+
+            print('\n----------------- Feature importance -------------------\n')
+            # # ___________________________________________________
+            # # plot feature importance
+            try:
+                fimp_object = fimp.FeatureImportance(custom_name, best_model)
+                fimp_object.plotImportance(model=ml_model, out_features=target_name,
+                                            train_x=train_x, train_y=train_y)
+                fimp_object.plotShapImportance(model=ml_model, out_features=target_name, 
+                                                train_x=train_x)
+            except Exception as e:       
+                print("An exception occurred due to shap internal errors!")  
+                print(e)      
+            print('\n**************** modeling parameter {0} ends here ****************\n'.format(target_name))
+            print('end')
 
 if __name__ == "__main__":
     RunMlModel.main(['test2', -1, "False", "False", 0.0])

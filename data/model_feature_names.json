@@ -82,7 +82,10 @@
         "ff_feature3"
     ],
     "out_features": [
-        
+        "Y_bf",
+        "Y_in",
+        "TW_bf",
+        "TW_in"
     ],
     "id_features": [
         "siteID",
