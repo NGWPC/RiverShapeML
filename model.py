@@ -62,6 +62,7 @@ class MlModel:
         self.rand_state                = 105
         self.grid_searches             = {}
         temp                           = json.load(open('data/model_feature_names.json'))
+        self.target_data_path          = ""
         self.train_x                   = 0 
         self.train_y                   = 0 
         self.train_id                  = 0 
@@ -132,8 +133,16 @@ class MlModel:
                  sample_type = "Sub")
         """
         # Bulid an instance of DataLoader object
-        data_loader = dataloader.DataLoader(data_path='data/width_predictor_test.parquet',
-                                            target_data_path='data/width_target.parquet',
+
+        if "TW_" in out_feature:
+            data_path = 'data/width_predictor_test.parquet'
+            self.target_data_path = 'data/width_target.parquet'
+        else:
+            data_path = 'data/depth_predictor_test.parquet'
+            self.target_data_path = 'data/depth_target.parquet'
+
+        data_loader = dataloader.DataLoader(data_path=data_path,
+                                            target_data_path=self.target_data_path,
                                             rand_state=self.rand_state, 
                                             # in_features=self.in_features, 
                                             out_feature=out_feature, 
@@ -390,10 +399,13 @@ class MlModel:
         self.x_train, self.x_eval, self.y_train, self.y_eval = train_test_split(concated_x, self.train_y, test_size=0.15,
                                                                 random_state=self.rand_state)
         self.train_sub_id = self.x_train[['siteID', 'R2']]
+        self.train_sub_id = self.train_sub_id.reset_index(drop=True)
         self.x_train = self.x_train.loc[:, ~self.x_train.columns.isin(['siteID', 'R2'])]
+        self.x_train = self.x_train.reset_index(drop=True)
         self.eval_id = self.x_eval[['siteID', 'R2']]
+        self.eval_id = self.eval_id.reset_index(drop=True)
         self.x_eval = self.x_eval.loc[:, ~self.x_eval.columns.isin(['siteID', 'R2'])]
-        
+        self.x_eval = self.x_eval.reset_index(drop=True)
         # ___________________________________________________
         # Out of the box evaluation of models
         # Fit all models
@@ -583,7 +595,7 @@ class RunMlModel:
         # Bulid an instance of MlModel object and itterate through targets
         model = MlModel(custom_name) 
         # temporary holder
-        temp        = json.load(open('data/ml_model_feature_names.json'))
+        temp        = json.load(open('data/model_feature_names.json'))
         target_list = temp.get('out_features')
         del temp
 
@@ -605,7 +617,7 @@ class RunMlModel:
             save_obj = sd.SaveOutput(train_id=model.train_sub_id, eval_id=model.eval_id, test_id=model.test_id,
                                         x_train=model.x_train, x_eval=model.x_eval, test_x=model.test_x,
                                         y_train=model.y_train, y_eval=model.y_eval, test_y=model.test_y,
-                                        best_model=best_model, loaded_model=ml_model, 
+                                        target_data_path = model.target_data_path, best_model=best_model, loaded_model=ml_model, 
                                         x_transform=x_transform, y_transform=y_transform,
                                         out_feature=target_name, custom_name=custom_name, SI=SI)
             save_obj.processData()
@@ -617,7 +629,7 @@ class RunMlModel:
             save_obj = sd.SaveOutput(train_id=model.train_sub_id, eval_id=model.eval_id, test_id=model.test_id,
                                         x_train=model.x_train, x_eval=model.x_eval, test_x=model.test_x,
                                         y_train=model.y_train, y_eval=model.y_eval, test_y=model.test_y,
-                                        best_model=best_model, loaded_model=voting_model, 
+                                        target_data_path = model.target_data_path, best_model=best_model, loaded_model=voting_model, 
                                         x_transform=x_transform, y_transform=y_transform,
                                         out_feature=target_name, custom_name=custom_name, SI=SI)
             save_obj.processData()
@@ -629,7 +641,7 @@ class RunMlModel:
             save_obj = sd.SaveOutput(train_id=model.train_sub_id, eval_id=model.eval_id, test_id=model.test_id,
                                         x_train=model.x_train, x_eval=model.x_eval, test_x=model.test_x,
                                         y_train=model.y_train, y_eval=model.y_eval, test_y=model.test_y,
-                                        best_model=best_model, loaded_model=meta_model, 
+                                        target_data_path = model.target_data_path, best_model=best_model, loaded_model=meta_model, 
                                         x_transform=x_transform, y_transform=y_transform,
                                         out_feature=target_name, custom_name=custom_name, SI=SI)
             save_obj.processData()
@@ -650,6 +662,6 @@ class RunMlModel:
             print('end')
 
 if __name__ == "__main__":
-    RunMlModel.main(['test2', -1, "False", "False", 0.0])
+    RunMlModel.main(['test2', -1, "True", "True", 0.4])
     # RunMlModel.main(sys.argv[1:])
 

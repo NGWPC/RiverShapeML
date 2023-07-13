@@ -119,7 +119,7 @@ class DataLoader:
         plt.xlabel("R2")
         plt.ylabel("% stations greater than or equal")
         my_plot = plt.gcf()
-        plt.savefig(self.custom_name+'/img/model/'+str(self.custom_name)+'_R2_cut.png',bbox_inches='tight', dpi = 600, facecolor='white')
+        plt.savefig(self.custom_name+'/img/model/'+str(self.custom_name)+'_'+str(self.out_feature)+'_R2_cut.png',bbox_inches='tight', dpi = 600, facecolor='white')
         plt.show()
 
         good_stations = grouped_r2.loc[(grouped_r2['R2'] >= self.R2_thresh)]
@@ -175,20 +175,25 @@ class DataLoader:
             temp = json.load(open('data/model_feature_names.json'))
             model_features += temp.get('out_features')+temp.get('id_features')
 
-        # to moderate HydroSwat discharge values
-        # model_features.append('nwis_25')
-        # added coordinates for spatial corralations 
-        # model_features.append('lat')
-        # model_features.append('lng')
-        # self.in_features.append('lat')
-        # self.in_features.append('lng')
         del temp
+        
+        # Apply some filtering
+        if "TW_" in self.out_feature: 
+            # The widest navigable section in the shipping channel of the Mississippi is Lake Pepin, where the channel is approximately 2 miles wide
+            # here we consider 3 miles or 15840 ft
+            self.data = self.data.loc[self.data[str(self.out_feature )] < 15840]
+        else:
+            # The deepest river in the U.S. is the Hudson River which reaches a maximum depth of 216 ft.
+            self.data = self.data.loc[self.data[str(self.out_feature )] < 216] 
+        
         df_mask = self.data[model_features]
-
+        df_mask.to_parquet(self.custom_name+'/metrics/df_mask.parquet')
         df_mask = df_mask.fillna(0) # // to be changed (compensating for EE features in cities that can be set to 0)
         msk = np.random.rand(len(df_mask)) < 0.85
         self.train = df_mask[msk]
+        self.train = self.train.reset_index(drop=True)
         self.test = df_mask[~msk]
+        self.test = self.test.reset_index(drop=True)
         return
 
 # --------------------------- Transformation --------------------------- #
