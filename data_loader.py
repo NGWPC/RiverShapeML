@@ -1,5 +1,6 @@
 # Libraries
 from sklearn.preprocessing import PowerTransformer, QuantileTransformer, StandardScaler, RobustScaler, MinMaxScaler, MaxAbsScaler, FunctionTransformer
+from sklearn.decomposition import PCA
 import scipy
 import matplotlib.pyplot as plt
 from matplotlib import pyplot
@@ -128,12 +129,86 @@ class DataLoader:
         stations = good_stations['siteID'].tolist()
         del good_stations
         self.data = self.data[self.data['siteID'].isin(stations)].reset_index(drop=True)
-        
+        self.data = self.data.fillna(0) # a temporary brute force way to deal with NAN
         return 
+
+ # --------------------------- Dimention Reduction --------------------------- #
+    def reduceDim(self) -> None:
+        """ Reduce the dimention of data some help addressing  multi-colinearity
+        """
+        print("\n Begin dimention reduction .... \n")
+        # Load dimention categories
+        temp = json.load(open('model_space/dimention_space.json'))
+        
+        # PCA model
+        def buildPCA(feat_list, name):
+            """ Builds a PCA and extracts new dimentions
+            
+            Parameters:
+            ----------
+            feat_list: list
+                A list containing all feature names to be reduced 
+            name: str    
+                Reduced feature names
+
+            Returns:
+            ----------
+
+            """
+            pca = PCA(n_components = 5)
+            out_arr = pca.fit_transform(self.data[feat_list])
+            explained_variance = pca.explained_variance_ratio_
+            
+            # Find optimum number of PCs
+            for i in range(0, 5, 1):
+                total_var = np.sum(explained_variance[0:i])
+                self.data[str(name)+"_"+str(i)] = out_arr[:, i]
+                if total_var >= 0.95:
+                    # num_pc = i
+                    break
+
+            # Remove transformed features
+            all_col = self.data.columns.tolist()
+            new_col = list(set(all_col) - set(feat_list))
+            self.data = self.data[new_col]
+            return
+
+        # Vegetation
+        print('Reducing Vegetation ..')
+        feat_list = temp.get('Vegetation')
+        buildPCA(feat_list, 'Vegetation')
+
+        # Discharge
+        print('Reducing Discharge ..')
+        feat_list = temp.get('Discharge')
+        buildPCA(feat_list, 'Discharge')
+
+        # Soil_temp_moist
+        print('Reducing Soil_temp_moist ..')
+        feat_list = temp.get('Soil_temp_moist')
+        buildPCA(feat_list, 'Soil_temp_moist')
+
+        # Soil
+        print('Reducing Soil ..')
+        feat_list = temp.get('Soil')
+        buildPCA(feat_list, 'Soil')
+
+        # Preciep
+        print('Reducing Preciep ..')
+        feat_list = temp.get('Preciep')
+        buildPCA(feat_list, 'Preciep')
+
+        # Topo
+        print('Reducing Topo ..')
+        feat_list = temp.get('Topo')
+        buildPCA(feat_list, 'Topo')
+
+        print("\n ------------- End of dimention reduction ----------- \n")
+        return
         
  # --------------------------- Split train and test --------------------------- #
     
-    def splitData(self, sample_type: str) -> None:
+    def splitData(self, sample_type: str, pci: bool) -> None:
         """ 
         To split data to train and test, and whether to use all 
         features or few 
@@ -151,8 +226,12 @@ class DataLoader:
             >>> splitData("All")
         """
         if sample_type == "All":
+            in_feat = 'in_features'
+            if pci:
+                in_feat = 'in_features_pci'
+
             temp = json.load(open('data/model_feature_names.json'))
-            model_features = [self.out_feature]+temp.get('in_features')+temp.get('id_features')#+temp.get('in_features_NWM')+temp.get('in_features_flow_freq')
+            model_features = [self.out_feature]+temp.get(in_feat)+temp.get('id_features')#+temp.get('in_features_NWM')+temp.get('in_features_flow_freq')
             # ___________________________________________________
             # to dump variables
             # dump_list = ["BFICat","CatAreaSqKm","ElevCat","PctWaterCat","PrecipCat",
