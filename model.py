@@ -97,7 +97,7 @@ class MlModel:
 # --------------------------- Load train and test data files --------------------------- #    
     def loadData(self, out_feature: str, x_transform: bool = False, 
                  y_transform: bool = False, R2_thresh: float = 0.0,
-                 sample_type: str = "All") -> None:
+                 sample_type: str = "All", pci: bool = True) -> None:
         """ Load the data and apply data filtering, transformation and 
         feature selection if nessassery
 
@@ -125,12 +125,17 @@ class MlModel:
             - "All": for considering all features
             - "Sub": for considering pre selected features
             - "test": a test case for unit testing
+        pci: bool
+            Whether to apply PCI or not 
+            Opptions are:
+            - True
+            - False
         
         Example
         --------
         >>> MlModel.loadData(out_feature = 'b', x_transform = False, 
                  y_transform = False, R2_thresh = 0.0,
-                 sample_type = "Sub")
+                 sample_type = "Sub", PCI = False)
         """
         # Bulid an instance of DataLoader object
 
@@ -150,7 +155,8 @@ class MlModel:
                                             x_transform=x_transform, y_transform=y_transform,
                                             R2_thresh=R2_thresh) 
         data_loader.readFiles()
-        data_loader.splitData(sample_type=sample_type)
+        data_loader.reduceDim()
+        data_loader.splitData(sample_type=sample_type, pci=pci)
         self.train_x, self.train_y, self.train_id, self.test_x, self.test_y, self.test_id = data_loader.transformData()
 
 # --------------------------- Grid Search --------------------------- #
@@ -585,8 +591,12 @@ class RunMlModel:
         R2_thresh   = float(argv[4])
         space       = 'test_space' # actual_space / test_space
         SI          = False # SI system
-        sample_type = "All" #"All", "Sub", "test"
+        sample_type = "All" #"All", "Sub", "test", "Sub_pci"
         weighted    = False
+        pci         = True 
+        if sample_type == "Sub" and pci:
+            sample_type = "Sub_pci"
+
         # List of traget varaibles
         # temp        = json.load(open('data/ml_model_feature_names.json'))
         # del temp
@@ -604,7 +614,8 @@ class RunMlModel:
             # Train models 
             print('\n******************* modeling parameter {0} starts here *******************\n'.format(target_name))
             model.loadData(out_feature=target_name, x_transform=x_transform,
-                                y_transform=y_transform, R2_thresh=R2_thresh, sample_type=sample_type)     
+                                y_transform=y_transform, R2_thresh=R2_thresh, 
+                                sample_type=sample_type, pci=pci)     
             print('end')
             best_model, best_params, best_models = model.findBestParams(out_features=target_name, nthreads=nthreads, 
                                                                                     space=space, weighted=weighted)
@@ -662,6 +673,6 @@ class RunMlModel:
             print('end')
 
 if __name__ == "__main__":
-    RunMlModel.main(['test2', -1, "True", "True", 0.4])
+    RunMlModel.main(['test2', -1, "True", "True", 0.6])
     # RunMlModel.main(sys.argv[1:])
 
