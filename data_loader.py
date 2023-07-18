@@ -252,7 +252,7 @@ class DataLoader:
             model_features = temp
             self.in_features = model_features.copy()
             temp = json.load(open('data/model_feature_names.json'))
-            model_features += temp.get('out_features')+temp.get('id_features')
+            model_features += [self.out_feature]+temp.get('id_features')
 
         del temp
         

@@ -1,21 +1,21 @@
 {
     "test": {
         "TW_bf_feats": [
-            "theta_s",
-            "slope_ave",
-            "mTPI_std"
+            "aet",
+            "snowmelt",
+            "ET_ave"
         ],
         "TW_in_feats": [
-            "def",
+            "snowmelt",
             "Wind_ave"
         ],
         "Y_in_feats": [
-            "SM_max",
-            "Q_mean"
+            "snowmelt",
+            "aet"
         ],
         "Y_bf_feats": [
-            "Precip_ave",
-            "NDVI_ave"
+            "Wind_ave",
+            "SWE"
         ]
     },
     "Sub": {
