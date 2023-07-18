@@ -155,7 +155,8 @@ class MlModel:
                                             x_transform=x_transform, y_transform=y_transform,
                                             R2_thresh=R2_thresh) 
         data_loader.readFiles()
-        data_loader.reduceDim()
+        if pci:
+            data_loader.reduceDim()
         data_loader.splitData(sample_type=sample_type, pci=pci)
         self.train_x, self.train_y, self.train_id, self.test_x, self.test_y, self.test_id = data_loader.transformData()
 
@@ -591,11 +592,11 @@ class RunMlModel:
         R2_thresh   = float(argv[4])
         space       = 'test_space' # actual_space / test_space
         SI          = False # SI system
-        sample_type = "All" #"All", "Sub", "test", "Sub_pci"
+        sample_type = "All" #"All", "Sub", "test"
         weighted    = False
         pci         = True 
         if sample_type == "Sub" and pci:
-            sample_type = "Sub_pci"
+            sample_type = "Sub_pca"
 
         # List of traget varaibles
         # temp        = json.load(open('data/ml_model_feature_names.json'))
@@ -673,6 +674,6 @@ class RunMlModel:
             print('end')
 
 if __name__ == "__main__":
-    RunMlModel.main(['test2', -1, "True", "True", 0.6])
+    RunMlModel.main(['test2', -1, "False", "False", 0.9])
     # RunMlModel.main(sys.argv[1:])
 
