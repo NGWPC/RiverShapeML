@@ -4,6 +4,7 @@ from sklearn.decomposition import PCA
 import scipy
 import matplotlib.pyplot as plt
 from matplotlib import pyplot
+import seaborn as sns
 import pandas as pd
 import numpy as np
 import pickle
@@ -78,6 +79,10 @@ class DataLoader:
         # Check directories
         if not os.path.isdir(os.path.join(os.getcwd(),self.custom_name,"model/")):
             os.mkdir(os.path.join(os.getcwd(),self.custom_name,"model/"))
+        if not os.path.isdir(os.path.join(os.getcwd(),self.custom_name,"img/")):
+            os.mkdir(os.path.join(os.getcwd(),self.custom_name,"img/"))
+        if not os.path.isdir(os.path.join(os.getcwd(),self.custom_name,'img/dist/')):
+            os.mkdir(os.path.join(os.getcwd(),self.custom_name,'img/dist/'))
 
     def readFiles(self) -> None:
         """ Read files from the directories
@@ -274,6 +279,49 @@ class DataLoader:
         self.test = df_mask[~msk]
         self.test = self.test.reset_index(drop=True)
         return
+    
+    # --------------------------- Plot Transformation --------------------------- #
+    def plotDist(self, df_old: pd.DataFrame, df_new: pd.DataFrame, split: str) -> None:
+        """
+        To show changes in distribution of data after transformation is applied
+        
+        Parameters:
+        ----------
+        df_old: pd.DataFrame
+            old data to be ploted
+        df_new: pd.DataFrame
+            transformed data to be ploted
+        split: str
+            train or test
+        
+        Parameters:
+        ----------
+        None
+
+        """
+        for feat in df_new.columns:
+            print(feat)
+            print(os.path.join(os.getcwd(),self.custom_name+"/img/dist/"+str(self.custom_name)+'_'+feat+'_'+split+'_dist.png'))
+            print(os.path.isfile(os.path.join(os.getcwd(),self.custom_name+"/img/dist/"+str(self.custom_name)+'_'+feat+'_'+split+'_dist.png')))
+
+            if os.path.isfile(os.path.join(os.getcwd(),self.custom_name+"/img/dist/"+str(self.custom_name)+'_'+feat+'_'+split+'_dist.png')):
+                print(feat+' found')
+                continue
+            fig, axes = plt.subplots(1, 2, figsize=(15, 7))
+            fig.tight_layout(pad = 6)
+            sns.kdeplot(data=df_new[[feat]], x=feat, color='black',  ax=axes[0])
+            axes[0].set_xlim((df_new[feat].min(), df_new[feat].max()))
+            ax2 = axes[0].twinx()
+            sns.histplot(data=df_new[[feat]], x=feat, color='blue', discrete=True, ax=ax2).set(title='After transformation')
+
+            sns.kdeplot(data=df_old[[feat]], x=feat, color='black', ax=axes[1])
+            axes[1].set_xlim((df_old[feat].min(), df_old[feat].max()))
+            ax2 = axes[1].twinx()
+            sns.histplot(data=df_old[[feat]], x=feat, color='orange', discrete=True, ax=ax2).set(title='Before transformation')
+            plt.savefig(self.custom_name+'/img/dist/'+str(self.custom_name)+'_'+feat+'_'+split+'_dist.png',bbox_inches='tight', dpi = 600, facecolor='white')
+            plt.show()
+        return
+
 
 # --------------------------- Transformation --------------------------- #
 
@@ -314,6 +362,7 @@ class DataLoader:
             --------
             >>> train_x, train_y, train_id, test_x, test_y, test_id = transformData("power")
         """
+        print('transforming and plotting ...')
         dump_list = ['R2', 'siteID']
         if self.x_transform:
             if type=='power':
@@ -326,18 +375,22 @@ class DataLoader:
                 )
             # scaler_x = StandardScaler()
             train_x = self.train[self.in_features].reset_index(drop=True)
+            train_x_cp = train_x.copy()
             train_x_t = t_x.fit_transform(train_x)
             pickle.dump(t_x, open(self.custom_name+'/model/'+'train_x_'+self.out_feature+'_tansformation.pkl', "wb"))
             # train_x_pt = scaler_x.fit_transform(train_x_pt)
             train_x = pd.DataFrame(data=train_x_t,
                     columns=train_x.columns)
+            self.plotDist(train_x_cp, train_x, 'train')
             train_id =  self.train[dump_list].reset_index(drop=True)
 
             test_x = self.test[self.in_features].reset_index(drop=True)
+            test_x_cp = test_x.copy()
             test_x_t = t_x.transform(test_x)
             # test_x_pt = scaler_x.transform(test_x_pt)
             test_x = pd.DataFrame(data=test_x_t,
                     columns=test_x.columns)
+            self.plotDist(test_x_cp, test_x, 'test')
             test_id =  self.test[dump_list].reset_index(drop=True)
 
         else:
@@ -357,19 +410,23 @@ class DataLoader:
                 )
             # scaler_y = StandardScaler()
             train_y = self.train[[self.out_feature]].reset_index(drop=True)
+            train_y_cp = train_y.copy()
             train_y_t = t_y.fit_transform(train_y)
             pickle.dump(t_y, open(self.custom_name+'/model/'+'train_y_'+self.out_feature+'_tansformation.pkl', "wb"))
             # train_y_pt = scaler_x.fit_transform(train_y_pt)
             train_y = train_y_t.ravel()
+            self.plotDist(train_y_cp, pd.DataFrame({self.out_feature: train_y}), 'train')
 
             test_y = self.test[[self.out_feature]].reset_index(drop=True)
+            test_y_cp = test_y.copy()
             test_y_t = t_y.transform(test_y)
             # test_y_pt = scaler_y.transform(test_y_pt)
             test_y = test_y_t.ravel()
+            self.plotDist(test_y_cp, pd.DataFrame({self.out_feature: test_y}), 'test')
         else:
             train_y = self.train[[self.out_feature]].reset_index(drop=True)
             train_y = train_y.values.ravel()
             test_y = self.test[[self.out_feature]].reset_index(drop=True)
             test_y = test_y.to_numpy().reshape((-1,))
-        
+        print('--------------- End of transformation ---------------')
         return train_x, train_y, train_id, test_x, test_y, test_id
