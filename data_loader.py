@@ -300,7 +300,7 @@ class DataLoader:
 
         """
         for feat in df_new.columns:
-            print(feat)
+            print('\n'+feat)
             print(os.path.join(os.getcwd(),self.custom_name+"/img/dist/"+str(self.custom_name)+'_'+feat+'_'+split+'_dist.png'))
             print(os.path.isfile(os.path.join(os.getcwd(),self.custom_name+"/img/dist/"+str(self.custom_name)+'_'+feat+'_'+split+'_dist.png')))
 

@@ -1,6 +1,17 @@
 #!/bin/bash
 # Conda
 # my directory source /home/amodaresirad/miniconda3/etc/profile.d/conda.sh
+#Account and Email Information
+#SBATCH -A amodaresirad ## User ID
+#SBATCH --mail-type=end
+#SBATCH --mail-user=arashmodaresirad@u.boisestate.edu
+
+#SBATCH -J quant       # job name
+#SBATCH -o outputs/quant_results_final.o%j # output and error file name (%j expands to jobID)
+#SBATCH -e outputs/quant_errors_final.e%j
+#SBATCH -n 2               # Run one process
+#SBATCH --cpus-per-task=28 # allow job to multithread across all cores
+#SBATCH -t 40-00:00:00      # run time (d-hh:mm:ss)
 ulimit -v unlimited
 ulimit -s unlimited
 ulimit -u 10000
