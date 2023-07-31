@@ -158,7 +158,7 @@ class MlModel:
         if pci:
             data_loader.reduceDim()
         data_loader.splitData(sample_type=sample_type, pci=pci)
-        self.train_x, self.train_y, self.train_id, self.test_x, self.test_y, self.test_id = data_loader.transformData()
+        self.train_x, self.train_y, self.train_id, self.test_x, self.test_y, self.test_id = data_loader.transformData(type='power', plot_dist=False)
 
 # --------------------------- Grid Search --------------------------- #
     def findBestParams(self, out_features: str = 'TW_bf', nthreads: int = -1, space: str = 'actual_space',

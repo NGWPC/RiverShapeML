@@ -325,7 +325,7 @@ class DataLoader:
 
 # --------------------------- Transformation --------------------------- #
 
-    def transformData(self, type: str = 'power') -> tuple[pd.DataFrame,
+    def transformData(self, type: str = 'power', plot_dist: bool = False) -> tuple[pd.DataFrame,
                                                           np.array,
                                                           pd.DataFrame,
                                                           pd.DataFrame,
@@ -381,7 +381,8 @@ class DataLoader:
             # train_x_pt = scaler_x.fit_transform(train_x_pt)
             train_x = pd.DataFrame(data=train_x_t,
                     columns=train_x.columns)
-            self.plotDist(train_x_cp, train_x, 'train')
+            if plot_dist:
+                self.plotDist(train_x_cp, train_x, 'train')
             train_id =  self.train[dump_list].reset_index(drop=True)
 
             test_x = self.test[self.in_features].reset_index(drop=True)
@@ -390,7 +391,8 @@ class DataLoader:
             # test_x_pt = scaler_x.transform(test_x_pt)
             test_x = pd.DataFrame(data=test_x_t,
                     columns=test_x.columns)
-            self.plotDist(test_x_cp, test_x, 'test')
+            if plot_dist:
+                self.plotDist(test_x_cp, test_x, 'test')
             test_id =  self.test[dump_list].reset_index(drop=True)
 
         else:
@@ -415,14 +417,16 @@ class DataLoader:
             pickle.dump(t_y, open(self.custom_name+'/model/'+'train_y_'+self.out_feature+'_tansformation.pkl', "wb"))
             # train_y_pt = scaler_x.fit_transform(train_y_pt)
             train_y = train_y_t.ravel()
-            self.plotDist(train_y_cp, pd.DataFrame({self.out_feature: train_y}), 'train')
+            if plot_dist:
+                self.plotDist(train_y_cp, pd.DataFrame({self.out_feature: train_y}), 'train')
 
             test_y = self.test[[self.out_feature]].reset_index(drop=True)
             test_y_cp = test_y.copy()
             test_y_t = t_y.transform(test_y)
             # test_y_pt = scaler_y.transform(test_y_pt)
             test_y = test_y_t.ravel()
-            self.plotDist(test_y_cp, pd.DataFrame({self.out_feature: test_y}), 'test')
+            if plot_dist:
+                self.plotDist(test_y_cp, pd.DataFrame({self.out_feature: test_y}), 'test')
         else:
             train_y = self.train[[self.out_feature]].reset_index(drop=True)
             train_y = train_y.values.ravel()
