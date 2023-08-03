@@ -5,6 +5,7 @@ def warn(*args, **kwargs):
 import warnings
 warnings.warn = warn
 
+from typing import Tuple
 import data_loader as dataloader
 import feature_importance as fimp
 import save_output as sd
@@ -162,7 +163,7 @@ class MlModel:
 
 # --------------------------- Grid Search --------------------------- #
     def findBestParams(self, out_features: str = 'TW_bf', nthreads: int = -1, space: str = 'actual_space',
-                        weighted: bool = False) -> tuple[str, dict, pd.DataFrame]:
+                        weighted: bool = False) -> Tuple[str, dict, pd.DataFrame]:
         """ Find the best parameters of the all ML models through k-fold
         cross validation and prevent overfit
 
@@ -322,7 +323,7 @@ class MlModel:
 
 # --------------------------- Run Best Model --------------------------- #
     def runMlModel(self, best_model: str, best_params: dict, best_models: pd.DataFrame, 
-                   weighted: bool, out_features: str, nthreads: int = -1) -> tuple[any, 
+                   weighted: bool, out_features: str, nthreads: int = -1) -> Tuple[any, 
                                                                                    VotingRegressor,
                                                                                    StackingRegressor,
                                                                                    pd.DataFrame,
@@ -499,7 +500,23 @@ class MlModel:
         pickle.dump(meta_model, open(self.custom_name+"/model/"+str(self.custom_name)+'_'+out_features+"_Meta_Model.pickle.dat", "wb"))
 
         return loaded_model, voting_model, meta_model, self.train_x, self.train_y, self.test_x, self.test_y
+    
+    def finalFits(self, ml_model: any, voting_model: VotingRegressor, meta_model: StackingRegressor, 
+                  out_features: str, best_model: str) -> Tuple[any, 
+                                                                VotingRegressor,
+                                                                StackingRegressor]:
+        concated_x = pd.concat([self.train_x, self.test_x], axis=0)
+        concated_x = concated_x.reset_index()
+        concated_y = np.concatenate([self.train_y, self.test_y])
+        ml_model.fit(concated_x, concated_y)
+        voting_model.fit(concated_x, concated_y)
+        meta_model.fit(concated_x, concated_y)
+        # Save models
+        pickle.dump(ml_model, open(self.custom_name+"/model/"+str(self.custom_name)+'_'+out_features+"_"+str(best_model)+"_final_Best_Model.pickle.dat", "wb"))
+        pickle.dump(voting_model, open(self.custom_name+"/model/"+str(self.custom_name)+'_'+out_features+"_final_Voting_Model.pickle.dat", "wb"))
+        pickle.dump(meta_model, open(self.custom_name+"/model/"+str(self.custom_name)+'_'+out_features+"_final_Meta_Model.pickle.dat", "wb"))
 
+        return 
 
 # --------------------------- Model Switcher --------------------------- #           
 class ModelSwitch:
@@ -620,6 +637,7 @@ class RunMlModel:
             print('end')
             best_model, best_params, best_models = model.findBestParams(out_features=target_name, nthreads=nthreads, 
                                                                                     space=space, weighted=weighted)
+            best_model_orig = best_model
             ml_model, voting_model, meta_model, train_x, train_y, _, _, = model.runMlModel(best_model=best_model, best_params=best_params, 
                                                 best_models=best_models, weighted=weighted, out_features=target_name, nthreads=nthreads)
             
@@ -657,6 +675,10 @@ class RunMlModel:
                                         x_transform=x_transform, y_transform=y_transform,
                                         out_feature=target_name, custom_name=custom_name, SI=SI)
             save_obj.processData()
+            
+            # ___________________________________________________
+            # Final training
+            model.finalFits(ml_model, voting_model, meta_model, target_name, best_model_orig)
 
             print('\n----------------- Feature importance -------------------\n')
             # # ___________________________________________________
