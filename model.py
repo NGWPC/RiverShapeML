@@ -144,7 +144,7 @@ class MlModel:
             data_path = 'data/width_predictor_test.parquet'
             self.target_data_path = 'data/width_target.parquet'
         else:
-            data_path = 'data/depth_predictor_test.parquet'
+            data_path = 'data/depth_mean_predictor_test.parquet'
             self.target_data_path = 'data/depth_target.parquet'
 
         data_loader = dataloader.DataLoader(data_path=data_path,
