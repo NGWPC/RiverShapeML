@@ -162,6 +162,7 @@ class DataLoader:
             """
             pca = PCA(n_components = 5)
             out_arr = pca.fit_transform(self.data[feat_list])
+            pickle.dump(pca, open(self.custom_name+'/model/'+'train_'+self.out_feature+'_'+name+'_PCA.pkl', "wb"))
             explained_variance = pca.explained_variance_ratio_
             
             # Find optimum number of PCs
