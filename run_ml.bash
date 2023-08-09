@@ -49,8 +49,9 @@ n=-1
 x=True
 y=True
 r=0.4
+t=3
 
-while getopts ":c:n:x:y:r:" opt; do
+while getopts ":c:n:x:y:r:t:" opt; do
     case "${opt}" in
         c)
             c=${OPTARG}
@@ -66,6 +67,9 @@ while getopts ":c:n:x:y:r:" opt; do
             ;;
         r)
             r=${OPTARG}
+            ;;
+        t)
+            t=${OPTARG}
             ;;
         \?)
           echo error "Invalid option: -$OPTARG" >&2
@@ -83,6 +87,7 @@ while getopts ":c:n:x:y:r:" opt; do
              x=False
              y=False
              r=0.4
+             t=3
             ;;
     esac
 done
@@ -93,9 +98,10 @@ echo "number of threads = ${n}"
 echo "x transformation = ${x}"
 echo "y transformation = ${y}"
 echo "R2 treshold to cut = ${r}"
+echo "count treshold to cut = ${t}"
 
 start=`date +%s`
-python3 model.py $c $n $x $y $r > "${c}_Ml_output.out"
+python3 model.py $c $n $x $y $r $t > "${c}_Ml_output.out"
 end=`date +%s`
 echo Execution time was `expr $end - $start` seconds.
 

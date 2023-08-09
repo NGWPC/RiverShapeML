@@ -97,7 +97,7 @@ class MlModel:
         
 # --------------------------- Load train and test data files --------------------------- #    
     def loadData(self, out_feature: str, x_transform: bool = False, 
-                 y_transform: bool = False, R2_thresh: float = 0.0,
+                 y_transform: bool = False, R2_thresh: float = 0.0, count_thresh: int = 3,
                  sample_type: str = "All", pci: bool = True) -> None:
         """ Load the data and apply data filtering, transformation and 
         feature selection if nessassery
@@ -120,6 +120,8 @@ class MlModel:
             The desired coeficent of determation to filter out bad measurments
             Opptions are:
             - any value between 0.0 - 100.0
+        count_thresh: int
+            The desired number of observations in each station to filter out bad measurments
         sample_type : str
             The type of predictor feature selection
             Opptions are:
@@ -154,7 +156,7 @@ class MlModel:
                                             out_feature=out_feature, 
                                             custom_name=self.custom_name, 
                                             x_transform=x_transform, y_transform=y_transform,
-                                            R2_thresh=R2_thresh) 
+                                            R2_thresh=R2_thresh, count_thresh=count_thresh) 
         data_loader.readFiles()
         if pci:
             data_loader.reduceDim()
@@ -279,7 +281,8 @@ class MlModel:
                     temp.append(deval_f(x))
                 param[k] = temp
                 del temp
-            grid_search = GridSearchCV(estimator=model, param_grid=param, n_jobs = nthreads, cv = cv)
+            grid_search = GridSearchCV(estimator=model, param_grid=param, n_jobs = nthreads, cv = cv,
+                                       scoring="neg_root_mean_squared_error",)
             if model_key == 'ard' or model_key == 'knr' or model_key == 'mlp':
                 grid_search.fit(self.train_x, self.train_y)
             else:
@@ -603,15 +606,16 @@ class RunMlModel:
         """
         custom_name = argv[0]
         # target_name = argv[1] 
-        nthreads    = int(argv[1])
-        x_transform = eval(argv[2])
-        y_transform = eval(argv[3])
-        R2_thresh   = float(argv[4])
-        space       = 'actual_space' # actual_space / test_space
-        SI          = False # SI system
-        sample_type = "All" #"All", "Sub", "test"
-        weighted    = False
-        pci         = True 
+        nthreads     = int(argv[1])
+        x_transform  = eval(argv[2])
+        y_transform  = eval(argv[3])
+        R2_thresh    = float(argv[4])
+        count_thresh = int(argv[5])
+        space        = 'actual_space' # actual_space / test_space
+        SI           = False # SI system
+        sample_type  = "All" #"All", "Sub", "test"
+        weighted     = False
+        pci          = True 
         if sample_type == "Sub" and pci:
             sample_type = "Sub_pca"
 
@@ -632,7 +636,7 @@ class RunMlModel:
             # Train models 
             print('\n******************* modeling parameter {0} starts here *******************\n'.format(target_name))
             model.loadData(out_feature=target_name, x_transform=x_transform,
-                                y_transform=y_transform, R2_thresh=R2_thresh, 
+                                y_transform=y_transform, R2_thresh=R2_thresh, count_thresh=count_thresh,
                                 sample_type=sample_type, pci=pci)     
             print('end')
             best_model, best_params, best_models = model.findBestParams(out_features=target_name, nthreads=nthreads, 
@@ -696,6 +700,6 @@ class RunMlModel:
             print('end')
 
 if __name__ == "__main__":
-    # RunMlModel.main(['test2', -1, "True", "True", 0.6])
+    # RunMlModel.main(['test2', -1, "True", "True", 0.6, 15])
     RunMlModel.main(sys.argv[1:])
 

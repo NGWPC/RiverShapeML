@@ -55,7 +55,8 @@
             "ST_min",
             "snowfall",
             "snowmelt",
-            "Wind_ave"
+            "Wind_ave",
+            "meas_q_va"
         ],
         "TW_in_feats": [
             "CHILI",
@@ -97,7 +98,8 @@
             "NDVI_max",
             "NDVI_min",
             "slope_ave",
-            "lat"
+            "lat",
+            "meas_q_va"
         ],
         "Y_bf_feats": [
             "CHILI",
@@ -142,7 +144,8 @@
             "LAI_min",
             "NDVI_ave",
             "NDVI_max",
-            "NDVI_min"
+            "NDVI_min",
+            "meas_q_va"
         ],
         "Y_in_feats": [
             "CHILI",
@@ -182,7 +185,8 @@
             "sub_surface_runoff",
             "surface_runoff",
             "long",
-            "Wind_ave"
+            "Wind_ave",
+            "meas_q_va"
         ]
     },
     "Sub_pca": {
@@ -214,7 +218,8 @@
             "vpd",
             "vs",
             "long",
-            "lat"
+            "lat",
+            "meas_q_va"
         ],
         "TW_in_feats": [
             "ET_ave",
@@ -244,7 +249,8 @@
             "vpd",
             "vs",
             "long",
-            "lat"
+            "lat",
+            "meas_q_va"
         ],
         "Y_bf_feats": [
             "ET_ave",
@@ -274,7 +280,8 @@
             "vpd",
             "vs",
             "long",
-            "lat"
+            "lat",
+            "meas_q_va"
         ],
         "Y_in_feats": [
             "ET_ave",
@@ -304,7 +311,8 @@
             "vpd",
             "vs",
             "long",
-            "lat"
+            "lat",
+            "meas_q_va"
         ]
     }
 }
