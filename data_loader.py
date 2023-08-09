@@ -50,15 +50,17 @@ class DataLoader:
         Opptions are:
         - any value between 0.0 - 100.0
         - defaults to 0.0
+    count_thresh: int
+            The desired number of observations in each station to filter out bad measurments
     Example
     --------
     >>> DataLoader(data_path = 'data/test.parquet', out_feature = 'b', rand_state = 115,
-        custom_name = 'test', x_transform = False, y_transform = False, R2_thresh = 0.0)
+        custom_name = 'test', x_transform = False, y_transform = False, R2_thresh = 0.0, count_thresh = 3)
         
     """
     def __init__(self, data_path: str, target_data_path: str, rand_state: int, out_feature: str, 
-                 custom_name: str, x_transform: bool = False, 
-                 y_transform: bool = False, R2_thresh: float = 0.0) -> None:
+                 custom_name: str, x_transform: bool = False, y_transform: bool = False, 
+                 R2_thresh: float = 0.0, count_thresh: int = 3) -> None:
         pd.options.display.max_columns  = 60
         self.data_path                  = data_path
         self.target_data_path           = target_data_path
@@ -74,7 +76,8 @@ class DataLoader:
         self.train                      = pd.DataFrame([])
         self.test                       = pd.DataFrame([])
         self.R2_thresh                  = R2_thresh
-
+        self.count_thresh               = count_thresh
+        
         # ___________________________________________________
         # Check directories
         if not os.path.isdir(os.path.join(os.getcwd(),self.custom_name,"model/")):
@@ -128,6 +131,15 @@ class DataLoader:
         plt.savefig(self.custom_name+'/img/model/'+str(self.custom_name)+'_'+str(self.out_feature)+'_R2_cut.png',bbox_inches='tight', dpi = 600, facecolor='white')
         plt.show()
 
+        # Filter based on count 
+        good_stations = grouped_r2.loc[(grouped_r2['Count'] >= self.count_thresh)]
+        good_stations = good_stations.reset_index()
+        good_stations.astype({'siteID': 'string'})
+        stations = good_stations['siteID'].tolist()
+        self.data = self.data[self.data['siteID'].isin(stations)].reset_index(drop=True)
+        del good_stations, stations
+
+        # Filter based on R2
         good_stations = grouped_r2.loc[(grouped_r2['R2'] >= self.R2_thresh)]
         good_stations = good_stations.reset_index()
         good_stations.astype({'siteID': 'string'})

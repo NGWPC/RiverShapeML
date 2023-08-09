@@ -66,13 +66,13 @@
         "rf_params": {
             "n_estimators": [
                 10,
-                100
+                35
             ],
             "max_depth": [
-                3
+                14
             ],
             "max_features": [
-                null
+                4
             ],
             "max_samples": [
                 0.6
