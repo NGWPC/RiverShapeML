@@ -147,7 +147,7 @@ class MlModel:
             self.target_data_path = 'data/width_target.parquet'
         else:
             data_path = 'data/depth_mean_predictor_test.parquet'
-            self.target_data_path = 'data/depth_target.parquet'
+            self.target_data_path = 'data/depth_mean_target.parquet'
 
         data_loader = dataloader.DataLoader(data_path=data_path,
                                             target_data_path=self.target_data_path,
@@ -238,27 +238,27 @@ class MlModel:
         models = { 
             'xgb': xgb_reg,
             'rf': rf_reg,
-            'hgb': hgb_reg,
-            'lgb': lgb_reg,
-            'bsvr': bsvr_reg,
-            'knr': knr_reg,
-            'ard': ard_reg,
-            'enet': enet_reg,
-            'mlp': mlp_reg,
-            'bays': bays_reg
+            # 'hgb': hgb_reg,
+            # 'lgb': lgb_reg,
+            # 'bsvr': bsvr_reg,
+            # 'knr': knr_reg,
+            # 'ard': ard_reg,
+            # 'enet': enet_reg,
+            # 'mlp': mlp_reg,
+            # 'bays': bays_reg
             # 'orth': orth_reg
         }
         params = { 
             'xgb': params_space.get(space).get('xgb_params'),
             'rf': params_space.get(space).get('rf_params'),
-            'hgb': params_space.get(space).get('hgb_params'),
-            'lgb': params_space.get(space).get('lgb_params'),
-            'bsvr': params_space.get(space).get('bsvr_params'),
-            'knr': params_space.get(space).get('knr_params'),
-            'ard': params_space.get(space).get('ard_params'),
-            'enet': params_space.get(space).get('enet_params'),
-            'mlp': params_space.get(space).get('mlp_params'),
-            'bays': params_space.get(space).get('bays_params')
+            # 'hgb': params_space.get(space).get('hgb_params'),
+            # 'lgb': params_space.get(space).get('lgb_params'),
+            # 'bsvr': params_space.get(space).get('bsvr_params'),
+            # 'knr': params_space.get(space).get('knr_params'),
+            # 'ard': params_space.get(space).get('ard_params'),
+            # 'enet': params_space.get(space).get('enet_params'),
+            # 'mlp': params_space.get(space).get('mlp_params'),
+            # 'bays': params_space.get(space).get('bays_params')
             # 'orth': params_space.get(space).get('orth_params')
         }
 
@@ -415,17 +415,18 @@ class MlModel:
         self.x_train = self.x_train.reset_index(drop=True)
         self.eval_id = self.x_eval[['siteID', 'R2']]
         self.eval_id = self.eval_id.reset_index(drop=True)
+
         self.x_eval = self.x_eval.loc[:, ~self.x_eval.columns.isin(['siteID', 'R2'])]
         self.x_eval = self.x_eval.reset_index(drop=True)
         # ___________________________________________________
         # Out of the box evaluation of models
         # Fit all models
-        reg_models = lazypredict.Supervised.REGRESSORS
-        lazypredict.Supervised.REGRESSORS = [t for t in reg_models if not t[0].startswith('Quantile')]
-        ob_reg = LazyRegressor(predictions=True)
-        models, predictions = ob_reg.fit(self.x_train, self.x_eval, self.y_train, self.y_eval)
-        print('\n out of the box evaluation of models for target: '+str(self.custom_name)+ '\n')
-        print(models)
+        # reg_models = lazypredict.Supervised.REGRESSORS
+        # lazypredict.Supervised.REGRESSORS = [t for t in reg_models if not t[0].startswith('Quantile')]
+        # ob_reg = LazyRegressor(predictions=True)
+        # models, predictions = ob_reg.fit(self.x_train, self.x_eval, self.y_train, self.y_eval)
+        # print('\n out of the box evaluation of models for target: '+str(self.custom_name)+ '\n')
+        # print(models)
 
         # ___________________________________________________
         # Check witch models are used with weights and fit
@@ -469,22 +470,22 @@ class MlModel:
         base_model.append(('xgb', temp))
         temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'rf'])
         base_model.append(('rf', temp))
-        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'hgb'])
-        base_model.append(('hgb', temp))
-        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'lgb'])
-        base_model.append(('lgb', temp))
-        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'bsvr'])
-        base_model.append(('bsvr', temp))
-        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'knr'])
-        base_model.append(('knr', temp))
-        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'ard'])
-        base_model.append(('ard', temp))
-        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'enet'])
-        base_model.append(('enet', temp))
-        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'mlp'])
-        base_model.append(('mlp', temp))
-        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'bays'])
-        base_model.append(('bays', temp))
+        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'hgb'])
+        # base_model.append(('hgb', temp))
+        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'lgb'])
+        # base_model.append(('lgb', temp))
+        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'bsvr'])
+        # base_model.append(('bsvr', temp))
+        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'knr'])
+        # base_model.append(('knr', temp))
+        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'ard'])
+        # base_model.append(('ard', temp))
+        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'enet'])
+        # base_model.append(('enet', temp))
+        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'mlp'])
+        # base_model.append(('mlp', temp))
+        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'bays'])
+        # base_model.append(('bays', temp))
         # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'orth'])
         # base_model.append(('orth', temp))
 
@@ -509,7 +510,7 @@ class MlModel:
                                                                 VotingRegressor,
                                                                 StackingRegressor]:
         concated_x = pd.concat([self.train_x, self.test_x], axis=0)
-        concated_x = concated_x.reset_index()
+        concated_x = concated_x.reset_index(drop=True)
         concated_y = np.concatenate([self.train_y, self.test_y])
         ml_model.fit(concated_x, concated_y)
         voting_model.fit(concated_x, concated_y)
@@ -611,9 +612,9 @@ class RunMlModel:
         y_transform  = eval(argv[3])
         R2_thresh    = float(argv[4])
         count_thresh = int(argv[5])
-        space        = 'actual_space' # actual_space / test_space
+        space        = 'test_space' # actual_space / test_space
         SI           = False # SI system
-        sample_type  = "All" #"All", "Sub", "test"
+        sample_type  = "Sub" #"All", "Sub", "test"
         weighted     = False
         pci          = True 
         if sample_type == "Sub" and pci:
@@ -687,19 +688,19 @@ class RunMlModel:
             print('\n----------------- Feature importance -------------------\n')
             # # ___________________________________________________
             # # plot feature importance
-            try:
-                fimp_object = fimp.FeatureImportance(custom_name, best_model)
-                fimp_object.plotImportance(model=ml_model, out_features=target_name,
-                                            train_x=train_x, train_y=train_y)
-                fimp_object.plotShapImportance(model=ml_model, out_features=target_name, 
-                                                train_x=train_x)
-            except Exception as e:       
-                print("An exception occurred due to shap internal errors!")  
-                print(e)      
+            # try:
+            fimp_object = fimp.FeatureImportance(custom_name, best_model)
+            fimp_object.plotImportance(model=ml_model, out_features=target_name,
+                                        train_x=train_x, train_y=train_y)
+            fimp_object.plotShapImportance(model=ml_model, out_features=target_name, 
+                                            train_x=train_x)
+            # except Exception as e:       
+            #     print("An exception occurred due to shap internal errors!")  
+            #     print(e)      
             print('\n**************** modeling parameter {0} ends here ****************\n'.format(target_name))
             print('end')
 
 if __name__ == "__main__":
-    # RunMlModel.main(['test2', -1, "True", "True", 0.6, 15])
-    RunMlModel.main(sys.argv[1:])
+    RunMlModel.main(['test2', -1, "True", "True", 0.0, 30])
+    # RunMlModel.main(sys.argv[1:])
 

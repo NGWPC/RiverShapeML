@@ -56,7 +56,7 @@
             "snowfall",
             "snowmelt",
             "Wind_ave",
-            "meas_q_va"
+            "bf_ff"
         ],
         "TW_in_feats": [
             "CHILI",
@@ -99,7 +99,7 @@
             "NDVI_min",
             "slope_ave",
             "lat",
-            "meas_q_va"
+            "in_ff"
         ],
         "Y_bf_feats": [
             "CHILI",
@@ -145,7 +145,7 @@
             "NDVI_ave",
             "NDVI_max",
             "NDVI_min",
-            "meas_q_va"
+            "bf_ff"
         ],
         "Y_in_feats": [
             "CHILI",
@@ -186,133 +186,101 @@
             "surface_runoff",
             "long",
             "Wind_ave",
-            "meas_q_va"
+            "in_ff"
         ]
     },
     "Sub_pca": {
         "TW_bf_feats": [
             "ET_ave",
-            "Vegetation_0",
-            "Vegetation_1",
-            "Vegetation_2",
-            "Preciep_0",
-            "Preciep_1",
-            "Soil_temp_moist_0",
-            "Soil_temp_moist_1",
-            "Soil_temp_moist_2",
             "SWE",
             "Wind_ave",
             "aet",
             "slope_ave",
             "snowfall",
             "snowmelt",
-            "Discharge_0",
-            "Discharge_1",
-            "Soil_0",
-            "Soil_1",
-            "Soil_2",
-            "Soil_3",
-            "Topo_0",
-            "Topo_1",
             "vap",
             "vpd",
             "vs",
             "long",
             "lat",
-            "meas_q_va"
+            "bf_ff"
+        ],
+        "TW_bf_pc_feats": [
+            "Vegetation",
+            "Preciep",
+            "Soil_temp_moist",
+            "Discharge",
+            "Soil_char",
+            "Topo"
         ],
         "TW_in_feats": [
             "ET_ave",
-            "Vegetation_0",
-            "Vegetation_1",
-            "Vegetation_2",
-            "Preciep_0",
-            "Preciep_1",
-            "Soil_temp_moist_0",
-            "Soil_temp_moist_1",
-            "Soil_temp_moist_2",
             "SWE",
             "Wind_ave",
             "aet",
             "slope_ave",
             "snowfall",
             "snowmelt",
-            "Discharge_0",
-            "Discharge_1",
-            "Soil_0",
-            "Soil_1",
-            "Soil_2",
-            "Soil_3",
-            "Topo_0",
-            "Topo_1",
             "vap",
             "vpd",
             "vs",
             "long",
             "lat",
-            "meas_q_va"
+            "in_ff"
+        ],
+        "TW_in_pc_feats": [
+            "Vegetation",
+            "Preciep",
+            "Soil_temp_moist",
+            "Discharge",
+            "Soil_char",
+            "Topo"
         ],
         "Y_bf_feats": [
             "ET_ave",
-            "Vegetation_0",
-            "Vegetation_1",
-            "Vegetation_2",
-            "Preciep_0",
-            "Preciep_1",
-            "Soil_temp_moist_0",
-            "Soil_temp_moist_1",
-            "Soil_temp_moist_2",
             "SWE",
             "Wind_ave",
             "aet",
             "slope_ave",
             "snowfall",
             "snowmelt",
-            "Discharge_0",
-            "Discharge_1",
-            "Soil_0",
-            "Soil_1",
-            "Soil_2",
-            "Soil_3",
-            "Topo_0",
-            "Topo_1",
             "vap",
             "vpd",
             "vs",
             "long",
             "lat",
-            "meas_q_va"
+            "bf_ff"
+        ],
+        "Y_bf_pc_feats": [
+            "Vegetation",
+            "Preciep",
+            "Soil_temp_moist",
+            "Discharge",
+            "Soil_char",
+            "Topo"
         ],
         "Y_in_feats": [
             "ET_ave",
-            "Vegetation_0",
-            "Vegetation_1",
-            "Vegetation_2",
-            "Preciep_0",
-            "Preciep_1",
-            "Soil_temp_moist_0",
-            "Soil_temp_moist_1",
-            "Soil_temp_moist_2",
             "SWE",
             "Wind_ave",
             "aet",
             "slope_ave",
             "snowfall",
             "snowmelt",
-            "Discharge_0",
-            "Discharge_1",
-            "Soil_0",
-            "Soil_1",
-            "Soil_2",
-            "Soil_3",
-            "Topo_0",
-            "Topo_1",
             "vap",
             "vpd",
             "vs",
             "long",
             "lat",
-            "meas_q_va"
+            "in_ff"
+        ],
+        "Y_in_feats": [
+            "Vegetation",
+            "Preciep",
+            "Soil_temp_moist",
+            "Discharge",
+            "Soil_char",
+            "Topo"
         ]
     }
 }
