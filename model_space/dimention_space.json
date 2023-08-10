@@ -23,7 +23,7 @@
         "ST_max",
         "ST_min"
     ],
-    "Soil": [
+    "Soil_char": [
         "bd",
         "clay",
         "hb",

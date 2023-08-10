@@ -69,6 +69,8 @@ class DataLoader:
         self.rand_state                 = rand_state
         np.random.seed(self.rand_state)
         self.in_features                = []
+        self.add_features               = []
+        self.del_features               = []
         self.out_feature                = out_feature
         self.custom_name                = custom_name
         self.x_transform                = x_transform
@@ -100,7 +102,7 @@ class DataLoader:
         
         # ___________________________________________________
         # Merge data and prepare targets
-        self.data_target = self.data_target[set(self.data_target) - set(['lat','long','meas_q_va','stream_wdth_va','max_depth_va'])]
+        self.data_target = self.data_target[set(self.data_target) - set(['lat','long','meas_q_va','stream_wdth_va','max_depth_va'])] # 'meas_q_va',
         self.data = pd.merge(self.data_target, self.data, on='siteID', how = 'inner')
 
         # ___________________________________________________
@@ -181,14 +183,19 @@ class DataLoader:
             for i in range(0, 5, 1):
                 total_var = np.sum(explained_variance[0:i])
                 self.data[str(name)+"_"+str(i)] = out_arr[:, i]
+                self.add_features.append(str(name)+"_"+str(i))
                 if total_var >= 0.95:
                     # num_pc = i
                     break
-
+            
             # Remove transformed features
             all_col = self.data.columns.tolist()
             new_col = list(set(all_col) - set(feat_list))
             self.data = self.data[new_col]
+
+            # Update varaibles
+            self.del_features += feat_list
+
             return
 
         # Vegetation
@@ -208,8 +215,8 @@ class DataLoader:
 
         # Soil
         print('Reducing Soil ..')
-        feat_list = temp.get('Soil')
-        buildPCA(feat_list, 'Soil')
+        feat_list = temp.get('Soil_char')
+        buildPCA(feat_list, 'Soil_char')
 
         # Preciep
         print('Reducing Preciep ..')
@@ -245,11 +252,11 @@ class DataLoader:
         """
         if sample_type == "All":
             in_feat = 'in_features'
-            if pci:
-                in_feat = 'in_features_pci'
+            # if pci:
+            #     in_feat = 'in_features_pci'
 
             temp = json.load(open('data/model_feature_names.json'))
-            model_features = [self.out_feature]+temp.get(in_feat)+temp.get('id_features')#+temp.get('in_features_NWM')+temp.get('in_features_flow_freq')
+            model_features = [self.out_feature]+temp.get(in_feat)-self.del_features+self.add_features+temp.get('id_features')#+temp.get('in_features_NWM')+temp.get('in_features_flow_freq')
             # ___________________________________________________
             # to dump variables
             # dump_list = ["BFICat","CatAreaSqKm","ElevCat","PctWaterCat","PrecipCat",
@@ -265,14 +272,20 @@ class DataLoader:
             self.in_features = model_features.copy()
             self.in_features = list(set(self.in_features) - set(temp.get('id_features')) - set([self.out_feature]))
         else:
-            temp = json.load(open('model_space/feature_space.json'))
-            temp = temp.get(sample_type).get(self.out_feature+'_feats')
-            model_features = temp
+            temp_o = json.load(open('model_space/feature_space.json'))
+            temp = temp_o.get(sample_type).get(self.out_feature+'_feats')
+            temp_pc = temp_o.get(sample_type).get(self.out_feature+'_pc_feats')
+            pc_vars = []
+            for pc_var in temp_pc:
+                matched_vars = [variable for variable in self.add_features if pc_var in variable]
+                pc_vars += matched_vars
+
+            model_features = temp + pc_vars
             self.in_features = model_features.copy()
             temp = json.load(open('data/model_feature_names.json'))
             model_features += [self.out_feature]+temp.get('id_features')
 
-        del temp
+        del temp, temp_o, temp_pc
         
         # Apply some filtering
         if "TW_" in self.out_feature: 
