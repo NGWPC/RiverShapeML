@@ -200,33 +200,33 @@ class DataLoader:
 
         # Vegetation
         print('Reducing Vegetation ..')
-        feat_list = temp.get('Vegetation')
-        buildPCA(feat_list, 'Vegetation')
+        feat_list = temp.get('Vegetation_pc')
+        buildPCA(feat_list, 'Vegetation_pc')
 
         # Discharge
         print('Reducing Discharge ..')
-        feat_list = temp.get('Discharge')
-        buildPCA(feat_list, 'Discharge')
+        feat_list = temp.get('Discharge_pc')
+        buildPCA(feat_list, 'Discharge_pc')
 
         # Soil_temp_moist
         print('Reducing Soil_temp_moist ..')
-        feat_list = temp.get('Soil_temp_moist')
-        buildPCA(feat_list, 'Soil_temp_moist')
+        feat_list = temp.get('Soil_temp_moist_pc')
+        buildPCA(feat_list, 'Soil_temp_moist_pc')
 
         # Soil
         print('Reducing Soil ..')
-        feat_list = temp.get('Soil_char')
-        buildPCA(feat_list, 'Soil_char')
+        feat_list = temp.get('Soil_char_pc')
+        buildPCA(feat_list, 'Soil_char_pc')
 
         # Preciep
         print('Reducing Preciep ..')
-        feat_list = temp.get('Preciep')
-        buildPCA(feat_list, 'Preciep')
+        feat_list = temp.get('Preciep_pc')
+        buildPCA(feat_list, 'Preciep_pc')
 
         # Topo
         print('Reducing Topo ..')
-        feat_list = temp.get('Topo')
-        buildPCA(feat_list, 'Topo')
+        feat_list = temp.get('Topo_pc')
+        buildPCA(feat_list, 'Topo_pc')
 
         print("\n ------------- End of dimention reduction ----------- \n")
         return

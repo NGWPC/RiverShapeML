@@ -206,12 +206,12 @@
             "bf_ff"
         ],
         "TW_bf_pc_feats": [
-            "Vegetation",
-            "Preciep",
-            "Soil_temp_moist",
-            "Discharge",
-            "Soil_char",
-            "Topo"
+            "Vegetation_pc",
+            "Preciep_pc",
+            "Soil_temp_moist_pc",
+            "Discharge_pc",
+            "Soil_char_pc",
+            "Topo_pc"
         ],
         "TW_in_feats": [
             "ET_ave",
@@ -229,12 +229,12 @@
             "in_ff"
         ],
         "TW_in_pc_feats": [
-            "Vegetation",
-            "Preciep",
-            "Soil_temp_moist",
-            "Discharge",
-            "Soil_char",
-            "Topo"
+            "Vegetation_pc",
+            "Preciep_pc",
+            "Soil_temp_moist_pc",
+            "Discharge_pc",
+            "Soil_char_pc",
+            "Topo_pc"
         ],
         "Y_bf_feats": [
             "ET_ave",
@@ -252,12 +252,12 @@
             "bf_ff"
         ],
         "Y_bf_pc_feats": [
-            "Vegetation",
-            "Preciep",
-            "Soil_temp_moist",
-            "Discharge",
-            "Soil_char",
-            "Topo"
+            "Vegetation_pc",
+            "Preciep_pc",
+            "Soil_temp_moist_pc",
+            "Discharge_pc",
+            "Soil_char_pc",
+            "Topo_pc"
         ],
         "Y_in_feats": [
             "ET_ave",
@@ -275,12 +275,12 @@
             "in_ff"
         ],
         "Y_in_feats": [
-            "Vegetation",
-            "Preciep",
-            "Soil_temp_moist",
-            "Discharge",
-            "Soil_char",
-            "Topo"
+            "Vegetation_pc",
+            "Preciep_pc",
+            "Soil_temp_moist_pc",
+            "Discharge_pc",
+            "Soil_char_pc",
+            "Topo_pc"
         ]
     }
 }

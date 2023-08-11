@@ -1,5 +1,5 @@
 {
-    "Vegetation": [
+    "Vegetation_pc": [
         "LAI_ave",
         "LAI_max",
         "LAI_min",
@@ -7,7 +7,7 @@
         "NDVI_max",
         "NDVI_min"
     ],
-    "Discharge": [
+    "Discharge_pc": [
         "Q_mean",
         "Qb_max",
         "Qb_mean",
@@ -15,7 +15,7 @@
         "sub_surface_runoff",
         "surface_runoff"
     ],
-    "Soil_temp_moist": [
+    "Soil_temp_moist_pc": [
         "SM_ave",
         "SM_max",
         "SM_min",
@@ -23,7 +23,7 @@
         "ST_max",
         "ST_min"
     ],
-    "Soil_char": [
+    "Soil_char_pc": [
         "bd",
         "clay",
         "hb",
@@ -39,7 +39,7 @@
         "theta_r",
         "theta_s"
     ],
-    "Preciep": [
+    "Preciep_pc": [
         "AI",
         "pdsi",
         "Precip_ave",
@@ -47,7 +47,7 @@
         "Precip_min",
         "pdsi"
     ],
-    "Topo": [
+    "Topo_pc": [
         "CHILI",
         "PhyD",
         "Phy_ave",
