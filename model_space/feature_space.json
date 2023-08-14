@@ -274,7 +274,7 @@
             "lat",
             "in_ff"
         ],
-        "Y_in_feats": [
+        "Y_in_pc_feats": [
             "Vegetation_pc",
             "Preciep_pc",
             "Soil_temp_moist_pc",
