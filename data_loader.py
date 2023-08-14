@@ -250,13 +250,15 @@ class DataLoader:
             --------
             >>> splitData("All")
         """
+        temp_pc = []
+        temp_o = []
         if sample_type == "All":
             in_feat = 'in_features'
             # if pci:
             #     in_feat = 'in_features_pci'
 
             temp = json.load(open('data/model_feature_names.json'))
-            model_features = [self.out_feature]+temp.get(in_feat)-self.del_features+self.add_features+temp.get('id_features')#+temp.get('in_features_NWM')+temp.get('in_features_flow_freq')
+            model_features = list(set([self.out_feature]+temp.get(in_feat))-set(self.del_features))+self.add_features+temp.get('id_features')#+temp.get('in_features_NWM')+temp.get('in_features_flow_freq')
             # ___________________________________________________
             # to dump variables
             # dump_list = ["BFICat","CatAreaSqKm","ElevCat","PctWaterCat","PrecipCat",
@@ -271,7 +273,7 @@ class DataLoader:
             # model_features = list(set(model_features) - set(dump_list))
             self.in_features = model_features.copy()
             self.in_features = list(set(self.in_features) - set(temp.get('id_features')) - set([self.out_feature]))
-        else:
+        elif sample_type == "Sub_pca":
             temp_o = json.load(open('model_space/feature_space.json'))
             temp = temp_o.get(sample_type).get(self.out_feature+'_feats')
             temp_pc = temp_o.get(sample_type).get(self.out_feature+'_pc_feats')
@@ -281,6 +283,14 @@ class DataLoader:
                 pc_vars += matched_vars
 
             model_features = temp + pc_vars
+            self.in_features = model_features.copy()
+            temp = json.load(open('data/model_feature_names.json'))
+            model_features += [self.out_feature]+temp.get('id_features')
+        else:
+            temp_o = json.load(open('model_space/feature_space.json'))
+            temp = temp_o.get(sample_type).get(self.out_feature+'_feats')
+
+            model_features = temp .copy()
             self.in_features = model_features.copy()
             temp = json.load(open('data/model_feature_names.json'))
             model_features += [self.out_feature]+temp.get('id_features')

@@ -701,6 +701,6 @@ class RunMlModel:
             print('end')
 
 if __name__ == "__main__":
-    # RunMlModel.main(['test2', -1, "True", "True", 0.0, 30])
+    # RunMlModel.main(['test2', -1, "True", "True", 0.8, 15])
     RunMlModel.main(sys.argv[1:])
 
