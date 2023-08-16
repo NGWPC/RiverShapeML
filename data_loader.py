@@ -4,6 +4,7 @@ from sklearn.decomposition import PCA
 import scipy
 import matplotlib.pyplot as plt
 from matplotlib import pyplot
+import matplotlib.colors as mcolors
 import seaborn as sns
 import pandas as pd
 import numpy as np
@@ -178,7 +179,8 @@ class DataLoader:
             out_arr = pca.fit_transform(self.data[feat_list])
             pickle.dump(pca, open(self.custom_name+'/model/'+'train_'+self.out_feature+'_'+name+'_PCA.pkl', "wb"))
             explained_variance = pca.explained_variance_ratio_
-            
+            components_matrix = pca.components_
+
             # Find optimum number of PCs
             for i in range(0, 5, 1):
                 total_var = np.sum(explained_variance[0:i])
@@ -188,6 +190,25 @@ class DataLoader:
                     # num_pc = i
                     break
             
+            # Save contibutions
+            fig, ax = plt.subplots(1, 1, figsize=(6,6))
+            ax.grid(True)
+            cmap = plt.cm.seismic
+            median_value = np.median(components_matrix)
+            midpoint = 1 - median_value / (components_matrix.max() - components_matrix.min())
+            cmap_adjusted = mcolors.TwoSlopeNorm(vmin=components_matrix.min(), vcenter=0, vmax=components_matrix.max())
+
+            plt.imshow(components_matrix, cmap=cmap, norm=cmap_adjusted, aspect='auto')
+            plt.xticks(range(len(feat_list)), feat_list, rotation=45, ha='right')
+            plt.yticks(range(len(self.add_features)), self.add_features, rotation=45, ha='right')
+            plt.colorbar(label='Loading Value')
+            plt.xlabel('Original Features')
+            plt.ylabel('Principal Components')
+            plt.title('Contributions of Original Features to Principal Components')
+            my_plot = plt.gcf()
+            plt.savefig(self.custom_name+'/img/model/'+str(self.custom_name)+'_'+str(self.out_feature)+'_'+str(name)+'_PCA.png', bbox_inches='tight', dpi = 600, facecolor='white')
+            plt.show()
+
             # Remove transformed features
             all_col = self.data.columns.tolist()
             new_col = list(set(all_col) - set(feat_list))
