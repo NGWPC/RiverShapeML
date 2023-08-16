@@ -98,7 +98,7 @@ class MlModel:
 # --------------------------- Load train and test data files --------------------------- #    
     def loadData(self, out_feature: str, x_transform: bool = False, 
                  y_transform: bool = False, R2_thresh: float = 0.0, count_thresh: int = 3,
-                 sample_type: str = "All", pci: bool = True) -> None:
+                 sample_type: str = "All", pci: bool = True, t_type: str = 'log') -> None:
         """ Load the data and apply data filtering, transformation and 
         feature selection if nessassery
 
@@ -133,12 +133,18 @@ class MlModel:
             Opptions are:
             - True
             - False
+        t_type: str
+            type of transformation
+            Opptions are:
+            - log
+            - power
+            - quant
         
         Example
         --------
         >>> MlModel.loadData(out_feature = 'b', x_transform = False, 
                  y_transform = False, R2_thresh = 0.0,
-                 sample_type = "Sub", PCI = False)
+                 sample_type = "Sub", pci = False, t_type = 'log')
         """
         # Bulid an instance of DataLoader object
 
@@ -161,7 +167,7 @@ class MlModel:
         if pci:
             data_loader.reduceDim()
         data_loader.splitData(sample_type=sample_type, pci=pci)
-        self.train_x, self.train_y, self.train_id, self.test_x, self.test_y, self.test_id = data_loader.transformData(type='power', plot_dist=False)
+        self.train_x, self.train_y, self.train_id, self.test_x, self.test_y, self.test_id = data_loader.transformData(t_type=t_type, plot_dist=False)
 
 # --------------------------- Grid Search --------------------------- #
     def findBestParams(self, out_features: str = 'TW_bf', nthreads: int = -1, space: str = 'actual_space',
@@ -238,27 +244,27 @@ class MlModel:
         models = { 
             'xgb': xgb_reg,
             'rf': rf_reg,
-            # 'hgb': hgb_reg,
-            # 'lgb': lgb_reg,
-            # 'bsvr': bsvr_reg,
-            # 'knr': knr_reg,
-            # 'ard': ard_reg,
-            # 'enet': enet_reg,
-            # 'mlp': mlp_reg,
-            # 'bays': bays_reg
+            'hgb': hgb_reg,
+            'lgb': lgb_reg,
+            'bsvr': bsvr_reg,
+            'knr': knr_reg,
+            'ard': ard_reg,
+            'enet': enet_reg,
+            'mlp': mlp_reg,
+            'bays': bays_reg
             # 'orth': orth_reg
         }
         params = { 
             'xgb': params_space.get(space).get('xgb_params'),
             'rf': params_space.get(space).get('rf_params'),
-            # 'hgb': params_space.get(space).get('hgb_params'),
-            # 'lgb': params_space.get(space).get('lgb_params'),
-            # 'bsvr': params_space.get(space).get('bsvr_params'),
-            # 'knr': params_space.get(space).get('knr_params'),
-            # 'ard': params_space.get(space).get('ard_params'),
-            # 'enet': params_space.get(space).get('enet_params'),
-            # 'mlp': params_space.get(space).get('mlp_params'),
-            # 'bays': params_space.get(space).get('bays_params')
+            'hgb': params_space.get(space).get('hgb_params'),
+            'lgb': params_space.get(space).get('lgb_params'),
+            'bsvr': params_space.get(space).get('bsvr_params'),
+            'knr': params_space.get(space).get('knr_params'),
+            'ard': params_space.get(space).get('ard_params'),
+            'enet': params_space.get(space).get('enet_params'),
+            'mlp': params_space.get(space).get('mlp_params'),
+            'bays': params_space.get(space).get('bays_params')
             # 'orth': params_space.get(space).get('orth_params')
         }
 
@@ -421,12 +427,12 @@ class MlModel:
         # ___________________________________________________
         # Out of the box evaluation of models
         # Fit all models
-        # reg_models = lazypredict.Supervised.REGRESSORS
-        # lazypredict.Supervised.REGRESSORS = [t for t in reg_models if not t[0].startswith('Quantile')]
-        # ob_reg = LazyRegressor(predictions=True)
-        # models, predictions = ob_reg.fit(self.x_train, self.x_eval, self.y_train, self.y_eval)
-        # print('\n out of the box evaluation of models for target: '+str(self.custom_name)+ '\n')
-        # print(models)
+        reg_models = lazypredict.Supervised.REGRESSORS
+        lazypredict.Supervised.REGRESSORS = [t for t in reg_models if not t[0].startswith('Quantile')]
+        ob_reg = LazyRegressor(predictions=True)
+        models, predictions = ob_reg.fit(self.x_train, self.x_eval, self.y_train, self.y_eval)
+        print('\n out of the box evaluation of models for target: '+str(self.custom_name)+ '\n')
+        print(models)
 
         # ___________________________________________________
         # Check witch models are used with weights and fit
@@ -470,22 +476,22 @@ class MlModel:
         base_model.append(('xgb', temp))
         temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'rf'])
         base_model.append(('rf', temp))
-        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'hgb'])
-        # base_model.append(('hgb', temp))
-        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'lgb'])
-        # base_model.append(('lgb', temp))
-        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'bsvr'])
-        # base_model.append(('bsvr', temp))
-        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'knr'])
-        # base_model.append(('knr', temp))
-        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'ard'])
-        # base_model.append(('ard', temp))
-        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'enet'])
-        # base_model.append(('enet', temp))
-        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'mlp'])
-        # base_model.append(('mlp', temp))
-        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'bays'])
-        # base_model.append(('bays', temp))
+        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'hgb'])
+        base_model.append(('hgb', temp))
+        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'lgb'])
+        base_model.append(('lgb', temp))
+        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'bsvr'])
+        base_model.append(('bsvr', temp))
+        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'knr'])
+        base_model.append(('knr', temp))
+        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'ard'])
+        base_model.append(('ard', temp))
+        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'enet'])
+        base_model.append(('enet', temp))
+        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'mlp'])
+        base_model.append(('mlp', temp))
+        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'bays'])
+        base_model.append(('bays', temp))
         # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'orth'])
         # base_model.append(('orth', temp))
 
@@ -612,11 +618,12 @@ class RunMlModel:
         y_transform  = eval(argv[3])
         R2_thresh    = float(argv[4])
         count_thresh = int(argv[5])
-        space        = 'test_space' # actual_space / test_space
+        space        = 'actual_space' # actual_space / test_space
         SI           = False # SI system
         sample_type  = "Sub" #"All", "Sub", "test"
         weighted     = False
         pci          = True 
+        t_type       = 'log'
         if sample_type == "Sub" and pci:
             sample_type = "Sub_pca"
 
@@ -638,7 +645,7 @@ class RunMlModel:
             print('\n******************* modeling parameter {0} starts here *******************\n'.format(target_name))
             model.loadData(out_feature=target_name, x_transform=x_transform,
                                 y_transform=y_transform, R2_thresh=R2_thresh, count_thresh=count_thresh,
-                                sample_type=sample_type, pci=pci)     
+                                sample_type=sample_type, pci=pci, t_type=t_type)     
             print('end')
             best_model, best_params, best_models = model.findBestParams(out_features=target_name, nthreads=nthreads, 
                                                                                     space=space, weighted=weighted)
@@ -701,6 +708,6 @@ class RunMlModel:
             print('end')
 
 if __name__ == "__main__":
-    RunMlModel.main(['test2', -1, "True", "True", 0.3, 5])
-    # RunMlModel.main(sys.argv[1:])
+    # RunMlModel.main(['test2', -1, "True", "True", 0.3, 5])
+    RunMlModel.main(sys.argv[1:])
 
