@@ -382,7 +382,7 @@ class DataLoader:
 
 # --------------------------- Transformation --------------------------- #
 
-    def transformData(self, type: str = 'power', plot_dist: bool = False) -> tuple[pd.DataFrame,
+    def transformData(self, t_type: str = 'power', plot_dist: bool = False) -> tuple[pd.DataFrame,
                                                           np.array,
                                                           pd.DataFrame,
                                                           pd.DataFrame,
@@ -394,11 +394,12 @@ class DataLoader:
 
         Parameters:
         ----------
-        type: str
-            Type of transformation
+        t_type: str
+            t_type of transformation
             Options are:
             - ``power`` for power transformation
-            - ``any``   for quantile transformation
+            - ``quant`` for quantile transformation
+            - ``log`` for log transformation
         
         Returns:
         ----------
@@ -422,7 +423,7 @@ class DataLoader:
         print('transforming and plotting ...')
         dump_list = ['R2', 'siteID']
         if self.x_transform:
-            if type=='power':
+            if t_type=='power':
                 # t_x = MinMaxScaler(feature_range=(0, 1))
                 t_x = PowerTransformer()
             else:
@@ -430,27 +431,41 @@ class DataLoader:
                     n_quantiles=500, output_distribution="normal", 
                     random_state=self.rand_state
                 )
-            # scaler_x = StandardScaler()
-            train_x = self.train[self.in_features].reset_index(drop=True)
-            train_x_cp = train_x.copy()
-            train_x_t = t_x.fit_transform(train_x)
-            pickle.dump(t_x, open(self.custom_name+'/model/'+'train_x_'+self.out_feature+'_tansformation.pkl', "wb"))
-            # train_x_pt = scaler_x.fit_transform(train_x_pt)
-            train_x = pd.DataFrame(data=train_x_t,
-                    columns=train_x.columns)
-            if plot_dist:
-                self.plotDist(train_x_cp, train_x, 'train')
-            train_id =  self.train[dump_list].reset_index(drop=True)
+            if t_type!='log':
+                # scaler_x = StandardScaler()
+                train_x = self.train[self.in_features].reset_index(drop=True)
+                train_x_cp = train_x.copy()
+                train_x_t = t_x.fit_transform(train_x)
+                pickle.dump(t_x, open(self.custom_name+'/model/'+'train_x_'+self.out_feature+'_tansformation.pkl', "wb"))
+                # train_x_pt = scaler_x.fit_transform(train_x_pt)
+                train_x = pd.DataFrame(data=train_x_t,
+                        columns=train_x.columns)
+                if plot_dist:
+                    self.plotDist(train_x_cp, train_x, 'train')
+                train_id = self.train[dump_list].reset_index(drop=True)
 
-            test_x = self.test[self.in_features].reset_index(drop=True)
-            test_x_cp = test_x.copy()
-            test_x_t = t_x.transform(test_x)
-            # test_x_pt = scaler_x.transform(test_x_pt)
-            test_x = pd.DataFrame(data=test_x_t,
-                    columns=test_x.columns)
-            if plot_dist:
-                self.plotDist(test_x_cp, test_x, 'test')
-            test_id =  self.test[dump_list].reset_index(drop=True)
+                test_x = self.test[self.in_features].reset_index(drop=True)
+                test_x_cp = test_x.copy()
+                test_x_t = t_x.transform(test_x)
+                # test_x_pt = scaler_x.transform(test_x_pt)
+                test_x = pd.DataFrame(data=test_x_t,
+                        columns=test_x.columns)
+                if plot_dist:
+                    self.plotDist(test_x_cp, test_x, 'test')
+                test_id = self.test[dump_list].reset_index(drop=True)
+            else:
+                train_x = self.train[self.in_features].reset_index(drop=True)
+                train_x_cp = train_x.copy()
+                train_x = np.log(train_x)
+                if plot_dist:
+                    self.plotDist(train_x_cp, train_x, 'train')
+                train_id = self.train[dump_list].reset_index(drop=True)
+                test_x = np.log(self.test[self.in_features].reset_index(drop=True))
+                test_x_cp = test_x.copy()
+                train_x = np.log(train_x)
+                if plot_dist:
+                    self.plotDist(test_x_cp, test_x, 'test')
+                test_id = self.test[dump_list].reset_index(drop=True)
 
         else:
             train_x = self.train[self.in_features].reset_index(drop=True)
@@ -459,7 +474,7 @@ class DataLoader:
             test_id =  self.test[dump_list].reset_index(drop=True)
 
         if self.y_transform:
-            if type=='power':
+            if t_type=='power':
                 # t_y = MinMaxScaler(feature_range=(0, 1))
                 t_y = PowerTransformer()
             else:    
@@ -485,9 +500,9 @@ class DataLoader:
             if plot_dist:
                 self.plotDist(test_y_cp, pd.DataFrame({self.out_feature: test_y}), 'test')
         else:
-            train_y = self.train[[self.out_feature]].reset_index(drop=True)
+            train_y = np.log(self.train[[self.out_feature]].reset_index(drop=True))
             train_y = train_y.values.ravel()
-            test_y = self.test[[self.out_feature]].reset_index(drop=True)
+            test_y = np.log(self.test[[self.out_feature]].reset_index(drop=True))
             test_y = test_y.to_numpy().reshape((-1,))
         print('--------------- End of transformation ---------------')
         return train_x, train_y, train_id, test_x, test_y, test_id
