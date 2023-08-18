@@ -46,7 +46,7 @@ class SaveOutput:
                  x_train: pd.DataFrame, x_eval: pd.DataFrame, test_x: pd.DataFrame,
                  y_train: np.array, y_eval: np.array, test_y: np.array,
                  target_data_path: str, best_model: str, loaded_model: any, 
-                 x_transform: bool, y_transform: bool, SI: bool) -> None:
+                 x_transform: bool, y_transform: bool, t_type: str, SI: bool) -> None:
         
         self.train_id               = train_id
         self.eval_id                = eval_id
@@ -64,6 +64,7 @@ class SaveOutput:
         self.loaded_model           = loaded_model
         self.y_trans                = y_transform
         self.x_trans                = x_transform
+        self.t_type                 = t_type
         self.SI                     = SI
 
         self.predictions_train      = 0
@@ -88,30 +89,40 @@ class SaveOutput:
         # self.test_y_orig = self.test_y.copy()
 
         if self.y_trans:
-            t_y = pickle.load(open(self.custom_name+'/model/'+'train_y_'+self.out_feature+'_tansformation.pkl', "rb"))
-            self.predictions_train = t_y.inverse_transform(self.predictions_train.reshape(-1,1)).ravel()
-            self.predictions_valid = t_y.inverse_transform(self.predictions_valid.reshape(-1,1)).ravel()
-            self.predictions_test = t_y.inverse_transform(self.predictions_test.reshape(-1,1)).ravel()
-            train_temp = self.y_train.copy()
-            eval_temp = self.y_eval.copy()
-            test_temp = self.test_y.copy()
-            self.y_train = t_y.inverse_transform(self.y_train.reshape(-1,1)).ravel()
-            self.y_eval = t_y.inverse_transform(self.y_eval.reshape(-1,1)).ravel()
-            self.test_y = t_y.inverse_transform(self.test_y.reshape(-1,1)).ravel()
+            if self.t_type != 'log':
+                t_y = pickle.load(open(self.custom_name+'/model/'+'train_y_'+self.out_feature+'_tansformation.pkl', "rb"))
+                self.predictions_train = t_y.inverse_transform(self.predictions_train.reshape(-1,1)).ravel()
+                self.predictions_valid = t_y.inverse_transform(self.predictions_valid.reshape(-1,1)).ravel()
+                self.predictions_test = t_y.inverse_transform(self.predictions_test.reshape(-1,1)).ravel()
+                # train_temp = self.y_train.copy()
+                # eval_temp = self.y_eval.copy()
+                # test_temp = self.test_y.copy()
+                self.y_train = t_y.inverse_transform(self.y_train.reshape(-1,1)).ravel()
+                self.y_eval = t_y.inverse_transform(self.y_eval.reshape(-1,1)).ravel()
+                self.test_y = t_y.inverse_transform(self.test_y.reshape(-1,1)).ravel()
+            else:
+                self.y_train = np.exp(self.y_train)
+                self.y_eval = np.exp(self.y_eval)
+                self.test_y = np.exp(self.test_y)
 
         if self.x_trans:
-            t_x = pickle.load(open(self.custom_name+'/model/'+'train_x_'+self.out_feature+'_tansformation.pkl', "rb"))
-            col_names = self.x_train.columns
-            self.x_train = t_x.inverse_transform(self.x_train)
-            self.x_train = pd.DataFrame(data=self.x_train,
-                                    columns=col_names).reset_index(drop=True)
-            self.x_eval = t_x.inverse_transform(self.x_eval)
-            self.x_eval = pd.DataFrame(data=self.x_eval,
-                                    columns=col_names).reset_index(drop=True)
-            self.test_x = t_x.inverse_transform(self.test_x)
-            self.test_x = pd.DataFrame(data=self.test_x,
+            if self.t_type != 'log':
+                t_x = pickle.load(open(self.custom_name+'/model/'+'train_x_'+self.out_feature+'_tansformation.pkl', "rb"))
+                col_names = self.x_train.columns
+                self.x_train = t_x.inverse_transform(self.x_train)
+                self.x_train = pd.DataFrame(data=self.x_train,
                                         columns=col_names).reset_index(drop=True)
-        
+                self.x_eval = t_x.inverse_transform(self.x_eval)
+                self.x_eval = pd.DataFrame(data=self.x_eval,
+                                        columns=col_names).reset_index(drop=True)
+                self.test_x = t_x.inverse_transform(self.test_x)
+                self.test_x = pd.DataFrame(data=self.test_x,
+                                            columns=col_names).reset_index(drop=True)
+            else:
+                self.x_train = np.exp(self.x_train)
+                self.x_eval = np.exp(self.x_eval)
+                self.test_x = np.exp(self.test_x)
+
         # ___________________________________________________
         # Build complete dataframe
         train_attr = self.x_train.copy()
