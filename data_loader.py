@@ -456,20 +456,24 @@ class DataLoader:
             else:
                 train_x = self.train[self.in_features].reset_index(drop=True)
                 train_x_cp = train_x.copy()
-                train_x = np.log(train_x)
+                # Replace NA and inf
+                train_x = np.log(np.abs(train_x)).fillna(0)
+                train_x.replace([np.inf, -np.inf], -100, inplace=True)
                 if plot_dist:
                     self.plotDist(train_x_cp, train_x, 'train')
                 train_id = self.train[dump_list].reset_index(drop=True)
-                test_x = np.log(self.test[self.in_features].reset_index(drop=True))
+                test_x = self.test[self.in_features].reset_index(drop=True)
                 test_x_cp = test_x.copy()
-                train_x = np.log(train_x)
+                # Replace NA and inf
+                test_x = np.log(np.abs(test_x)).fillna(0)
+                test_x.replace([np.inf, -np.inf], -100, inplace=True)
                 if plot_dist:
                     self.plotDist(test_x_cp, test_x, 'test')
                 test_id = self.test[dump_list].reset_index(drop=True)
 
         else:
             train_x = self.train[self.in_features].reset_index(drop=True)
-            train_id =  self.train[dump_list].reset_index(drop=True)
+            train_id = self.train[dump_list].reset_index(drop=True)
             test_x = self.test[self.in_features].reset_index(drop=True)
             test_id =  self.test[dump_list].reset_index(drop=True)
 
@@ -482,23 +486,42 @@ class DataLoader:
                     n_quantiles=500, output_distribution="normal", 
                     random_state=self.rand_state
                 )
-            # scaler_y = StandardScaler()
-            train_y = self.train[[self.out_feature]].reset_index(drop=True)
-            train_y_cp = train_y.copy()
-            train_y_t = t_y.fit_transform(train_y)
-            pickle.dump(t_y, open(self.custom_name+'/model/'+'train_y_'+self.out_feature+'_tansformation.pkl', "wb"))
-            # train_y_pt = scaler_x.fit_transform(train_y_pt)
-            train_y = train_y_t.ravel()
-            if plot_dist:
-                self.plotDist(train_y_cp, pd.DataFrame({self.out_feature: train_y}), 'train')
+            if t_type!='log':
+                # scaler_y = StandardScaler()
+                train_y = self.train[[self.out_feature]].reset_index(drop=True)
+                train_y_cp = train_y.copy()
+                train_y_t = t_y.fit_transform(train_y)
+                pickle.dump(t_y, open(self.custom_name+'/model/'+'train_y_'+self.out_feature+'_tansformation.pkl', "wb"))
+                # train_y_pt = scaler_x.fit_transform(train_y_pt)
+                train_y = train_y_t.ravel()
+                if plot_dist:
+                    self.plotDist(train_y_cp, pd.DataFrame({self.out_feature: train_y}), 'train')
 
-            test_y = self.test[[self.out_feature]].reset_index(drop=True)
-            test_y_cp = test_y.copy()
-            test_y_t = t_y.transform(test_y)
-            # test_y_pt = scaler_y.transform(test_y_pt)
-            test_y = test_y_t.ravel()
-            if plot_dist:
-                self.plotDist(test_y_cp, pd.DataFrame({self.out_feature: test_y}), 'test')
+                test_y = self.test[[self.out_feature]].reset_index(drop=True)
+                test_y_cp = test_y.copy()
+                test_y_t = t_y.transform(test_y)
+                # test_y_pt = scaler_y.transform(test_y_pt)
+                test_y = test_y_t.ravel()
+                if plot_dist:
+                    self.plotDist(test_y_cp, pd.DataFrame({self.out_feature: test_y}), 'test')
+            else:
+                train_y = self.train[[self.out_feature]].reset_index(drop=True)
+                train_y_cp = train_y.copy()
+                # Replace NA and inf
+                train_y = np.log(np.abs(train_y)).fillna(0)
+                train_y.replace([np.inf, -np.inf], -100, inplace=True)
+                if plot_dist:
+                    self.plotDist(train_y_cp, train_y, 'train')
+                train_y = train_y.values.ravel()
+
+                test_y = self.test[[self.out_feature]].reset_index(drop=True)
+                test_y_cp = test_y.copy()
+                # Replace NA and inf
+                test_y = np.log(np.abs(test_y)).fillna(0)
+                test_y.replace([np.inf, -np.inf], -100, inplace=True)
+                if plot_dist:
+                    self.plotDist(train_y_cp, test_y, 'test')
+                test_y = test_y.values.ravel()
         else:
             train_y = np.log(self.train[[self.out_feature]].reset_index(drop=True))
             train_y = train_y.values.ravel()

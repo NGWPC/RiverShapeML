@@ -660,7 +660,7 @@ class RunMlModel:
                                         x_train=model.x_train, x_eval=model.x_eval, test_x=model.test_x,
                                         y_train=model.y_train, y_eval=model.y_eval, test_y=model.test_y,
                                         target_data_path = model.target_data_path, best_model=best_model, loaded_model=ml_model, 
-                                        x_transform=x_transform, y_transform=y_transform,
+                                        x_transform=x_transform, y_transform=y_transform, t_type=t_type,
                                         out_feature=target_name, custom_name=custom_name, SI=SI)
             save_obj.processData()
 
@@ -672,7 +672,7 @@ class RunMlModel:
                                         x_train=model.x_train, x_eval=model.x_eval, test_x=model.test_x,
                                         y_train=model.y_train, y_eval=model.y_eval, test_y=model.test_y,
                                         target_data_path = model.target_data_path, best_model=best_model, loaded_model=voting_model, 
-                                        x_transform=x_transform, y_transform=y_transform,
+                                        x_transform=x_transform, y_transform=y_transform, t_type=t_type,
                                         out_feature=target_name, custom_name=custom_name, SI=SI)
             save_obj.processData()
 
@@ -684,7 +684,7 @@ class RunMlModel:
                                         x_train=model.x_train, x_eval=model.x_eval, test_x=model.test_x,
                                         y_train=model.y_train, y_eval=model.y_eval, test_y=model.test_y,
                                         target_data_path = model.target_data_path, best_model=best_model, loaded_model=meta_model, 
-                                        x_transform=x_transform, y_transform=y_transform,
+                                        x_transform=x_transform, y_transform=y_transform, t_type=t_type,
                                         out_feature=target_name, custom_name=custom_name, SI=SI)
             save_obj.processData()
             
@@ -708,6 +708,6 @@ class RunMlModel:
             print('end')
 
 if __name__ == "__main__":
-    # RunMlModel.main(['test2', -1, "True", "True", 0.3, 5])
+    # RunMlModel.main(['test2', -1, "True", "True", 0.8, 5])
     RunMlModel.main(sys.argv[1:])
 
