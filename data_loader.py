@@ -527,5 +527,6 @@ class DataLoader:
             train_y = train_y.values.ravel()
             test_y = np.log(self.test[[self.out_feature]].reset_index(drop=True))
             test_y = test_y.to_numpy().reshape((-1,))
+
         print('--------------- End of transformation ---------------')
         return train_x, train_y, train_id, test_x, test_y, test_id
