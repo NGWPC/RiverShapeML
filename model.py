@@ -623,7 +623,7 @@ class RunMlModel:
         sample_type  = "Sub" #"All", "Sub", "test"
         weighted     = False
         pci          = True 
-        t_type       = 'log'
+        t_type       = 'power' # 'log', 'power', 'quant' 
         if sample_type == "Sub" and pci:
             sample_type = "Sub_pca"
 
