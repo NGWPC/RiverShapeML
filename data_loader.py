@@ -180,7 +180,7 @@ class DataLoader:
             pickle.dump(pca, open(self.custom_name+'/model/'+'train_'+self.out_feature+'_'+name+'_PCA.pkl', "wb"))
             explained_variance = pca.explained_variance_ratio_
             components_matrix = pca.components_
-
+            features_pc = set(self.add_features.copy())
             # Find optimum number of PCs
             for i in range(0, 5, 1):
                 total_var = np.sum(explained_variance[0:i])
@@ -190,9 +190,10 @@ class DataLoader:
                     # num_pc = i
                     break
             
+            features_pc = set(self.add_features) - features_pc
             # Save contibutions
             fig, ax = plt.subplots(1, 1, figsize=(6,6))
-            ax.grid(True)
+            ax.grid(color='gray', linewidth=0.5)
             cmap = plt.cm.seismic
             median_value = np.median(components_matrix)
             midpoint = 1 - median_value / (components_matrix.max() - components_matrix.min())
@@ -200,7 +201,7 @@ class DataLoader:
 
             plt.imshow(components_matrix, cmap=cmap, norm=cmap_adjusted, aspect='auto')
             plt.xticks(range(len(feat_list)), feat_list, rotation=45, ha='right')
-            plt.yticks(range(len(self.add_features)), self.add_features, rotation=45, ha='right')
+            plt.yticks(range(len(features_pc)), features_pc, rotation=45, ha='right')
             plt.colorbar(label='Loading Value')
             plt.xlabel('Original Features')
             plt.ylabel('Principal Components')
@@ -254,7 +255,7 @@ class DataLoader:
         
  # --------------------------- Split train and test --------------------------- #
     
-    def splitData(self, sample_type: str, pci: bool) -> None:
+    def splitData(self, sample_type: str) -> None:
         """ 
         To split data to train and test, and whether to use all 
         features or few 
@@ -275,8 +276,6 @@ class DataLoader:
         temp_o = []
         if sample_type == "All":
             in_feat = 'in_features'
-            # if pci:
-            #     in_feat = 'in_features_pci'
 
             temp = json.load(open('data/model_feature_names.json'))
             model_features = list(set([self.out_feature]+temp.get(in_feat))-set(self.del_features))+self.add_features+temp.get('id_features')#+temp.get('in_features_NWM')+temp.get('in_features_flow_freq')
@@ -311,7 +310,7 @@ class DataLoader:
             temp_o = json.load(open('model_space/feature_space.json'))
             temp = temp_o.get(sample_type).get(self.out_feature+'_feats')
 
-            model_features = temp .copy()
+            model_features = temp.copy()
             self.in_features = model_features.copy()
             temp = json.load(open('data/model_feature_names.json'))
             model_features += [self.out_feature]+temp.get('id_features')

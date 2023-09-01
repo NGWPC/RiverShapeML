@@ -44,8 +44,7 @@
         "pdsi",
         "Precip_ave",
         "Precip_max",
-        "Precip_min",
-        "pdsi"
+        "Precip_min"
     ],
     "Topo_pc": [
         "CHILI",
