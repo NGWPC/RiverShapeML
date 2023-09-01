@@ -129,7 +129,7 @@ class MlModel:
             - "Sub": for considering pre selected features
             - "test": a test case for unit testing
         pci: bool
-            Whether to apply PCI or not 
+            Whether to apply PCA or not 
             Opptions are:
             - True
             - False
@@ -166,7 +166,7 @@ class MlModel:
         data_loader.readFiles()
         if pci:
             data_loader.reduceDim()
-        data_loader.splitData(sample_type=sample_type, pci=pci)
+        data_loader.splitData(sample_type=sample_type)
         self.train_x, self.train_y, self.train_id, self.test_x, self.test_y, self.test_id = data_loader.transformData(t_type=t_type, plot_dist=False)
 
 # --------------------------- Grid Search --------------------------- #
