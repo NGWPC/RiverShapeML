@@ -98,7 +98,7 @@ class MlModel:
 # --------------------------- Load train and test data files --------------------------- #    
     def loadData(self, out_feature: str, x_transform: bool = False, 
                  y_transform: bool = False, R2_thresh: float = 0.0, count_thresh: int = 3,
-                 sample_type: str = "All", pci: bool = True, t_type: str = 'log') -> None:
+                 sample_type: str = "All", pca: bool = True, t_type: str = 'log') -> None:
         """ Load the data and apply data filtering, transformation and 
         feature selection if nessassery
 
@@ -128,7 +128,7 @@ class MlModel:
             - "All": for considering all features
             - "Sub": for considering pre selected features
             - "test": a test case for unit testing
-        pci: bool
+        pca: bool
             Whether to apply PCA or not 
             Opptions are:
             - True
@@ -144,7 +144,7 @@ class MlModel:
         --------
         >>> MlModel.loadData(out_feature = 'b', x_transform = False, 
                  y_transform = False, R2_thresh = 0.0,
-                 sample_type = "Sub", pci = False, t_type = 'log')
+                 sample_type = "Sub", pca = False, t_type = 'log')
         """
         # Bulid an instance of DataLoader object
 
@@ -162,11 +162,12 @@ class MlModel:
                                             out_feature=out_feature, 
                                             custom_name=self.custom_name, 
                                             x_transform=x_transform, y_transform=y_transform,
-                                            R2_thresh=R2_thresh, count_thresh=count_thresh) 
+                                            R2_thresh=R2_thresh, count_thresh=count_thresh,
+                                            sample_type=sample_type) 
         data_loader.readFiles()
-        if pci:
+        if pca:
             data_loader.reduceDim()
-        data_loader.splitData(sample_type=sample_type)
+        data_loader.splitData()
         self.train_x, self.train_y, self.train_id, self.test_x, self.test_y, self.test_id = data_loader.transformData(t_type=t_type, plot_dist=False)
 
 # --------------------------- Grid Search --------------------------- #
@@ -244,27 +245,27 @@ class MlModel:
         models = { 
             'xgb': xgb_reg,
             'rf': rf_reg,
-            'hgb': hgb_reg,
-            'lgb': lgb_reg,
-            'bsvr': bsvr_reg,
-            'knr': knr_reg,
-            'ard': ard_reg,
-            'enet': enet_reg,
-            'mlp': mlp_reg,
-            'bays': bays_reg
+            # 'hgb': hgb_reg,
+            # 'lgb': lgb_reg,
+            # 'bsvr': bsvr_reg,
+            # 'knr': knr_reg,
+            # 'ard': ard_reg,
+            # 'enet': enet_reg,
+            # 'mlp': mlp_reg,
+            # 'bays': bays_reg
             # 'orth': orth_reg
         }
         params = { 
             'xgb': params_space.get(space).get('xgb_params'),
             'rf': params_space.get(space).get('rf_params'),
-            'hgb': params_space.get(space).get('hgb_params'),
-            'lgb': params_space.get(space).get('lgb_params'),
-            'bsvr': params_space.get(space).get('bsvr_params'),
-            'knr': params_space.get(space).get('knr_params'),
-            'ard': params_space.get(space).get('ard_params'),
-            'enet': params_space.get(space).get('enet_params'),
-            'mlp': params_space.get(space).get('mlp_params'),
-            'bays': params_space.get(space).get('bays_params')
+            # 'hgb': params_space.get(space).get('hgb_params'),
+            # 'lgb': params_space.get(space).get('lgb_params'),
+            # 'bsvr': params_space.get(space).get('bsvr_params'),
+            # 'knr': params_space.get(space).get('knr_params'),
+            # 'ard': params_space.get(space).get('ard_params'),
+            # 'enet': params_space.get(space).get('enet_params'),
+            # 'mlp': params_space.get(space).get('mlp_params'),
+            # 'bays': params_space.get(space).get('bays_params')
             # 'orth': params_space.get(space).get('orth_params')
         }
 
@@ -427,12 +428,12 @@ class MlModel:
         # ___________________________________________________
         # Out of the box evaluation of models
         # Fit all models
-        reg_models = lazypredict.Supervised.REGRESSORS
-        lazypredict.Supervised.REGRESSORS = [t for t in reg_models if not t[0].startswith('Quantile')]
-        ob_reg = LazyRegressor(predictions=True)
-        models, predictions = ob_reg.fit(self.x_train, self.x_eval, self.y_train, self.y_eval)
-        print('\n out of the box evaluation of models for target: '+str(self.custom_name)+ '\n')
-        print(models)
+        # reg_models = lazypredict.Supervised.REGRESSORS
+        # lazypredict.Supervised.REGRESSORS = [t for t in reg_models if not t[0].startswith('Quantile')]
+        # ob_reg = LazyRegressor(predictions=True)
+        # models, predictions = ob_reg.fit(self.x_train, self.x_eval, self.y_train, self.y_eval)
+        # print('\n out of the box evaluation of models for target: '+str(self.custom_name)+ '\n')
+        # print(models)
 
         # ___________________________________________________
         # Check witch models are used with weights and fit
@@ -476,22 +477,22 @@ class MlModel:
         base_model.append(('xgb', temp))
         temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'rf'])
         base_model.append(('rf', temp))
-        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'hgb'])
-        base_model.append(('hgb', temp))
-        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'lgb'])
-        base_model.append(('lgb', temp))
-        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'bsvr'])
-        base_model.append(('bsvr', temp))
-        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'knr'])
-        base_model.append(('knr', temp))
-        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'ard'])
-        base_model.append(('ard', temp))
-        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'enet'])
-        base_model.append(('enet', temp))
-        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'mlp'])
-        base_model.append(('mlp', temp))
-        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'bays'])
-        base_model.append(('bays', temp))
+        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'hgb'])
+        # base_model.append(('hgb', temp))
+        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'lgb'])
+        # base_model.append(('lgb', temp))
+        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'bsvr'])
+        # base_model.append(('bsvr', temp))
+        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'knr'])
+        # base_model.append(('knr', temp))
+        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'ard'])
+        # base_model.append(('ard', temp))
+        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'enet'])
+        # base_model.append(('enet', temp))
+        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'mlp'])
+        # base_model.append(('mlp', temp))
+        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'bays'])
+        # base_model.append(('bays', temp))
         # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'orth'])
         # base_model.append(('orth', temp))
 
@@ -618,14 +619,16 @@ class RunMlModel:
         y_transform  = eval(argv[3])
         R2_thresh    = float(argv[4])
         count_thresh = int(argv[5])
-        space        = 'actual_space' # actual_space / test_space
+        space        = 'test_space' # actual_space / test_space
         SI           = False # SI system
-        sample_type  = "Sub" #"All", "Sub", "test"
+        sample_type  = "All" #"All", "Sub", "test"
         weighted     = False
-        pci          = True 
+        pca          = True 
         t_type       = 'power' # 'log', 'power', 'quant' 
-        if sample_type == "Sub" and pci:
+        if sample_type == "Sub" and pca:
             sample_type = "Sub_pca"
+        if sample_type == "All" and pca:
+            sample_type = "All_pca"
 
         # List of traget varaibles
         # temp        = json.load(open('data/ml_model_feature_names.json'))
@@ -645,7 +648,7 @@ class RunMlModel:
             print('\n******************* modeling parameter {0} starts here *******************\n'.format(target_name))
             model.loadData(out_feature=target_name, x_transform=x_transform,
                                 y_transform=y_transform, R2_thresh=R2_thresh, count_thresh=count_thresh,
-                                sample_type=sample_type, pci=pci, t_type=t_type)     
+                                sample_type=sample_type, pca=pca, t_type=t_type)     
             print('end')
             best_model, best_params, best_models = model.findBestParams(out_features=target_name, nthreads=nthreads, 
                                                                                     space=space, weighted=weighted)
@@ -708,6 +711,6 @@ class RunMlModel:
             print('end')
 
 if __name__ == "__main__":
-    # RunMlModel.main(['test2', -1, "True", "True", 0.8, 5])
-    RunMlModel.main(sys.argv[1:])
+    RunMlModel.main(['test2', -1, "True", "True", 0.8, 5])
+    # RunMlModel.main(sys.argv[1:])
 

@@ -60,7 +60,7 @@ class DataLoader:
         
     """
     def __init__(self, data_path: str, target_data_path: str, rand_state: int, out_feature: str, 
-                 custom_name: str, x_transform: bool = False, y_transform: bool = False, 
+                 custom_name: str, sample_type: str, x_transform: bool = False, y_transform: bool = False, 
                  R2_thresh: float = 0.0, count_thresh: int = 3) -> None:
         pd.options.display.max_columns  = 60
         self.data_path                  = data_path
@@ -74,6 +74,7 @@ class DataLoader:
         self.del_features               = []
         self.out_feature                = out_feature
         self.custom_name                = custom_name
+        self.sample_type                = sample_type
         self.x_transform                = x_transform
         self.y_transform                = y_transform
         self.train                      = pd.DataFrame([])
@@ -161,13 +162,15 @@ class DataLoader:
         temp = json.load(open('model_space/dimention_space.json'))
         
         # PCA model
-        def buildPCA(feat_list, name):
+        def buildPCA(feat_list, n_components, name):
             """ Builds a PCA and extracts new dimentions
             
             Parameters:
             ----------
             feat_list: list
                 A list containing all feature names to be reduced 
+            n_components: int, default=None    
+                Number of components to keep. if n_components is not set all components are kept
             name: str    
                 Reduced feature names
 
@@ -175,14 +178,15 @@ class DataLoader:
             ----------
 
             """
-            pca = PCA(n_components = 5)
+            pca = PCA(n_components = n_components)
             out_arr = pca.fit_transform(self.data[feat_list])
             pickle.dump(pca, open(self.custom_name+'/model/'+'train_'+self.out_feature+'_'+name+'_PCA.pkl', "wb"))
             explained_variance = pca.explained_variance_ratio_
             components_matrix = pca.components_
             features_pc = set(self.add_features.copy())
+            n_components = out_arr.shape[1]
             # Find optimum number of PCs
-            for i in range(0, 5, 1):
+            for i in range(0, n_components, 1):
                 total_var = np.sum(explained_variance[0:i])
                 self.data[str(name)+"_"+str(i)] = out_arr[:, i]
                 self.add_features.append(str(name)+"_"+str(i))
@@ -219,62 +223,62 @@ class DataLoader:
             self.del_features += feat_list
 
             return
+        if self.sample_type == "Sub_pca":
+            # Vegetation
+            print('Reducing Vegetation ..')
+            feat_list = temp.get('Vegetation_pc')
+            buildPCA(feat_list, 5, 'Vegetation_pc')
 
-        # Vegetation
-        print('Reducing Vegetation ..')
-        feat_list = temp.get('Vegetation_pc')
-        buildPCA(feat_list, 'Vegetation_pc')
+            # Discharge
+            print('Reducing Discharge ..')
+            feat_list = temp.get('Discharge_pc')
+            buildPCA(feat_list, 5, 'Discharge_pc')
 
-        # Discharge
-        print('Reducing Discharge ..')
-        feat_list = temp.get('Discharge_pc')
-        buildPCA(feat_list, 'Discharge_pc')
+            # Soil_temp_moist
+            print('Reducing Soil_temp_moist ..')
+            feat_list = temp.get('Soil_temp_moist_pc')
+            buildPCA(feat_list, 5,'Soil_temp_moist_pc')
 
-        # Soil_temp_moist
-        print('Reducing Soil_temp_moist ..')
-        feat_list = temp.get('Soil_temp_moist_pc')
-        buildPCA(feat_list, 'Soil_temp_moist_pc')
+            # Soil
+            print('Reducing Soil ..')
+            feat_list = temp.get('Soil_char_pc')
+            buildPCA(feat_list, 5,'Soil_char_pc')
 
-        # Soil
-        print('Reducing Soil ..')
-        feat_list = temp.get('Soil_char_pc')
-        buildPCA(feat_list, 'Soil_char_pc')
+            # Preciep
+            print('Reducing Preciep ..')
+            feat_list = temp.get('Preciep_pc')
+            buildPCA(feat_list, 5,'Preciep_pc')
 
-        # Preciep
-        print('Reducing Preciep ..')
-        feat_list = temp.get('Preciep_pc')
-        buildPCA(feat_list, 'Preciep_pc')
-
-        # Topo
-        print('Reducing Topo ..')
-        feat_list = temp.get('Topo_pc')
-        buildPCA(feat_list, 'Topo_pc')
+            # Topo
+            print('Reducing Topo ..')
+            feat_list = temp.get('Topo_pc')
+            buildPCA(feat_list, 5,'Topo_pc')
+        
+        if self.sample_type == "All_pca":
+            temp = json.load(open('model_space/feature_space.json'))
+            feat_list = temp.get('All').get(self.out_feature+'_feats')
+            buildPCA(feat_list, None,'PC')
 
         print("\n ------------- End of dimention reduction ----------- \n")
         return
         
  # --------------------------- Split train and test --------------------------- #
     
-    def splitData(self, sample_type: str) -> None:
+    def splitData(self) -> None:
         """ 
         To split data to train and test, and whether to use all 
         features or few 
 
         Parameters:
         ----------
-        sample_type: str
-            For limiting feature space
-            Options are:
-            - ``All``
-            - ``Sub``
-            - ``test`
+
         Example
             --------
             >>> splitData("All")
         """
         temp_pc = []
         temp_o = []
-        if sample_type == "All":
+        if self.sample_type == "All":
             in_feat = 'in_features'
 
             temp = json.load(open('data/model_feature_names.json'))
@@ -293,10 +297,11 @@ class DataLoader:
             # model_features = list(set(model_features) - set(dump_list))
             self.in_features = model_features.copy()
             self.in_features = list(set(self.in_features) - set(temp.get('id_features')) - set([self.out_feature]))
-        elif sample_type == "Sub_pca":
+        
+        elif self.sample_type == "Sub_pca":
             temp_o = json.load(open('model_space/feature_space.json'))
-            temp = temp_o.get(sample_type).get(self.out_feature+'_feats')
-            temp_pc = temp_o.get(sample_type).get(self.out_feature+'_pc_feats')
+            temp = temp_o.get(self.sample_type).get(self.out_feature+'_feats')
+            temp_pc = temp_o.get(self.sample_type).get(self.out_feature+'_pc_feats')
             pc_vars = []
             for pc_var in temp_pc:
                 matched_vars = [variable for variable in self.add_features if pc_var in variable]
@@ -306,9 +311,15 @@ class DataLoader:
             self.in_features = model_features.copy()
             temp = json.load(open('data/model_feature_names.json'))
             model_features += [self.out_feature]+temp.get('id_features')
+        
+        elif self.sample_type == "All_pca":
+            temp = json.load(open('data/model_feature_names.json'))
+            model_features = [self.out_feature]+self.add_features+temp.get('id_features')#+temp.get('in_features_NWM')+temp.get('in_features_flow_freq')
+            self.in_features = self.add_features.copy()
+
         else:
             temp_o = json.load(open('model_space/feature_space.json'))
-            temp = temp_o.get(sample_type).get(self.out_feature+'_feats')
+            temp = temp_o.get(self.sample_type).get(self.out_feature+'_feats')
 
             model_features = temp.copy()
             self.in_features = model_features.copy()
@@ -321,10 +332,10 @@ class DataLoader:
         if "TW_" in self.out_feature: 
             # The widest navigable section in the shipping channel of the Mississippi is Lake Pepin, where the channel is approximately 2 miles wide
             # here we consider 3 miles or 15840 ft
-            self.data = self.data.loc[self.data[str(self.out_feature )] < 15840]
+            self.data = self.data.loc[self.data[str(self.out_feature)] < 15840]
         else:
             # The deepest river in the U.S. is the Hudson River which reaches a maximum depth of 216 ft.
-            self.data = self.data.loc[self.data[str(self.out_feature )] < 216] 
+            self.data = self.data.loc[self.data[str(self.out_feature)] < 216] 
         
         df_mask = self.data[model_features]
         df_mask.to_parquet(self.custom_name+'/metrics/df_mask.parquet')
