@@ -71,21 +71,21 @@
         "scat_dummy",
         "discharge_dummy"
     ],
-    "in_features_flow": [
+    "in_flow": [
         "nwis_min",
         "nwis_25",
         "nwis_50",
         "nwis_75",
         "nwis_max"
     ],
-    "in_features_NWM": [
+    "in_NWM": [
         "nwm_min_ap",
         "nwm_25_ap",
         "nwm_50_ap",
         "nwm_75_ap",
         "nwm_max_ap"
     ],
-    "in_features_flow_freq": [
+    "in_flow_freq": [
         "rp_5",
         "rp_10",
         "rp_15",

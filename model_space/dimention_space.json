@@ -110,7 +110,8 @@
         "PctUrbLo2011Cat",
         "PctUrbMd2011Cat",
         "PctUrbOp2011Cat",
-        "PctWdWet2011Cat"
+        "PctWdWet2011Cat",
+        "scat_dummy"
     ],
     "Human_pc": [
         "FertCat",
@@ -124,7 +125,8 @@
         "PopDen2010Cat",
         "RdCrsCat",
         "RdCrsSlpWtdCat",
-        "RdDensCat"
+        "RdDensCat",
+        "scat_dummy"
     ],
     "Lithology_pc": [
         "Fe2O3Cat",
@@ -144,7 +146,8 @@
         "PctHydricCat",
         "PctNonCarbResidCat",
         "PctSalLakeCat",
-        "PctSilicicCat"
+        "PctSilicicCat",
+        "scat_dummy"
     ]
 
 }
