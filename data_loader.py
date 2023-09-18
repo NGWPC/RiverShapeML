@@ -66,7 +66,7 @@ class DataLoader:
         self.data_path                  = data_path
         self.target_data_path           = target_data_path
         self.data                       = pd.DataFrame([])
-        self.data_target                       = pd.DataFrame([])
+        self.data_target                = pd.DataFrame([])
         self.rand_state                 = rand_state
         np.random.seed(self.rand_state)
         self.in_features                = []
@@ -150,7 +150,15 @@ class DataLoader:
         stations = good_stations['siteID'].tolist()
         del good_stations
         self.data = self.data[self.data['siteID'].isin(stations)].reset_index(drop=True)
-        self.data = self.data.fillna(0) # a temporary brute force way to deal with NAN
+        
+        # Data imputation 
+        impute = "median"
+        if impute == "zero":
+            self.data = self.data.fillna(-1) # a temporary brute force way to deal with NAN
+        if impute == "median":
+            self.data = self.data.replace(-1, np.nan)
+            column_medians = self.data.median()
+            self.data = self.data.fillna(column_medians)
         return 
 
  # --------------------------- Dimention Reduction --------------------------- #
@@ -253,6 +261,26 @@ class DataLoader:
             print('Reducing Topo ..')
             feat_list = temp.get('Topo_pc')
             buildPCA(feat_list, 5,'Topo_pc')
+
+            # Flood
+            print('Reducing Topo ..')
+            feat_list = temp.get('Flood_freq_pc')
+            buildPCA(feat_list, 5,'Flood_freq_pc')
+
+            # Land_cover
+            print('Reducing Topo ..')
+            feat_list = temp.get('Land_cover_pc')
+            buildPCA(feat_list, 5,'Land_cover_pc')
+
+            # Human
+            print('Reducing Topo ..')
+            feat_list = temp.get('Human_pc')
+            buildPCA(feat_list, 5,'Human_pc')
+
+            # Lithology
+            print('Reducing Topo ..')
+            feat_list = temp.get('Lithology_pc')
+            buildPCA(feat_list, 5,'Lithology_pc')
         
         if self.sample_type == "All_pca":
             temp = json.load(open('model_space/feature_space.json'))
@@ -282,7 +310,8 @@ class DataLoader:
             in_feat = 'in_features'
 
             temp = json.load(open('data/model_feature_names.json'))
-            model_features = list(set([self.out_feature]+temp.get(in_feat))-set(self.del_features))+self.add_features+temp.get('id_features')#+temp.get('in_features_NWM')+temp.get('in_features_flow_freq')
+            model_features = list(set([self.out_feature]+temp.get(in_feat)+temp.get('in_NWM')+temp.get('in_flow_freq')+temp.get('in_scat')+temp.get('in_vaa'))
+                                  -set(self.del_features))+self.add_features+temp.get('id_features')
             # ___________________________________________________
             # to dump variables
             # dump_list = ["BFICat","CatAreaSqKm","ElevCat","PctWaterCat","PrecipCat",
