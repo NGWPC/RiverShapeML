@@ -375,7 +375,6 @@
             "long",
             "lat",
             "BFICat",
-            "PctWaterCat",
             "RckDepCat",
             "RockNCat",
             "WaterInputCat",
@@ -395,7 +394,6 @@
             "roughness",
             "bf_ff",
             "NWM",
-            "nwm_dummy",
             "vaa_dummy",
             "scat_dummy",
             "discharge_dummy"
@@ -426,7 +424,6 @@
             "long",
             "lat",
             "BFICat",
-            "PctWaterCat",
             "RckDepCat",
             "RockNCat",
             "WaterInputCat",
@@ -446,7 +443,6 @@
             "roughness",
             "in_ff",
             "NWM",
-            "nwm_dummy",
             "vaa_dummy",
             "scat_dummy",
             "discharge_dummy"
@@ -477,7 +473,6 @@
             "long",
             "lat",
             "BFICat",
-            "PctWaterCat",
             "RckDepCat",
             "RockNCat",
             "WaterInputCat",
@@ -497,7 +492,6 @@
             "roughness",
             "bf_ff",
             "NWM",
-            "nwm_dummy",
             "vaa_dummy",
             "scat_dummy",
             "discharge_dummy"
@@ -528,7 +522,6 @@
             "long",
             "lat",
             "BFICat",
-            "PctWaterCat",
             "RckDepCat",
             "RockNCat",
             "WaterInputCat",
@@ -548,7 +541,6 @@
             "roughness",
             "in_ff",
             "NWM",
-            "nwm_dummy",
             "vaa_dummy",
             "scat_dummy",
             "discharge_dummy"

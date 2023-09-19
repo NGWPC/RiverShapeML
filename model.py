@@ -70,7 +70,6 @@ class MlModel:
         self.test_x                    = 0
         self.test_y                    = 0
         self.test_id                   = 0
-       
         self.train_sub_id              = 0 
         self.x_train                   = 0 
         self.eval_id                   = 0 
@@ -149,16 +148,15 @@ class MlModel:
         # Bulid an instance of DataLoader object
 
         if "TW_" in out_feature:
-            data_path = 'data/width_predictor_test.parquet'
+            data_path = 'data/width_predictor.parquet'
             self.target_data_path = 'data/width_target.parquet'
         else:
-            data_path = 'data/depth_mean_predictor_test.parquet'
+            data_path = 'data/depth_mean_predictor.parquet'
             self.target_data_path = 'data/depth_mean_target.parquet'
 
         data_loader = dataloader.DataLoader(data_path=data_path,
                                             target_data_path=self.target_data_path,
                                             rand_state=self.rand_state, 
-                                            # in_features=self.in_features, 
                                             out_feature=out_feature, 
                                             custom_name=self.custom_name, 
                                             x_transform=x_transform, y_transform=y_transform,
@@ -245,27 +243,27 @@ class MlModel:
         models = { 
             'xgb': xgb_reg,
             'rf': rf_reg,
-            # 'hgb': hgb_reg,
-            # 'lgb': lgb_reg,
-            # 'bsvr': bsvr_reg,
-            # 'knr': knr_reg,
-            # 'ard': ard_reg,
-            # 'enet': enet_reg,
-            # 'mlp': mlp_reg,
-            # 'bays': bays_reg
+            'hgb': hgb_reg,
+            'lgb': lgb_reg,
+            'bsvr': bsvr_reg,
+            'knr': knr_reg,
+            'ard': ard_reg,
+            'enet': enet_reg,
+            'mlp': mlp_reg,
+            'bays': bays_reg
             # 'orth': orth_reg
         }
         params = { 
             'xgb': params_space.get(space).get('xgb_params'),
             'rf': params_space.get(space).get('rf_params'),
-            # 'hgb': params_space.get(space).get('hgb_params'),
-            # 'lgb': params_space.get(space).get('lgb_params'),
-            # 'bsvr': params_space.get(space).get('bsvr_params'),
-            # 'knr': params_space.get(space).get('knr_params'),
-            # 'ard': params_space.get(space).get('ard_params'),
-            # 'enet': params_space.get(space).get('enet_params'),
-            # 'mlp': params_space.get(space).get('mlp_params'),
-            # 'bays': params_space.get(space).get('bays_params')
+            'hgb': params_space.get(space).get('hgb_params'),
+            'lgb': params_space.get(space).get('lgb_params'),
+            'bsvr': params_space.get(space).get('bsvr_params'),
+            'knr': params_space.get(space).get('knr_params'),
+            'ard': params_space.get(space).get('ard_params'),
+            'enet': params_space.get(space).get('enet_params'),
+            'mlp': params_space.get(space).get('mlp_params'),
+            'bays': params_space.get(space).get('bays_params')
             # 'orth': params_space.get(space).get('orth_params')
         }
 
@@ -428,12 +426,12 @@ class MlModel:
         # ___________________________________________________
         # Out of the box evaluation of models
         # Fit all models
-        # reg_models = lazypredict.Supervised.REGRESSORS
-        # lazypredict.Supervised.REGRESSORS = [t for t in reg_models if not t[0].startswith('Quantile')]
-        # ob_reg = LazyRegressor(predictions=True)
-        # models, predictions = ob_reg.fit(self.x_train, self.x_eval, self.y_train, self.y_eval)
-        # print('\n out of the box evaluation of models for target: '+str(self.custom_name)+ '\n')
-        # print(models)
+        reg_models = lazypredict.Supervised.REGRESSORS
+        lazypredict.Supervised.REGRESSORS = [t for t in reg_models if not t[0].startswith('Quantile')]
+        ob_reg = LazyRegressor(predictions=True)
+        models, predictions = ob_reg.fit(self.x_train, self.x_eval, self.y_train, self.y_eval)
+        print('\n out of the box evaluation of models for target: '+str(self.custom_name)+ '\n')
+        print(models)
 
         # ___________________________________________________
         # Check witch models are used with weights and fit
@@ -477,22 +475,22 @@ class MlModel:
         base_model.append(('xgb', temp))
         temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'rf'])
         base_model.append(('rf', temp))
-        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'hgb'])
-        # base_model.append(('hgb', temp))
-        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'lgb'])
-        # base_model.append(('lgb', temp))
-        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'bsvr'])
-        # base_model.append(('bsvr', temp))
-        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'knr'])
-        # base_model.append(('knr', temp))
-        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'ard'])
-        # base_model.append(('ard', temp))
-        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'enet'])
-        # base_model.append(('enet', temp))
-        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'mlp'])
-        # base_model.append(('mlp', temp))
-        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'bays'])
-        # base_model.append(('bays', temp))
+        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'hgb'])
+        base_model.append(('hgb', temp))
+        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'lgb'])
+        base_model.append(('lgb', temp))
+        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'bsvr'])
+        base_model.append(('bsvr', temp))
+        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'knr'])
+        base_model.append(('knr', temp))
+        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'ard'])
+        base_model.append(('ard', temp))
+        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'enet'])
+        base_model.append(('enet', temp))
+        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'mlp'])
+        base_model.append(('mlp', temp))
+        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'bays'])
+        base_model.append(('bays', temp))
         # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'orth'])
         # base_model.append(('orth', temp))
 
@@ -619,9 +617,9 @@ class RunMlModel:
         y_transform  = eval(argv[3])
         R2_thresh    = float(argv[4])
         count_thresh = int(argv[5])
-        space        = 'test_space' # actual_space / test_space
+        space        = 'actual_space' # actual_space / test_space
         SI           = False # SI system
-        sample_type  = "All" #"All", "Sub", "test"
+        sample_type  = "Sub" #"All", "Sub", "test"
         weighted     = False
         pca          = True 
         t_type       = 'power' # 'log', 'power', 'quant' 
@@ -711,6 +709,6 @@ class RunMlModel:
             print('end')
 
 if __name__ == "__main__":
-    RunMlModel.main(['test2', -1, "True", "True", 0.8, 5])
-    # RunMlModel.main(sys.argv[1:])
+    # RunMlModel.main(['test2', -1, "True", "True", 0.8, 5])
+    RunMlModel.main(sys.argv[1:])
 

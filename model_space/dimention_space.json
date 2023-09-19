@@ -51,7 +51,6 @@
         "Precip_ave",
         "Precip_max",
         "Precip_min",
-        "PrecipCat",
         "scat_dummy"
     ],
     "Topo_pc": [

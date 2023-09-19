@@ -104,7 +104,7 @@ class DataLoader:
         
         # ___________________________________________________
         # Merge data and prepare targets
-        self.data_target = self.data_target[set(self.data_target) - set(['lat','long','meas_q_va','stream_wdth_va','max_depth_va'])] # 'meas_q_va',
+        self.data_target = self.data_target[set(self.data_target) - set(['lat','long','meas_q_va','stream_wdth_va','max_depth_va','bf_ff','in_ff'])] # 'meas_q_va',
         self.data = pd.merge(self.data_target, self.data, on='siteID', how = 'inner')
 
         # ___________________________________________________
@@ -201,17 +201,18 @@ class DataLoader:
                 if total_var >= 0.95:
                     # num_pc = i
                     break
-            
             features_pc = set(self.add_features) - features_pc
+            # Filter to important ones
+            components_matrix = components_matrix[:i+1, :]
             # Save contibutions
             fig, ax = plt.subplots(1, 1, figsize=(6,6))
             ax.grid(color='gray', linewidth=0.5)
-            cmap = plt.cm.seismic
+            cmap = plt.cm.bwr
             median_value = np.median(components_matrix)
             midpoint = 1 - median_value / (components_matrix.max() - components_matrix.min())
             cmap_adjusted = mcolors.TwoSlopeNorm(vmin=components_matrix.min(), vcenter=0, vmax=components_matrix.max())
-
-            plt.imshow(components_matrix, cmap=cmap, norm=cmap_adjusted, aspect='auto')
+            plt.pcolor(components_matrix, cmap=cmap, norm=cmap_adjusted, edgecolors='k', linewidths=2)
+            # plt.imshow(components_matrix, cmap=cmap, norm=cmap_adjusted, aspect='auto')
             plt.xticks(range(len(feat_list)), feat_list, rotation=45, ha='right')
             plt.yticks(range(len(features_pc)), features_pc, rotation=45, ha='right')
             plt.colorbar(label='Loading Value')
@@ -225,6 +226,10 @@ class DataLoader:
             # Remove transformed features
             all_col = self.data.columns.tolist()
             new_col = list(set(all_col) - set(feat_list))
+            
+            # look for when scat dummy drops    
+            if "scat_dummy" in feat_list:
+                new_col.append('scat_dummy')
             self.data = self.data[new_col]
 
             # Update varaibles
@@ -263,22 +268,22 @@ class DataLoader:
             buildPCA(feat_list, 5,'Topo_pc')
 
             # Flood
-            print('Reducing Topo ..')
+            print('Reducing Flood ..')
             feat_list = temp.get('Flood_freq_pc')
             buildPCA(feat_list, 5,'Flood_freq_pc')
 
             # Land_cover
-            print('Reducing Topo ..')
+            print('Reducing Land cover ..')
             feat_list = temp.get('Land_cover_pc')
             buildPCA(feat_list, 5,'Land_cover_pc')
 
             # Human
-            print('Reducing Topo ..')
+            print('Reducing Human ..')
             feat_list = temp.get('Human_pc')
             buildPCA(feat_list, 5,'Human_pc')
 
             # Lithology
-            print('Reducing Topo ..')
+            print('Reducing Lithology ..')
             feat_list = temp.get('Lithology_pc')
             buildPCA(feat_list, 5,'Lithology_pc')
         
@@ -461,7 +466,11 @@ class DataLoader:
         """
         print('transforming and plotting ...')
         dump_list = ['R2', 'siteID']
+        
         if self.x_transform:
+            min_value = 0
+            max_value = 500
+            scaler = MinMaxScaler(feature_range=(min_value, max_value))
             if t_type=='power':
                 # t_x = MinMaxScaler(feature_range=(0, 1))
                 t_x = PowerTransformer()
@@ -473,10 +482,12 @@ class DataLoader:
             if t_type!='log':
                 # scaler_x = StandardScaler()
                 train_x = self.train[self.in_features].reset_index(drop=True)
+                train_x = pd.DataFrame(scaler.fit_transform(train_x), columns=train_x.columns)
                 train_x_cp = train_x.copy()
                 train_x_t = t_x.fit_transform(train_x)
                 pickle.dump(t_x, open(self.custom_name+'/model/'+'train_x_'+self.out_feature+'_tansformation.pkl', "wb"))
-                # train_x_pt = scaler_x.fit_transform(train_x_pt)
+                pickle.dump(scaler, open(self.custom_name+'/model/'+'train_x_'+self.out_feature+'_scaler_tansformation.pkl', "wb"))
+
                 train_x = pd.DataFrame(data=train_x_t,
                         columns=train_x.columns)
                 if plot_dist:
@@ -484,9 +495,10 @@ class DataLoader:
                 train_id = self.train[dump_list].reset_index(drop=True)
 
                 test_x = self.test[self.in_features].reset_index(drop=True)
+                # test_x.to_parquet('data/tttt.parquet')
+                test_x = pd.DataFrame(scaler.transform(test_x), columns=test_x.columns)
                 test_x_cp = test_x.copy()
                 test_x_t = t_x.transform(test_x)
-                # test_x_pt = scaler_x.transform(test_x_pt)
                 test_x = pd.DataFrame(data=test_x_t,
                         columns=test_x.columns)
                 if plot_dist:
