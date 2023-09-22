@@ -106,7 +106,15 @@ class DataLoader:
         # Merge data and prepare targets
         self.data_target = self.data_target[set(self.data_target) - set(['lat','long','meas_q_va','stream_wdth_va','max_depth_va','bf_ff','in_ff'])] # 'meas_q_va',
         self.data = pd.merge(self.data_target, self.data, on='siteID', how = 'inner')
-
+        # Data cleaning based on logical values
+        if self.out_feature.startswith("Y"):
+            # Hudson River, which reaches 200 feet deep at some points
+            self.data = self.data.loc[(self.data[self.out_feature] <= 200) & 
+                                      (self.data[self.out_feature] > 0)]
+        else:
+            # Mississippi River, which reaches 50000 feet width at some points
+            self.data = self.data.loc[(self.data[self.out_feature] <= 50000) & 
+                                      (self.data[self.out_feature] > 0)]
         # ___________________________________________________
         # Filter bad stations
         target_df = pd.read_parquet(self.target_data_path, engine='pyarrow')
@@ -580,4 +588,31 @@ class DataLoader:
             test_y = test_y.to_numpy().reshape((-1,))
 
         print('--------------- End of transformation ---------------')
+        
+        # Test data
+        is_inf_train_x = train_x.isin([np.inf, -np.inf]).any().any()
+        if is_inf_train_x:
+            print('---- found inf in train x !!!!' )
+        is_inf_test_x = test_x.isin([np.inf, -np.inf]).any().any()
+        if is_inf_test_x:
+            print('---- found inf in test x !!!!' )
+        is_inf_train_y = np.isinf(train_y).any()
+        if is_inf_train_y:
+            print('---- found inf in train y !!!!' )
+        is_inf_test_y = np.isinf(test_y).any()
+        if is_inf_test_y:
+            print('---- found inf in test y !!!!' )
+        has_missing_train_x = train_x.isna().any().any()
+        if has_missing_train_x:
+            print('---- found nan in train x !!!!' )
+        has_missing_test_x= test_x.isna().any().any()
+        if has_missing_test_x:
+            print('---- found nan in test x !!!!' )
+        has_missing_train_y = np.isnan(train_y).any()
+        if has_missing_train_y:
+            print('---- found nan in train y !!!!' )
+        has_missing_test_y = np.isnan(test_y).any()
+        if has_missing_test_y:
+            print('---- found nan in test y !!!!' )
+            
         return train_x, train_y, train_id, test_x, test_y, test_id

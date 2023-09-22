@@ -617,7 +617,7 @@ class RunMlModel:
         y_transform  = eval(argv[3])
         R2_thresh    = float(argv[4])
         count_thresh = int(argv[5])
-        space        = 'actual_space' # actual_space / test_space
+        space        = 'test_space' # actual_space / test_space
         SI           = False # SI system
         sample_type  = "Sub" #"All", "Sub", "test"
         weighted     = False
@@ -639,7 +639,9 @@ class RunMlModel:
         temp        = json.load(open('data/model_feature_names.json'))
         target_list = temp.get('out_features')
         del temp
-
+        # target_list = ["Y_in",
+        # "TW_bf",
+        # "TW_in"]
         for target_name in tqdm(target_list):
             # ___________________________________________________
             # Train models 
@@ -696,19 +698,19 @@ class RunMlModel:
             print('\n----------------- Feature importance -------------------\n')
             # # ___________________________________________________
             # # plot feature importance
-            try:
-                fimp_object = fimp.FeatureImportance(custom_name, best_model)
-                fimp_object.plotImportance(model=ml_model, out_features=target_name,
-                                            train_x=train_x, train_y=train_y)
-                fimp_object.plotShapImportance(model=ml_model, out_features=target_name, 
-                                                train_x=train_x)
-            except Exception as e:       
-                print("An exception occurred due to shap internal errors!")  
-                print(e)      
-            print('\n**************** modeling parameter {0} ends here ****************\n'.format(target_name))
-            print('end')
+            # try:
+            #     fimp_object = fimp.FeatureImportance(custom_name, best_model)
+            #     fimp_object.plotImportance(model=ml_model, out_features=target_name,
+            #                                 train_x=train_x, train_y=train_y)
+            #     fimp_object.plotShapImportance(model=ml_model, out_features=target_name, 
+            #                                     train_x=train_x)
+            # except Exception as e:       
+            #     print("An exception occurred due to shap internal errors!")  
+            #     print(e)      
+            # print('\n**************** modeling parameter {0} ends here ****************\n'.format(target_name))
+            # print('end')
 
 if __name__ == "__main__":
-    # RunMlModel.main(['test2', -1, "True", "True", 0.8, 5])
-    RunMlModel.main(sys.argv[1:])
+    RunMlModel.main(['test2', -1, "False", "False", 0.3, 5])
+    # RunMlModel.main(sys.argv[1:])
 
