@@ -1,28 +1,28 @@
 #!/bin/bash
 # Conda
-# my directory source /home/amodaresirad/miniconda3/etc/profile.d/conda.sh
+# my directory source /bsuhome/arashmodaresirad/miniconda3/etc/profile.d/conda.sh
 #Account and Email Information
-#SBATCH -A amodaresirad ## User ID
+#SBATCH -A arashmodaresirad ## User ID
 #SBATCH --mail-type=end
 #SBATCH --mail-user=arashmodaresirad@u.boisestate.edu
 
-#SBATCH -J quant       # job name
-#SBATCH -o outputs/quant_results_final.o%j # output and error file name (%j expands to jobID)
-#SBATCH -e outputs/quant_errors_final.e%j
-#SBATCH -n 2               # Run one process
+#SBATCH -J not       # job name
+#SBATCH -o outputs/R30C5_not_results_final.o%j # output and error file name (%j expands to jobID)
+#SBATCH -e outputs/R30C5_not_errors_final.e%j
 #SBATCH -p bsudfq # queue (partition)
+#SBATCH -n 2               # Run one process
 #SBATCH --cpus-per-task=28 # allow job to multithread across all cores
-#SBATCH -t 40-00:00:00      # run time (d-hh:mm:ss)
+#SBATCH -t 10-00:00:00      # run time (d-hh:mm:ss)
 ulimit -v unlimited
 ulimit -s unlimited
 ulimit -u 10000
 
-if [ ! -d /home/amodaresirad/River_new/bf/bankfull_W_D/outputs ]; then
+if [ ! -d /bsuhome/arashmodaresirad/scratch/WD/noT/bankfull_W_D/outputs ]; then
     echo "outputs floder not found, creating one..."
-    mkdir -p /home/amodaresirad/River_new/bf/bankfull_W_D/outputs;
+    mkdir -p /bsuhome/arashmodaresirad/scratch/WD/noT/bankfull_W_D/outputs;
 fi
 
-source /home/amodaresirad/anaconda3/etc/profile.d/conda.sh
+source /bsuhome/arashmodaresirad/miniconda3/etc/profile.d/conda.sh
 
 conda activate base
 
