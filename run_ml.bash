@@ -10,6 +10,7 @@
 #SBATCH -o outputs/quant_results_final.o%j # output and error file name (%j expands to jobID)
 #SBATCH -e outputs/quant_errors_final.e%j
 #SBATCH -n 2               # Run one process
+#SBATCH -p bsudfq # queue (partition)
 #SBATCH --cpus-per-task=28 # allow job to multithread across all cores
 #SBATCH -t 40-00:00:00      # run time (d-hh:mm:ss)
 ulimit -v unlimited
