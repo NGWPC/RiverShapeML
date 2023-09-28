@@ -380,6 +380,9 @@ class DataLoader:
             self.data = self.data.loc[self.data[str(self.out_feature)] < 216] 
         
         df_mask = self.data[model_features]
+        # duplicated_columns = df_mask.columns[df_mask.columns.duplicated()]
+        # print('dupies')
+        # print(duplicated_columns)
         df_mask.to_parquet(self.custom_name+'/metrics/df_mask.parquet')
         df_mask = df_mask.fillna(0) # // to be changed (compensating for EE features in cities that can be set to 0)
         msk = np.random.rand(len(df_mask)) < 0.85
