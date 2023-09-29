@@ -485,7 +485,7 @@ class DataLoader:
             if t_type=='power':
                 # t_x = MinMaxScaler(feature_range=(0, 1))
                 t_x = PowerTransformer()
-            else:
+            if t_type=='quant':
                 t_x = QuantileTransformer(
                     n_quantiles=500, output_distribution="normal", 
                     random_state=self.rand_state
@@ -543,7 +543,7 @@ class DataLoader:
             if t_type=='power':
                 # t_y = MinMaxScaler(feature_range=(0, 1))
                 t_y = PowerTransformer()
-            else:    
+            if t_type=='quant':  
                 t_y = QuantileTransformer(
                     n_quantiles=500, output_distribution="normal", 
                     random_state=self.rand_state
@@ -585,9 +585,9 @@ class DataLoader:
                     self.plotDist(train_y_cp, test_y, 'test')
                 test_y = test_y.values.ravel()
         else:
-            train_y = np.log(self.train[[self.out_feature]].reset_index(drop=True))
+            train_y = self.train[[self.out_feature]].reset_index(drop=True)
             train_y = train_y.values.ravel()
-            test_y = np.log(self.test[[self.out_feature]].reset_index(drop=True))
+            test_y = self.test[[self.out_feature]].reset_index(drop=True)
             test_y = test_y.to_numpy().reshape((-1,))
 
         print('--------------- End of transformation ---------------')
