@@ -242,28 +242,28 @@ class MlModel:
         params_space = json.load(open('model_space/params_space.json')) 
         models = { 
             'xgb': xgb_reg,
-            'rf': rf_reg,
-            'hgb': hgb_reg,
+            # 'rf': rf_reg,
+            # 'hgb': hgb_reg,
             'lgb': lgb_reg,
-            'bsvr': bsvr_reg,
-            'knr': knr_reg,
-            'ard': ard_reg,
-            'enet': enet_reg,
-            'mlp': mlp_reg,
-            'bays': bays_reg
+            # 'bsvr': bsvr_reg,
+            # 'knr': knr_reg,
+            # 'ard': ard_reg,
+            # 'enet': enet_reg,
+            # 'mlp': mlp_reg,
+            # 'bays': bays_reg
             # 'orth': orth_reg
         }
         params = { 
             'xgb': params_space.get(space).get('xgb_params'),
-            'rf': params_space.get(space).get('rf_params'),
-            'hgb': params_space.get(space).get('hgb_params'),
+            # 'rf': params_space.get(space).get('rf_params'),
+            # 'hgb': params_space.get(space).get('hgb_params'),
             'lgb': params_space.get(space).get('lgb_params'),
-            'bsvr': params_space.get(space).get('bsvr_params'),
-            'knr': params_space.get(space).get('knr_params'),
-            'ard': params_space.get(space).get('ard_params'),
-            'enet': params_space.get(space).get('enet_params'),
-            'mlp': params_space.get(space).get('mlp_params'),
-            'bays': params_space.get(space).get('bays_params')
+            # 'bsvr': params_space.get(space).get('bsvr_params'),
+            # 'knr': params_space.get(space).get('knr_params'),
+            # 'ard': params_space.get(space).get('ard_params'),
+            # 'enet': params_space.get(space).get('enet_params'),
+            # 'mlp': params_space.get(space).get('mlp_params'),
+            # 'bays': params_space.get(space).get('bays_params')
             # 'orth': params_space.get(space).get('orth_params')
         }
 
@@ -473,24 +473,24 @@ class MlModel:
         base_model = list()
         temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'xgb'])
         base_model.append(('xgb', temp))
-        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'rf'])
-        base_model.append(('rf', temp))
-        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'hgb'])
-        base_model.append(('hgb', temp))
+        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'rf'])
+        # base_model.append(('rf', temp))
+        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'hgb'])
+        # base_model.append(('hgb', temp))
         temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'lgb'])
         base_model.append(('lgb', temp))
-        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'bsvr'])
-        base_model.append(('bsvr', temp))
-        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'knr'])
-        base_model.append(('knr', temp))
-        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'ard'])
-        base_model.append(('ard', temp))
-        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'enet'])
-        base_model.append(('enet', temp))
-        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'mlp'])
-        base_model.append(('mlp', temp))
-        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'bays'])
-        base_model.append(('bays', temp))
+        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'bsvr'])
+        # base_model.append(('bsvr', temp))
+        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'knr'])
+        # base_model.append(('knr', temp))
+        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'ard'])
+        # base_model.append(('ard', temp))
+        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'enet'])
+        # base_model.append(('enet', temp))
+        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'mlp'])
+        # base_model.append(('mlp', temp))
+        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'bays'])
+        # base_model.append(('bays', temp))
         # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'orth'])
         # base_model.append(('orth', temp))
 
@@ -639,7 +639,7 @@ class RunMlModel:
         temp        = json.load(open('data/model_feature_names.json'))
         target_list = temp.get('out_features')
         del temp
-        # target_list=['Y_in']
+        # target_list=['TW_bf', 'TW_in']
         for target_name in tqdm(target_list):
             # ___________________________________________________
             # Train models 
@@ -709,6 +709,6 @@ class RunMlModel:
             print('end')
 
 if __name__ == "__main__":
-    # RunMlModel.main(['test2', -1, "False", "False", 0.3, 5])
-    RunMlModel.main(sys.argv[1:])
+    RunMlModel.main(['trans610not', -1, "False", "False", 0.6, 10])
+    # RunMlModel.main(sys.argv[1:])
 
