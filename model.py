@@ -709,6 +709,6 @@ class RunMlModel:
             print('end')
 
 if __name__ == "__main__":
-    RunMlModel.main(['trans610not', -1, "False", "False", 0.6, 10])
-    # RunMlModel.main(sys.argv[1:])
+    # RunMlModel.main(['up610not', -1, "False", "False", 0.6, 10])
+    RunMlModel.main(sys.argv[1:])
 
