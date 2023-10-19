@@ -17,6 +17,10 @@ __pycache__/
 *.sqlite
 data/nwm21-ff.parquet
 Untitled-1
+vars.json
+model_space-20231013T184912Z-001.zip
+launch.json
+
 
 # Folders
 Images/paper/*
@@ -28,6 +32,10 @@ model/*
 cache/**
 **/cache
 test*/*
+trans/*
+trans610/*
+trans610not/*
+maps/*
 
 # Distribution / packaging
 .Python

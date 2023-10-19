@@ -57,13 +57,10 @@
         "CHILI",
         "PhyD",
         "Phy_ave",
-        "Phy_std",
         "aspect",
         "def",
-        "elevation_ave",
         "facc",
         "mTPI_ave",
-        "mTPI_std",
         "topo"
     ], 
     "Flood_freq_pc": [
