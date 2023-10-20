@@ -35,7 +35,9 @@ test*/*
 trans/*
 trans610/*
 trans610not/*
+up610not/*
 maps/*
+
 
 # Distribution / packaging
 .Python
