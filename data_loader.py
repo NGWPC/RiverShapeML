@@ -245,35 +245,35 @@ class DataLoader:
 
             return
         if self.sample_type == "Sub_pca":
-            # Vegetation
-            print('Reducing Vegetation ..')
-            feat_list = temp.get('Vegetation_pc')
-            buildPCA(feat_list, 5, 'Vegetation_pc')
+            # # Vegetation
+            # print('Reducing Vegetation ..')
+            # feat_list = temp.get('Vegetation_pc')
+            # buildPCA(feat_list, 5, 'Vegetation_pc')
 
-            # Discharge
-            print('Reducing Discharge ..')
-            feat_list = temp.get('Discharge_pc')
-            buildPCA(feat_list, 5, 'Discharge_pc')
+            # # Discharge
+            # print('Reducing Discharge ..')
+            # feat_list = temp.get('Discharge_pc')
+            # buildPCA(feat_list, 5, 'Discharge_pc')
 
-            # Soil_temp_moist
-            print('Reducing Soil_temp_moist ..')
-            feat_list = temp.get('Soil_temp_moist_pc')
-            buildPCA(feat_list, 5,'Soil_temp_moist_pc')
+            # # Soil_temp_moist
+            # print('Reducing Soil_temp_moist ..')
+            # feat_list = temp.get('Soil_temp_moist_pc')
+            # buildPCA(feat_list, 5,'Soil_temp_moist_pc')
 
-            # Soil
-            print('Reducing Soil ..')
-            feat_list = temp.get('Soil_char_pc')
-            buildPCA(feat_list, 5,'Soil_char_pc')
+            # # Soil
+            # print('Reducing Soil ..')
+            # feat_list = temp.get('Soil_char_pc')
+            # buildPCA(feat_list, 5,'Soil_char_pc')
 
-            # Preciep
-            print('Reducing Preciep ..')
-            feat_list = temp.get('Preciep_pc')
-            buildPCA(feat_list, 5,'Preciep_pc')
+            # # Preciep
+            # print('Reducing Preciep ..')
+            # feat_list = temp.get('Preciep_pc')
+            # buildPCA(feat_list, 5,'Preciep_pc')
 
-            # Topo
-            print('Reducing Topo ..')
-            feat_list = temp.get('Topo_pc')
-            buildPCA(feat_list, 5,'Topo_pc')
+            # # Topo
+            # print('Reducing Topo ..')
+            # feat_list = temp.get('Topo_pc')
+            # buildPCA(feat_list, 5,'Topo_pc')
 
             # Flood
             print('Reducing Flood ..')
@@ -285,10 +285,10 @@ class DataLoader:
             feat_list = temp.get('Land_cover_pc')
             buildPCA(feat_list, 5,'Land_cover_pc')
 
-            # Human
-            print('Reducing Human ..')
-            feat_list = temp.get('Human_pc')
-            buildPCA(feat_list, 5,'Human_pc')
+            # # Human
+            # print('Reducing Human ..')
+            # feat_list = temp.get('Human_pc')
+            # buildPCA(feat_list, 5,'Human_pc')
 
             # Lithology
             print('Reducing Lithology ..')
