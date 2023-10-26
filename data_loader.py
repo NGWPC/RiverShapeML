@@ -104,8 +104,10 @@ class DataLoader:
         
         # ___________________________________________________
         # Merge data and prepare targets
-        self.data_target = self.data_target[set(self.data_target) - set(['lat','long','meas_q_va','stream_wdth_va','max_depth_va','bf_ff','in_ff'])] # 'meas_q_va',
+        self.data_target = self.data_target[set(self.data_target.columns.to_list()) - set(['lat','long','meas_q_va','stream_wdth_va','max_depth_va','bf_ff','in_ff'])] # 'meas_q_va'
         self.data = pd.merge(self.data_target, self.data, on='siteID', how = 'inner')
+        self.data = self.data[set(self.data.columns.to_list()) - set(['id', 'geometry'])]
+                              
         # Data cleaning based on logical values
         if self.out_feature.startswith("Y"):
             # Hudson River, which reaches 200 feet deep at some points
@@ -119,7 +121,7 @@ class DataLoader:
         # Filter bad stations
         target_df = pd.read_parquet(self.target_data_path, engine='pyarrow')
         target_df.astype({'siteID': 'string'})
-        
+
         r2_epochs = np.arange(0, 1.05, 0.05)
         grouped_r2 = target_df.groupby('siteID').agg('mean')
         count_list = [len(grouped_r2)]
@@ -158,15 +160,21 @@ class DataLoader:
         stations = good_stations['siteID'].tolist()
         del good_stations
         self.data = self.data[self.data['siteID'].isin(stations)].reset_index(drop=True)
-        
         # Data imputation 
-        impute = "median"
+        
+        impute = "None"
         if impute == "zero":
             self.data = self.data.fillna(-1) # a temporary brute force way to deal with NAN
         if impute == "median":
-            self.data = self.data.replace(-1, np.nan)
-            column_medians = self.data.median()
-            self.data = self.data.fillna(column_medians)
+            self.data = self.data.reset_index(drop=True)
+            # self.data = self.data.replace(-1, np.nan)
+            number_to_replace = -1
+            self.data = self.data.fillna(-1)
+            for column_name in self.data.columns:
+                if number_to_replace in self.data[column_name].values:
+                    median_value = self.data[column_name].median()
+                    self.data[column_name] = self.data[column_name].replace(number_to_replace, median_value)
+
         return 
 
  # --------------------------- Dimention Reduction --------------------------- #
@@ -353,7 +361,7 @@ class DataLoader:
             self.in_features = model_features.copy()
             temp = json.load(open('data/model_feature_names.json'))
             model_features += [self.out_feature]+temp.get('id_features')
-        
+
         elif self.sample_type == "All_pca":
             temp = json.load(open('data/model_feature_names.json'))
             model_features = [self.out_feature]+self.add_features+temp.get('id_features')#+temp.get('in_features_NWM')+temp.get('in_features_flow_freq')
@@ -378,7 +386,6 @@ class DataLoader:
         else:
             # The deepest river in the U.S. is the Hudson River which reaches a maximum depth of 216 ft.
             self.data = self.data.loc[self.data[str(self.out_feature)] < 216] 
-        
         df_mask = self.data[model_features]
         # duplicated_columns = df_mask.columns[df_mask.columns.duplicated()]
         # print('dupies')
@@ -617,5 +624,11 @@ class DataLoader:
         has_missing_test_y = np.isnan(test_y).any()
         if has_missing_test_y:
             print('---- found nan in test y !!!!' )
-            
+
+        train_x.to_parquet(self.custom_name+'/metrics/'+'train_x'+'_'+self.out_feature+'.parquet')
+        pd.DataFrame({self.out_feature: train_y}).to_parquet(self.custom_name+'/metrics/'+'train_y'+'_'+self.out_feature+'.parquet')
+        train_id.to_parquet(self.custom_name+'/metrics/'+'train_id'+'_'+self.out_feature+'.parquet')
+        test_x.to_parquet(self.custom_name+'/metrics/'+'test_x'+'_'+self.out_feature+'.parquet')
+        pd.DataFrame({self.out_feature: test_y}).to_parquet(self.custom_name+'/metrics/'+'test_y'+'_'+self.out_feature+'.parquet')
+        test_id.to_parquet(self.custom_name+'/metrics/'+'test_id'+'_'+self.out_feature+'.parquet')    
         return train_x, train_y, train_id, test_x, test_y, test_id
