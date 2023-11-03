@@ -1,0 +1,308 @@
+[
+    {
+        "Variable name": "aet",
+        "Aggregation": "Watershed ",
+        "Description": "Actual Evapotranspiration",
+        "Reduction": "Average",
+        "Source": "ClimateR",
+        "Data": "TERRACLIMATE",
+        "Category": ["Width", "Depth"]
+    },
+    {
+        "Variable name": "PRISM",
+        "Aggregation": "Watershed ",
+        "Description": "PRISM climate data - 30-year normal mean precipitation (mm): Annual period: 1981-2010 within AOI",
+        "Reduction": "Average",
+        "Source": "StreamCat",
+        "Data": ["streamcat_PRISM_1981_2010_cat.parquet"],
+        "Category": ["Width", "Depth"]
+    },
+    {
+        "Variable name": "AI",
+        "Aggregation": "Watershed ",
+        "Description": "Aridity Index",
+        "Reduction": "Average",
+        "Source": "ClimateR",
+        "Data": "link",
+        "Category": ["Width", "Depth"]
+    },
+    {
+        "Variable name": "pdsi",
+        "Aggregation": "Watershed ",
+        "Description": "Palmer drought severity index",
+        "Reduction": "Average",
+        "Source": "ClimateR",
+        "Data": "TERRACLIMATE",
+        "Category": ["Width", "Depth"]
+    },
+    {
+        "Variable name": "def",
+        "Aggregation": "Watershed ",
+        "Description": "Climate water deficit, derived using a one-dimensional soil water balance model",
+        "Reduction": "Average",
+        "Source": "ClimateR",
+        "Data": "TERRACLIMATE",
+        "Category": ["Width", "Depth"]
+    },
+    {
+        "Variable name": "WetIndex",
+        "Aggregation": "Watershed",
+        "Description": "Mean Composite Topographic Index (CTI) [Wetness Index] within AOI",
+        "Reduction": "Average",
+        "Source": "StreamCat",
+        "Data": ["streamcat_WetIndx_cat.parquet"],
+        "Category": ["Width"]
+    },
+    {
+        "Variable name": "facc",
+        "Aggregation": "Watershed",
+        "Description": "Flow accumulation grids",
+        "Reduction": "Average",
+        "Source": "Local",
+        "Data": ["/mnt/d/Lynker/Data/na_acc_3s/na_acc_3s.tif"],
+        "Category": ["Width", "Depth"]
+    },
+    {
+        "Variable name": "PctWdWet",
+        "Aggregation": "Watershed",
+        "Description": "Woody Wetland Percentage",
+        "Reduction": "Average",
+        "Source": "StreamCat",
+        "Data": ["streamcat_NLCD"],
+        "Category": ["Width", "Depth"]
+    },
+    {
+        "Variable name": "PctBl",
+        "Aggregation": "Watershed",
+        "Description": "Percent of AOI classified as barren land cover",
+        "Reduction": "Average",
+        "Source": "StreamCat",
+        "Data": ["streamcat_NLCD"],
+        "Category": ["Width", "Depth"]
+    },
+    {
+        "Variable name": "PctWater",
+        "Aggregation": "Watershed",
+        "Description": "% of AOI area classified as lithology type: water",
+        "Reduction": "Average",
+        "Source": "StreamCat",
+        "Data": ["streamcat_NLCD"],
+        "Category": ["Width", "Depth"]
+    },
+    {
+        "Variable name": "PctConif",
+        "Aggregation": "Watershed",
+        "Description": "% of AOI area classified as lithology type: water",
+        "Reduction": "Average",
+        "Source": "StreamCat",
+        "Data": ["streamcat_NLCD"],
+        "Category": ["Width", "Depth"]
+    },
+    {
+        "Variable name": "PctConif",
+        "Aggregation": "Watershed",
+        "Description": "% of AOI area classified as lithology type: water",
+        "Reduction": "Average",
+        "Source": "StreamCat",
+        "Data": ["streamcat_NLCD"],
+        "Category": ["Width", "Depth"]
+    },
+    {
+        "Variable name": "bd",
+        "Aggregation": "Divide",
+        "Description": "bulk density g/cm3",
+        "Reduction": "Average",
+        "Source": "polaris",
+        "Data": ["ClimateR"],
+        "Category": ["Width", "Depth"]
+    },
+    {
+        "Variable name": "silt",
+        "Aggregation": "Divide",
+        "Description": "silt %",
+        "Reduction": "Average",
+        "Source": "polaris",
+        "Data": ["ClimateR"],
+        "Category": ["Width", "Depth"]
+    },
+    {
+        "Variable name": "sand",
+        "Aggregation": "Divide",
+        "Description": "sand %",
+        "Reduction": "Average",
+        "Source": "polaris",
+        "Data": ["ClimateR"],
+        "Category": ["Width", "Depth"]
+    },
+    {
+        "Variable name": "clay",
+        "Aggregation": "Divide",
+        "Description": "clay %",
+        "Reduction": "Average",
+        "Source": "polaris",
+        "Data": ["ClimateR"],
+        "Category": ["Width", "Depth"]
+    },
+    {
+        "Variable name": "theta_s",
+        "Aggregation": "Divide",
+        "Description": "saturated soil water content m3/m3",
+        "Reduction": "Average",
+        "Source": "polaris",
+        "Data": ["ClimateR"],
+        "Category": ["Width", "Depth"]
+    },
+    {
+        "Variable name": "theta_r",
+        "Aggregation": "Divide",
+        "Description": "clay %",
+        "Reduction": "Average",
+        "Source": "polaris",
+        "Data": ["residual soil water content m3/m3"],
+        "Category": ["Width", "Depth"]
+    },
+    {
+        "Variable name": "ksat",
+        "Aggregation": "Divide",
+        "Description": "saturated hydraulic conductivity log10(cm/hr)",
+        "Reduction": "Average",
+        "Source": "polaris",
+        "Data": ["ClimateR"],
+        "Category": ["Width", "Depth"]
+    },
+    {
+        "Variable name": "ph",
+        "Aggregation": "Divide",
+        "Description": "soil pH in H20",
+        "Reduction": "Average",
+        "Source": "polaris",
+        "Data": ["ClimateR"],
+        "Category": ["Width", "Depth"]
+    },
+    {
+        "Variable name": "om",
+        "Aggregation": "Divide",
+        "Description": "organic matter log10(%)",
+        "Reduction": "Average",
+        "Source": "polaris",
+        "Data": ["ClimateR"],
+        "Category": ["Width", "Depth"]
+    },
+    {
+        "Variable name": "lambda",
+        "Aggregation": "Divide",
+        "Description": "pore size distribution index (brooks corey)",
+        "Reduction": "Average",
+        "Source": "polaris",
+        "Data": ["ClimateR"],
+        "Category": ["Width", "Depth"]
+    },
+    {
+        "Variable name": "hb",
+        "Aggregation": "Divide",
+        "Description": "bubbling pressure (brooks corey) log10(kPa)",
+        "Reduction": "Average",
+        "Source": "polaris",
+        "Data": ["ClimateR"],
+        "Category": ["Width", "Depth"]
+    },
+    {
+        "Variable name": "n",
+        "Aggregation": "Divide",
+        "Description": "measure of the pore size distribution (van genuchten)",
+        "Reduction": "Average",
+        "Source": "polaris",
+        "Data": ["ClimateR"],
+        "Category": ["Width", "Depth"]
+    },
+    {
+        "Variable name": "alpha",
+        "Aggregation": "Divide",
+        "Description": "scale parameter inversely proportional to mean pore diameter (van genuchten) log10(kPa-1)",
+        "Reduction": "Average",
+        "Source": "polaris",
+        "Data": ["ClimateR"],
+        "Category": ["Width", "Depth"]
+    },
+    {
+        "Variable name": "CompStrgth",
+        "Aggregation": "Watershed",
+        "Description": "Mean Lithological Compressive Strength",
+        "Reduction": "Average",
+        "Source": "StreamCat",
+        "Data": ["NAN"],
+        "Category": ["Width", "Depth"]
+    },
+    {
+        "Variable name": "HydrlCond",
+        "Aggregation": "Watershed",
+        "Description": "Mean lithological hydraulic conductivity (micrometers per second) content in surface or near surface geology within AOI",
+        "Reduction": "Average",
+        "Source": "StreamCat",
+        "Data": ["NAN"],
+        "Category": ["Width", "Depth"]
+    },
+    {
+        "Variable name": "K2O",
+        "Aggregation": "Watershed",
+        "Description": "Mean % of lithological potassium oxide (K2O) content in surface or near surface geology within AOI",
+        "Reduction": "Average",
+        "Source": "StreamCat",
+        "Data": ["NAN"],
+        "Category": ["Width", "Depth"]
+    },
+    {
+        "Variable name": "WtDep",
+        "Aggregation": "Watershed",
+        "Description": "Mean seasonal water table depth (cm) of soils (STATSGO) within AOI.",
+        "Reduction": "Average",
+        "Source": "StreamCat",
+        "Data": ["NAN"],
+        "Category": ["Depth"]
+    },
+    {
+        "Variable name": "BFI",
+        "Aggregation": "Watershed",
+        "Description": "Baseflow is the component of streamflow that can be attributed to ground-water discharge into streams. The Baseflow Index (BFI) is the ratio of baseflow to total flow, expressed as a percentage, within AOI.",
+        "Reduction": "Average",
+        "Source": "StreamCat",
+        "Data": ["streamcat_NLCD"],
+        "Category": ["Depth"]
+    },
+    {
+        "Variable name": "snowmelt_sum",
+        "Aggregation": "Watershed",
+        "Description": "Melting of snow averaged over the grid box (to find melt over snow, divide by snow fraction). This variable is accumulated from the beginning of the forecast time to the end of the forecast step.",
+        "Reduction": "SUM",
+        "Source": "ERA5",
+        "Data": ["ClimateR"],
+        "Category": ["Depth"]
+    },
+    {
+        "Variable name": "snowfall_sum",
+        "Aggregation": "Watershed",
+        "Description": "Accumulated total snow that has fallen to the Earth's surface. It consists of snow due to the large-scale atmospheric flow (horizontal scales greater than around a few hundred meters) and convection where smaller scale areas (around 5km to a few hundred kilometers) of warm air rise. If snow has melted during the period over which this variable was accumulated, then it will be higher than the snow depth. This variable is the total amount of water accumulated from the beginning of the forecast time to the end of the forecast step. The units given measure the depth the water would have if the snow melted and was spread evenly over the grid box. Care should be taken when comparing model variables with observations, because observations are often local to a particular point in space and time, rather than representing averages over a model grid box and model time step.",
+        "Reduction": "SUM",
+        "Source": "ERA5",
+        "Data": ["ClimateR"],
+        "Category": ["Depth"]
+    },
+    {
+        "Variable name": "snow_depth_water_equivalent",
+        "Aggregation": "Watershed",
+        "Description": "Depth of snow from the snow-covered area of a grid box. Its units are meters of water equivalent, so it is the depth the water would have if the snow melted and was spread evenly over the whole grid box. The ECMWF Integrated Forecast System represents snow as a single additional layer over the uppermost soil level. The snow may cover all or part of the grid box.",
+        "Reduction": "SUM",
+        "Source": "ERA5",
+        "Data": ["ClimateR"],
+        "Category": ["Depth"]
+    },
+    {
+        "Variable name": "sub_surface_runoff_sum",
+        "Aggregation": "Watershed",
+        "Description": "Some water from rainfall, melting snow, or deep in the soil, stays stored in the soil. Otherwise, the water drains away, either over the surface (surface runoff), or under the ground(sub-surface runoff) and the sum of these two is simply called 'runoff'. This variable is accumulated from the beginning of the forecast time to the end of the forecast step. The units of runoff are depth in meters. This is the depth the water would have if it were spread evenly over the grid box. Care should be taken when comparing model variables with observations, because observations are often local to a particular point rather than averaged over a grid square area. Observations are also often taken in different units, such as mm/day, rather than the accumulated meters produced here. Runoff is a measure of the availability of water in the soil, and can, for example, be used as an indicator of drought or flood. More information about how runoff is calculated is given in the IFS Physical Processes documentation.",
+        "Reduction": "SUM",
+        "Source": "ERA5",
+        "Data": ["ClimateR"],
+        "Category": ["Width", "Depth"]
+    }
+]
