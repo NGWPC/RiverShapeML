@@ -21,7 +21,8 @@ vars.json
 model_space-20231013T184912Z-001.zip
 launch.json
 model_space/bu_dimention_space.json
-
+/deployment/models/*Meta*
+/deployment/models/*Voting*
 
 # Folders
 Images/paper/*
