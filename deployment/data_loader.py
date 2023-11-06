@@ -48,6 +48,28 @@ class DataLoader:
         except:
             print('Wrong address or data format. Please use parquet file.')
         return
+    
+    # --------------------------- Add Binary Features --------------------------- #
+    def addExtraFeatures(self, target_name: str) -> None:
+        # Add VAA dummy
+        self.data['vaa_dummy'] = self.data['roughness'].isnull().values
+        self.data['vaa_dummy'] = self.data['vaa_dummy'] * 1
+
+        # Add Scat dummy
+        self.data['scat_dummy'] = self.data['BFICat'].isnull().values
+        self.data['scat_dummy'] = self.data['scat_dummy'] * 1
+
+        # Add discharge dummy
+        if target_name.endswith("bf"):
+            self.data['bf_ff'] = np.nan
+            self.data['NWM'] = self.data['rp 2']
+            self.data['discharge_dummy'] = 3
+        else:
+            self.data['in_ff'] = np.nan
+            self.data['NWM'] = self.data['rp 1.5']
+            self.data['discharge_dummy'] = 3
+        return
+
     # --------------------------- Imputation --------------------------- #
     def imputeData(self) -> None:
         # Data imputation 

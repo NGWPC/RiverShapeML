@@ -97,8 +97,9 @@ class DPModel:
     def process_target(self, dl_obj, target_name: str, vote_flag: bool=False, meta_flag: bool=False, 
                         best_flag: bool=True, file: str='bf', model_type: str='xgb') -> Tuple[str, np.array]:
         
+        dl_obj.addExtraFeatures(target_name)
         dl_obj.buildPCA(target_name)
-
+        
         if target_name.startswith("Y"):
             model_type = 'xgb'
         else:
