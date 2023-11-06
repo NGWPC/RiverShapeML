@@ -1,18 +1,13 @@
 # Libraries
-from sklearn.preprocessing import PowerTransformer, QuantileTransformer, StandardScaler, RobustScaler, MinMaxScaler, MaxAbsScaler, FunctionTransformer
-from sklearn.decomposition import PCA
-import scipy
-import matplotlib.pyplot as plt
-from matplotlib import pyplot
-import matplotlib.colors as mcolors
-import seaborn as sns
 import pandas as pd
 import numpy as np
 import pickle
 import os
 import json
+import re
+import fnmatch
 
-# FHG dataset
+# Custom dataset
 # --------------------------- Read data files --------------------------- #
 class DataLoader:
     """ Main body of the data loader for preparing data for ML models
@@ -21,42 +16,11 @@ class DataLoader:
     ----------
     data_path : str
         The path to data that is used in ML model
-    target_data_path : str
-        The path to target widt/depth data that is used in ML model
     rand_state : int
         A random state number
-    out_feature : str
-        The name of the FHG coeficent to be used
-    custom_name : str
-        A custom name defiend by user to name modeling task
-    x_transform : str
-        Whether to apply transformation to predictor variables or not 
-        Opptions are:
-        - True
-        - False
-    x_transform : str
-        Whether to apply transformation to predictor variables or not 
-        Opptions are:
-        - True
-        - False
-        - defaults to False
-    y_transform : bool
-        Whether to apply transformation to target variable or not 
-        Opptions are:
-        - True
-        - False
-        - defaults to False
-    R2_thresh : float
-        The desired coeficent of determation to filter out bad measurments
-        Opptions are:
-        - any value between 0.0 - 100.0
-        - defaults to 0.0
-    count_thresh: int
-            The desired number of observations in each station to filter out bad measurments
     Example
     --------
-    >>> DataLoader(data_path = 'data/test.parquet', out_feature = 'b', rand_state = 115,
-        custom_name = 'test', x_transform = False, y_transform = False, R2_thresh = 0.0, count_thresh = 3)
+    >>> DataLoader(rand_state = 105, data_path = 'data/input.parquet')
         
     """
     def __init__(self, rand_state: int, data_path: str = 'data/input.parquet') -> None:
@@ -68,17 +32,18 @@ class DataLoader:
         
         # ___________________________________________________
         # Check directories
-        if not os.path.isdir(os.path.join(os.getcwd(),self.custom_name,"model/")):
-            os.mkdir(os.path.join(os.getcwd(),self.custom_name,"model/"))
-        if not os.path.isdir(os.path.join(os.getcwd(),self.custom_name,"data/")):
-            os.mkdir(os.path.join(os.getcwd(),self.custom_name,"data/"))
-        if not os.path.isdir(os.path.join(os.getcwd(),self.custom_name,'model_space/')):
-            os.mkdir(os.path.join(os.getcwd(),self.custom_name,'model_space/'))
+        if not os.path.isdir(os.path.join(os.getcwd(),"models/")):
+            os.mkdir(os.path.join(os.getcwd(),"models/"))
+        if not os.path.isdir(os.path.join(os.getcwd(),"data/")):
+            os.mkdir(os.path.join(os.getcwd(),"data/"))
+        if not os.path.isdir(os.path.join(os.getcwd(),'model_space/')):
+            os.mkdir(os.path.join(os.getcwd(),'model_space/'))
 
     def readFiles(self) -> None:
         """ Read files from the directories
         """
         try:
+            print(os.getcwd())
             self.data = pd.read_parquet(self.data_path, engine='pyarrow')
         except:
             print('Wrong address or data format. Please use parquet file.')
@@ -97,17 +62,13 @@ class DataLoader:
 
     # --------------------------- Dimention Reduction --------------------------- #     
     # PCA model
-    def buildPCA(self)  -> None:
+    def buildPCA(self, variable)  -> None:
         """ Builds a PCA and extracts new dimensions
         
         Parameters:
         ----------
-        feat_list: list
-            A list containing all feature names to be reduced 
-        n_components: int, default=None    
-            Number of components to keep. if n_components is not set all components are kept
-        name: str    
-            Reduced feature names
+        variable: str
+            A string of target variable to be transformed
 
         Returns:
         ----------
@@ -133,7 +94,7 @@ class DataLoader:
             else:
                 captured_texts.append("No match found")
 
-        temp = json.load(open('/model_space/dimension_space.json'))
+        temp = json.load(open('model_space/dimension_space.json'))
         
         # Print the list of matching files
         for pca_item, text in zip(matching_files, captured_texts):
@@ -143,6 +104,5 @@ class DataLoader:
             for i in range(0, 5, 1):
                 self.data[str(text[1:-1])+"_"+str(i)] = new_data_pca[:, i]
 
-        print("\n ------------- End of dimension reduction ----------- \n")
         return 
         

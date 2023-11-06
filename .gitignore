@@ -23,6 +23,8 @@ launch.json
 model_space/bu_dimention_space.json
 /deployment/models/*Meta*
 /deployment/models/*Voting*
+/deployment/test.ipynb
+Untitled-1.ipynb
 
 # Folders
 Images/paper/*
