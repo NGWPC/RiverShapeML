@@ -59,28 +59,12 @@ class DataLoader:
         custom_name = 'test', x_transform = False, y_transform = False, R2_thresh = 0.0, count_thresh = 3)
         
     """
-    def __init__(self, data_path: str, target_data_path: str, rand_state: int, out_feature: str, 
-                 custom_name: str, sample_type: str, x_transform: bool = False, y_transform: bool = False, 
-                 R2_thresh: float = 0.0, count_thresh: int = 3) -> None:
+    def __init__(self, rand_state: int, data_path: str = 'data/input.parquet') -> None:
         pd.options.display.max_columns  = 60
         self.data_path                  = data_path
-        self.target_data_path           = target_data_path
         self.data                       = pd.DataFrame([])
-        self.data_target                = pd.DataFrame([])
         self.rand_state                 = rand_state
         np.random.seed(self.rand_state)
-        self.in_features                = []
-        self.add_features               = []
-        self.del_features               = []
-        self.out_feature                = out_feature
-        self.custom_name                = custom_name
-        self.sample_type                = sample_type
-        self.x_transform                = x_transform
-        self.y_transform                = y_transform
-        self.train                      = pd.DataFrame([])
-        self.test                       = pd.DataFrame([])
-        self.R2_thresh                  = R2_thresh
-        self.count_thresh               = count_thresh
         
         # ___________________________________________________
         # Check directories
@@ -95,7 +79,7 @@ class DataLoader:
         """ Read files from the directories
         """
         try:
-            self.data = pd.read_parquet('data/input.parquet', engine='pyarrow')
+            self.data = pd.read_parquet(self.data_path, engine='pyarrow')
         except:
             print('Wrong address or data format. Please use parquet file.')
         return
@@ -109,10 +93,11 @@ class DataLoader:
             self.data = self.data.replace(-1, np.nan)
             column_medians = self.data.median()
             self.data = self.data.fillna(column_medians)
+        return
 
     # --------------------------- Dimention Reduction --------------------------- #     
     # PCA model
-    def buildPCA(self, feat_list: list, n_components: int, name: str)  -> None:
+    def buildPCA(self)  -> None:
         """ Builds a PCA and extracts new dimensions
         
         Parameters:
@@ -151,12 +136,13 @@ class DataLoader:
         temp = json.load(open('/model_space/dimension_space.json'))
         
         # Print the list of matching files
-        for item, text in zip(matching_files, captured_texts):
-            pca =  pickle.load(open(item, "rb"))
+        for pca_item, text in zip(matching_files, captured_texts):
+            pca =  pickle.load(open(pca_item, "rb"))
             temp_data = self.data[temp.get(text[1:-1])]
             new_data_pca = pca.transform(temp_data)
             for i in range(0, 5, 1):
                 self.data[str(text[1:-1])+"_"+str(i)] = new_data_pca[:, i]
 
         print("\n ------------- End of dimension reduction ----------- \n")
-        return
+        return 
+        
