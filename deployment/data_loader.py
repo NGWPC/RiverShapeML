@@ -43,7 +43,6 @@ class DataLoader:
         """ Read files from the directories
         """
         try:
-            print(os.getcwd())
             self.data = pd.read_parquet(self.data_path, engine='pyarrow')
         except:
             print('Wrong address or data format. Please use parquet file.')
@@ -62,11 +61,11 @@ class DataLoader:
         # Add discharge dummy
         if target_name.endswith("bf"):
             self.data['bf_ff'] = np.nan
-            self.data['NWM'] = self.data['rp 2']
+            self.data['NWM'] = self.data['rp_2']
             self.data['discharge_dummy'] = 3
         else:
             self.data['in_ff'] = np.nan
-            self.data['NWM'] = self.data['rp 1.5']
+            self.data['NWM'] = self.data['rp_1.5']
             self.data['discharge_dummy'] = 3
         return
 

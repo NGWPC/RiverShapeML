@@ -84,7 +84,41 @@ if [ $? -eq 0 ]; then
             echo "(WD-model) environment activated"
             echo "Running scripts..."
 
+            # Main ml estimations
+            usage() { echo "Usage: $0 [-n number of cores <int>]" 1>&2; exit 1; }
+            n=-1
             
+            while getopts ":n:" opt; do
+                case "${opt}" in
+                    n)
+                        n=${OPTARG}
+                        ;;
+                    \?)
+                    echo error "Invalid option: -$OPTARG" >&2
+                    exit 1
+                    ;;
+
+                    :)
+                    echo error "Option -$OPTARG requires an argument."
+                    exit 1
+                    ;;
+                    *)
+                        usage
+                        n=-1
+                        ;;
+                esac
+            done
+            shift $((OPTIND-1))
+            echo "number of threads = ${n}"
+            
+            start=`date +%s`
+            python3 deploy.py $n > "deploy_output.out"
+            end=`date +%s`
+            echo Execution time was `expr $end - $start` seconds.
+
+            # write file
+            output=output_bash.out  
+            ls > $output 
         else 
             echo "Creating new environment..."
             conda env create --file wd_env.yaml
