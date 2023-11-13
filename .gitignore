@@ -44,6 +44,7 @@ maps/*
 tst610not/*
 Coastal/*
 vpu12/*
+deployment/data/vpu12/*
 
 
 # Distribution / packaging
