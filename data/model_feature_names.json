@@ -86,7 +86,12 @@
         "nwm_25_ap",
         "nwm_50_ap",
         "nwm_75_ap",
-        "nwm_max_ap"
+        "nwm_max_ap",
+        "nwm_min",
+        "nwm_25",
+        "nwm_50",
+        "nwm_75",
+        "nwm_max"
     ],
     "in_flow_freq": [
         "rp_5",
