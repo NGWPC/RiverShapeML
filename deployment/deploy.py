@@ -69,7 +69,7 @@ class DPModel:
             - xgb
             - lgb
         
-        Example
+       ` Example
         --------
         >>> DPModel.loadData(out_feature = 'Y-bf', vote_flag = False, meta_flag = False,
                     best_flag = True, file = 'bf', model_type = 'xgb')

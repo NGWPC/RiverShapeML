@@ -1,5 +1,13 @@
 {
     "in_features": [
+        "lengthkm",
+        "areasqkm",
+        "tot_drainage_areasqkm",
+        "HLR",
+        "DIVISION_encode",
+        "PROVINCE_encode",
+
+
         "AI",
         "CHILI",
         "ET_ave",
@@ -82,6 +90,13 @@
         "nwis_max"
     ],
     "in_NWM": [
+        "nwm_min",
+        "nwm_25",
+        "nwm_50",
+        "nwm_75",
+        "nwm_max"
+    ],
+    "in_NWM_ap": [
         "nwm_min_ap",
         "nwm_25_ap",
         "nwm_50_ap",
@@ -168,10 +183,8 @@
         "PctWdWet2011Cat"
     ],
     "in_vaa":[
-        "lengthkm",
         "arbolatesu",
         "pathlength",
-        "totdasqkm",
         "streamleve",
         "streamorde",
         "slope",
