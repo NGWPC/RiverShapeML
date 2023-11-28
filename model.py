@@ -97,7 +97,8 @@ class MlModel:
 # --------------------------- Load train and test data files --------------------------- #    
     def loadData(self, out_feature: str, x_transform: bool = False, 
                  y_transform: bool = False, R2_thresh: float = 0.0, count_thresh: int = 3,
-                 sample_type: str = "All", pca: bool = True, t_type: str = 'log') -> None:
+                 sample_type: str = "All", pca: bool = True, t_type: str = 'log',
+                 train_type: str = "NWIS") -> None:
         """ Load the data and apply data filtering, transformation and 
         feature selection if nessassery
 
@@ -138,21 +139,27 @@ class MlModel:
             - log
             - power
             - quant
+        train_type: str
+            type of model training
+            Opptions are:
+            - NWIS
+            - NWM
         
         Example
         --------
         >>> MlModel.loadData(out_feature = 'b', x_transform = False, 
                  y_transform = False, R2_thresh = 0.0,
-                 sample_type = "Sub", pca = False, t_type = 'log')
+                 sample_type = "Sub", pca = False, t_type = 'log', train_type = 'NWM')
         """
         # Bulid an instance of DataLoader object
-
-        if "TW_" in out_feature:
-            data_path = 'data/width_predictor.parquet'
-            self.target_data_path = 'data/width_target.parquet'
-        else:
-            data_path = 'data/depth_mean_predictor.parquet'
-            self.target_data_path = 'data/depth_mean_target.parquet'
+        if train_type == "NWIS" and "TW_" in out_feature:
+            data_path = 'data/nwis_width_pred_tar.parquet'
+        elif train_type == "NWIS" and "Y_" in out_feature:
+            data_path = 'data/nwis_depth__pred_tar.parquet'
+        elif train_type == "NWM" and "TW_" in out_feature:
+            data_path = 'data/nwm_width_pred_tar.parquet'
+        elif train_type == "NWM" and "Y_" in out_feature:
+            data_path = 'data/nwm_depth_pred_tar.parquet'
 
         data_loader = dataloader.DataLoader(data_path=data_path,
                                             target_data_path=self.target_data_path,
@@ -242,8 +249,8 @@ class MlModel:
         params_space = json.load(open('model_space/params_space.json')) 
         models = { 
             'xgb': xgb_reg,
-            # 'rf': rf_reg,
-            # 'hgb': hgb_reg,
+            'rf': rf_reg,
+            'hgb': hgb_reg,
             'lgb': lgb_reg,
             # 'bsvr': bsvr_reg,
             # 'knr': knr_reg,
@@ -255,8 +262,8 @@ class MlModel:
         }
         params = { 
             'xgb': params_space.get(space).get('xgb_params'),
-            # 'rf': params_space.get(space).get('rf_params'),
-            # 'hgb': params_space.get(space).get('hgb_params'),
+            'rf': params_space.get(space).get('rf_params'),
+            'hgb': params_space.get(space).get('hgb_params'),
             'lgb': params_space.get(space).get('lgb_params'),
             # 'bsvr': params_space.get(space).get('bsvr_params'),
             # 'knr': params_space.get(space).get('knr_params'),
@@ -473,10 +480,10 @@ class MlModel:
         base_model = list()
         temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'xgb'])
         base_model.append(('xgb', temp))
-        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'rf'])
-        # base_model.append(('rf', temp))
-        # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'hgb'])
-        # base_model.append(('hgb', temp))
+        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'rf'])
+        base_model.append(('rf', temp))
+        temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'hgb'])
+        base_model.append(('hgb', temp))
         temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'lgb'])
         base_model.append(('lgb', temp))
         # temp = loadBaseModel(best_models.loc[best_models['estimator'] == 'bsvr'])
@@ -623,6 +630,7 @@ class RunMlModel:
         weighted     = False
         pca          = True 
         t_type       = 'power' # 'log', 'power', 'quant' 
+        train_type   = 'NWIS' # 'NWM'
         if sample_type == "Sub" and pca:
             sample_type = "Sub_pca"
         if sample_type == "All" and pca:
@@ -646,7 +654,7 @@ class RunMlModel:
             print('\n******************* modeling parameter {0} starts here *******************\n'.format(target_name))
             model.loadData(out_feature=target_name, x_transform=x_transform,
                                 y_transform=y_transform, R2_thresh=R2_thresh, count_thresh=count_thresh,
-                                sample_type=sample_type, pca=pca, t_type=t_type)     
+                                sample_type=sample_type, pca=pca, t_type=t_type, train_type=train_type)     
             print('end')
             best_model, best_params, best_models = model.findBestParams(out_features=target_name, nthreads=nthreads, 
                                                                                     space=space, weighted=weighted)
