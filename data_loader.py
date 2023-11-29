@@ -1,6 +1,6 @@
 # Libraries
 from sklearn.preprocessing import PowerTransformer, QuantileTransformer, StandardScaler, RobustScaler, MinMaxScaler, MaxAbsScaler, FunctionTransformer
-from sklearn.decomposition import PCA
+from sklearn.decomposition import PCA, KernelPCA
 import scipy
 import matplotlib.pyplot as plt
 from matplotlib import pyplot
@@ -29,6 +29,8 @@ class DataLoader:
         The name of the FHG coeficent to be used
     custom_name : str
         A custom name defiend by user to name modeling task
+    sample_type : str
+        A custom sampling method
     x_transform : str
         Whether to apply transformation to predictor variables or not 
         Opptions are:
@@ -52,16 +54,19 @@ class DataLoader:
         - any value between 0.0 - 100.0
         - defaults to 0.0
     count_thresh: int
-            The desired number of observations in each station to filter out bad measurments
+        The desired number of observations in each station to filter out bad measurments
+    train_type : str
+        A custom training method
     Example
     --------
     >>> DataLoader(data_path = 'data/test.parquet', out_feature = 'b', rand_state = 115,
-        custom_name = 'test', x_transform = False, y_transform = False, R2_thresh = 0.0, count_thresh = 3)
+        custom_name = 'test', x_transform = False, y_transform = False, R2_thresh = 0.0, count_thresh = 3,
+        sample_type = 'All', train_type = 'NWIS')
         
     """
     def __init__(self, data_path: str, target_data_path: str, rand_state: int, out_feature: str, 
                  custom_name: str, sample_type: str, x_transform: bool = False, y_transform: bool = False, 
-                 R2_thresh: float = 0.0, count_thresh: int = 3) -> None:
+                 R2_thresh: float = 0.0, count_thresh: int = 3, train_type: str = 'NWIS') -> None:
         pd.options.display.max_columns  = 60
         self.data_path                  = data_path
         self.target_data_path           = target_data_path
@@ -81,6 +86,7 @@ class DataLoader:
         self.test                       = pd.DataFrame([])
         self.R2_thresh                  = R2_thresh
         self.count_thresh               = count_thresh
+        self.train_type                 = train_type
         
         # ___________________________________________________
         # Check directories
@@ -97,17 +103,27 @@ class DataLoader:
         try:
             self.data = pd.read_parquet(self.data_path, engine='pyarrow')
             self.data.astype({'siteID': 'string'})
-            self.data_target = pd.read_parquet(self.target_data_path, engine='pyarrow')
-            self.data_target.astype({'siteID': 'string'})
+            # self.data_target = pd.read_parquet(self.target_data_path, engine='pyarrow')
+            # self.data_target.astype({'siteID': 'string'})
         except:
             print('Wrong address or data format. Please use parquet file.')   
         
         # ___________________________________________________
         # Merge data and prepare targets
-        self.data_target = self.data_target[set(self.data_target.columns.to_list()) - set(['lat','long','meas_q_va','stream_wdth_va','max_depth_va','bf_ff','in_ff'])] # 'meas_q_va'
-        self.data = pd.merge(self.data_target, self.data, on='siteID', how = 'inner')
-        self.data = self.data[set(self.data.columns.to_list()) - set(['id', 'geometry'])]
-                              
+        # self.data_target = self.data_target[set(self.data_target.columns.to_list()) - set(['lat','long','meas_q_va','stream_wdth_va','max_depth_va','bf_ff','in_ff'])] # 'meas_q_va'
+        # self.data = pd.merge(self.data_target, self.data, on='siteID', how = 'inner')
+        self.data = self.data[set(self.data.columns.to_list()) - set(['geometry','NHDFlowline','full_cats',
+                                                                      'gridcode','number_unique_peaks','non_zero_years',
+                                                                      'toCOMID','Hydroseq','RPUID','FromNode',
+                                                                      'ToNode','VPUID','hy_cats','geometry_poly',
+                                                                      'REACHCODE','sourcefc','comid','FEATUREID'])]
+        # Find string columns (debug)
+        # string_columns = []
+        # # Iterate through each column and check if it contains string values
+        # for col in self.data.columns:
+        #     if self.data[col].dtype == 'O':  # 'O' represents object type (strings) in Pandas
+        #         string_columns.append(col)  
+        # print(string_columns)
         # Data cleaning based on logical values
         if self.out_feature.startswith("Y"):
             # Hudson River, which reaches 200 feet deep at some points
@@ -119,8 +135,9 @@ class DataLoader:
                                       (self.data[self.out_feature] > 0)]
         # ___________________________________________________
         # Filter bad stations
-        target_df = pd.read_parquet(self.target_data_path, engine='pyarrow')
-        target_df.astype({'siteID': 'string'})
+        #target_df = pd.read_parquet(self.target_data_path, engine='pyarrow')
+        #target_df.astype({'siteID': 'string'})
+        target_df = self.data[['siteID','R2','Count']]
 
         r2_epochs = np.arange(0, 1.05, 0.05)
         grouped_r2 = target_df.groupby('siteID').agg('mean')
@@ -160,9 +177,10 @@ class DataLoader:
         stations = good_stations['siteID'].tolist()
         del good_stations
         self.data = self.data[self.data['siteID'].isin(stations)].reset_index(drop=True)
+        print("Shape of data after filter: {0}".format(self.data.shape))
+
         # Data imputation 
-        
-        impute = "None"
+        impute = "median"
         if impute == "zero":
             self.data = self.data.fillna(-1) # a temporary brute force way to deal with NAN
         if impute == "median":
@@ -243,9 +261,13 @@ class DataLoader:
             all_col = self.data.columns.tolist()
             new_col = list(set(all_col) - set(feat_list))
             
-            # look for when scat dummy drops    
+            # look for when dummy drops    
             if "scat_dummy" in feat_list:
                 new_col.append('scat_dummy')
+            elif "nwm_dummy" in feat_list:
+                new_col.append('nwm_dummy')
+            elif "vaa_dummy" in feat_list:
+                new_col.append('vaa_dummy')
             self.data = self.data[new_col]
 
             # Update varaibles
@@ -269,9 +291,9 @@ class DataLoader:
             # buildPCA(feat_list, 5,'Soil_temp_moist_pc')
 
             # # Soil
-            # print('Reducing Soil ..')
-            # feat_list = temp.get('Soil_char_pc')
-            # buildPCA(feat_list, 5,'Soil_char_pc')
+            print('Reducing Soil ..')
+            feat_list = temp.get('Soil_char_pc')
+            buildPCA(feat_list, 5,'Soil_char_pc')
 
             # # Preciep
             # print('Reducing Preciep ..')
@@ -294,9 +316,9 @@ class DataLoader:
             buildPCA(feat_list, 5,'Land_cover_pc')
 
             # # Human
-            # print('Reducing Human ..')
-            # feat_list = temp.get('Human_pc')
-            # buildPCA(feat_list, 5,'Human_pc')
+            print('Reducing Human ..')
+            feat_list = temp.get('Human_pc')
+            buildPCA(feat_list, 5,'Human_pc')
 
             # Lithology
             print('Reducing Lithology ..')
@@ -331,7 +353,7 @@ class DataLoader:
             in_feat = 'in_features'
 
             temp = json.load(open('data/model_feature_names.json'))
-            model_features = list(set([self.out_feature]+temp.get(in_feat)+temp.get('in_NWM')+temp.get('in_flow_freq')+temp.get('in_scat')+temp.get('in_vaa'))
+            model_features = list(set([self.out_feature]+temp.get(in_feat)+temp.get('in_NWM')+temp.get('in_flow_freq')+temp.get('in_scat'))
                                   -set(self.del_features))+self.add_features+temp.get('id_features')
             # ___________________________________________________
             # to dump variables
@@ -386,6 +408,13 @@ class DataLoader:
         else:
             # The deepest river in the U.S. is the Hudson River which reaches a maximum depth of 216 ft.
             self.data = self.data.loc[self.data[str(self.out_feature)] < 216] 
+       
+       # Drop NWM features as input for NWM training only
+        if self.train_type == "NWM":
+            self.data = self.data.drop(columns=["NWM_2","NWM_1.5"])
+            model_features = set(model_features) - set(["NWM_2","NWM_1.5"])
+            self.in_features = set(self.in_features) - set(["NWM_2","NWM_1.5"])
+        
         df_mask = self.data[model_features]
         # duplicated_columns = df_mask.columns[df_mask.columns.duplicated()]
         # print('dupies')

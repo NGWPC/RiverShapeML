@@ -45,6 +45,8 @@ tst610not/*
 Coastal/*
 vpu12/*
 deployment/data/vpu12/*
+conus/data/*
+light_notrans_35/*
 
 
 # Distribution / packaging
