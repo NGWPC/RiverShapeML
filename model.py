@@ -630,7 +630,7 @@ class RunMlModel:
         weighted     = False
         pca          = True 
         t_type       = 'power' # 'log', 'power', 'quant' 
-        train_type   = 'NWIS' # 'NWM'
+        train_type   = 'MWIS' # 'NWM'
         if sample_type == "Sub" and pca:
             sample_type = "Sub_pca"
         if sample_type == "All" and pca:
@@ -647,8 +647,28 @@ class RunMlModel:
         temp        = json.load(open('data/model_feature_names.json'))
         target_list = temp.get('out_features')
         del temp
-        # target_list=['TW_bf', 'TW_in']
+        # target_list=['Y_in', 'TW_in']
         for target_name in tqdm(target_list):
+            if target_name == "Y_bf": 
+                R2_thresh    = 0.85
+                count_thresh = 5
+                x_transform  = False
+                y_transform  = False
+            elif target_name == "Y_in": 
+                R2_thresh    = 0.85
+                count_thresh = 5
+                x_transform  = False
+                y_transform  = False
+            elif target_name == "TW_bf": 
+                R2_thresh    = 0.2
+                count_thresh = 8
+                x_transform  = True
+                y_transform  = True
+            elif target_name == "TW_in": 
+                R2_thresh    = 0.2
+                count_thresh = 8
+                x_transform  = True
+                y_transform  = True
             # ___________________________________________________
             # Train models 
             print('\n******************* modeling parameter {0} starts here *******************\n'.format(target_name))
@@ -717,6 +737,6 @@ class RunMlModel:
             print('end')
 
 if __name__ == "__main__":
-    # RunMlModel.main(['light_notrans_35', -1, "False", "False", 0.3, 5])
+    # RunMlModel.main(['light_notrans_35', -1, "False", "False", 0.85, 5])
     RunMlModel.main(sys.argv[1:])
 

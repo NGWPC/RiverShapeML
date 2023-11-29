@@ -151,7 +151,11 @@ class SaveOutput:
         data_attr.astype({'siteID': 'string'})
         #list_attr = list(set(data_attr.columns.to_list()) - set(['lat', 'long']))
         #data_attr = data_attr[list_attr]
-        data_attr = data_attr[['siteID','Count','coe','exp','R2','Y_bf','Y_in']]
+        if self.out_feature.startswith("Y"):
+
+            data_attr = data_attr[['siteID','Count','coe','exp','R2','Y_bf','Y_in']]
+        else:
+            data_attr = data_attr[['siteID','Count','coe','exp','R2','TW_bf','TW_in']]
 
         self.merged_data = self.merged_data.merge(data_attr, on='siteID', how='inner')
 

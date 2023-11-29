@@ -1,6 +1,6 @@
 # Libraries
 from sklearn.preprocessing import PowerTransformer, QuantileTransformer, StandardScaler, RobustScaler, MinMaxScaler, MaxAbsScaler, FunctionTransformer
-from sklearn.decomposition import PCA
+from sklearn.decomposition import PCA, KernelPCA
 import scipy
 import matplotlib.pyplot as plt
 from matplotlib import pyplot
@@ -112,8 +112,18 @@ class DataLoader:
         # Merge data and prepare targets
         # self.data_target = self.data_target[set(self.data_target.columns.to_list()) - set(['lat','long','meas_q_va','stream_wdth_va','max_depth_va','bf_ff','in_ff'])] # 'meas_q_va'
         # self.data = pd.merge(self.data_target, self.data, on='siteID', how = 'inner')
-        self.data = self.data[set(self.data.columns.to_list()) - set(['geometry'])]
-                              
+        self.data = self.data[set(self.data.columns.to_list()) - set(['geometry','NHDFlowline','full_cats',
+                                                                      'gridcode','number_unique_peaks','non_zero_years',
+                                                                      'toCOMID','Hydroseq','RPUID','FromNode',
+                                                                      'ToNode','VPUID','hy_cats','geometry_poly',
+                                                                      'REACHCODE','sourcefc','comid','FEATUREID'])]
+        # Find string columns (debug)
+        # string_columns = []
+        # # Iterate through each column and check if it contains string values
+        # for col in self.data.columns:
+        #     if self.data[col].dtype == 'O':  # 'O' represents object type (strings) in Pandas
+        #         string_columns.append(col)  
+        # print(string_columns)
         # Data cleaning based on logical values
         if self.out_feature.startswith("Y"):
             # Hudson River, which reaches 200 feet deep at some points
@@ -170,7 +180,7 @@ class DataLoader:
         print("Shape of data after filter: {0}".format(self.data.shape))
 
         # Data imputation 
-        impute = "zero"
+        impute = "median"
         if impute == "zero":
             self.data = self.data.fillna(-1) # a temporary brute force way to deal with NAN
         if impute == "median":
@@ -398,6 +408,13 @@ class DataLoader:
         else:
             # The deepest river in the U.S. is the Hudson River which reaches a maximum depth of 216 ft.
             self.data = self.data.loc[self.data[str(self.out_feature)] < 216] 
+       
+       # Drop NWM features as input for NWM training only
+        if self.train_type == "NWM":
+            self.data = self.data.drop(columns=["NWM_2","NWM_1.5"])
+            model_features = set(model_features) - set(["NWM_2","NWM_1.5"])
+            self.in_features = set(self.in_features) - set(["NWM_2","NWM_1.5"])
+        
         df_mask = self.data[model_features]
         # duplicated_columns = df_mask.columns[df_mask.columns.duplicated()]
         # print('dupies')
