@@ -1,5 +1,8 @@
 {
     "in_features": [
+        "elevation_ave",
+        "elevation_diff",
+        "Sinuosity",
         "lat",
         "long",
         "in_ff",
@@ -79,6 +82,9 @@
         "nwm_max_ap"
     ],
     "in_flow_freq": [
+        "rp_1",
+        "rp_1.5",
+        "rp_2",
         "rp_5",
         "rp_10",
         "rp_15",

@@ -168,7 +168,7 @@ class MlModel:
                                             custom_name=self.custom_name, 
                                             x_transform=x_transform, y_transform=y_transform,
                                             R2_thresh=R2_thresh, count_thresh=count_thresh,
-                                            sample_type=sample_type) 
+                                            sample_type=sample_type, train_type=train_type) 
         data_loader.readFiles()
         if pca:
             data_loader.reduceDim()
