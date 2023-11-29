@@ -149,8 +149,9 @@ class SaveOutput:
 
         data_attr = pd.read_parquet(self.target_data_path, engine='pyarrow')
         data_attr.astype({'siteID': 'string'})
-        list_attr = list(set(data_attr.columns.to_list()) - set(['lat', 'long']))
-        data_attr = data_attr[list_attr]
+        #list_attr = list(set(data_attr.columns.to_list()) - set(['lat', 'long']))
+        #data_attr = data_attr[list_attr]
+        data_attr = data_attr[['siteID','Count','coe','exp','R2','Y_bf','Y_in']]
 
         self.merged_data = self.merged_data.merge(data_attr, on='siteID', how='inner')
 

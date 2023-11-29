@@ -112,7 +112,7 @@ class DataLoader:
         # Merge data and prepare targets
         # self.data_target = self.data_target[set(self.data_target.columns.to_list()) - set(['lat','long','meas_q_va','stream_wdth_va','max_depth_va','bf_ff','in_ff'])] # 'meas_q_va'
         # self.data = pd.merge(self.data_target, self.data, on='siteID', how = 'inner')
-        self.data = self.data[set(self.data.columns.to_list()) - set(['id', 'geometry'])]
+        self.data = self.data[set(self.data.columns.to_list()) - set(['geometry'])]
                               
         # Data cleaning based on logical values
         if self.out_feature.startswith("Y"):
@@ -125,8 +125,9 @@ class DataLoader:
                                       (self.data[self.out_feature] > 0)]
         # ___________________________________________________
         # Filter bad stations
-        target_df = pd.read_parquet(self.target_data_path, engine='pyarrow')
-        target_df.astype({'siteID': 'string'})
+        #target_df = pd.read_parquet(self.target_data_path, engine='pyarrow')
+        #target_df.astype({'siteID': 'string'})
+        target_df = self.data[['siteID','R2','Count']]
 
         r2_epochs = np.arange(0, 1.05, 0.05)
         grouped_r2 = target_df.groupby('siteID').agg('mean')
@@ -166,9 +167,10 @@ class DataLoader:
         stations = good_stations['siteID'].tolist()
         del good_stations
         self.data = self.data[self.data['siteID'].isin(stations)].reset_index(drop=True)
+        print("Shape of data after filter: {0}".format(self.data.shape))
+
         # Data imputation 
-        
-        impute = "None"
+        impute = "zero"
         if impute == "zero":
             self.data = self.data.fillna(-1) # a temporary brute force way to deal with NAN
         if impute == "median":
@@ -249,9 +251,13 @@ class DataLoader:
             all_col = self.data.columns.tolist()
             new_col = list(set(all_col) - set(feat_list))
             
-            # look for when scat dummy drops    
+            # look for when dummy drops    
             if "scat_dummy" in feat_list:
                 new_col.append('scat_dummy')
+            elif "nwm_dummy" in feat_list:
+                new_col.append('nwm_dummy')
+            elif "vaa_dummy" in feat_list:
+                new_col.append('vaa_dummy')
             self.data = self.data[new_col]
 
             # Update varaibles
@@ -275,9 +281,9 @@ class DataLoader:
             # buildPCA(feat_list, 5,'Soil_temp_moist_pc')
 
             # # Soil
-            # print('Reducing Soil ..')
-            # feat_list = temp.get('Soil_char_pc')
-            # buildPCA(feat_list, 5,'Soil_char_pc')
+            print('Reducing Soil ..')
+            feat_list = temp.get('Soil_char_pc')
+            buildPCA(feat_list, 5,'Soil_char_pc')
 
             # # Preciep
             # print('Reducing Preciep ..')
@@ -300,9 +306,9 @@ class DataLoader:
             buildPCA(feat_list, 5,'Land_cover_pc')
 
             # # Human
-            # print('Reducing Human ..')
-            # feat_list = temp.get('Human_pc')
-            # buildPCA(feat_list, 5,'Human_pc')
+            print('Reducing Human ..')
+            feat_list = temp.get('Human_pc')
+            buildPCA(feat_list, 5,'Human_pc')
 
             # Lithology
             print('Reducing Lithology ..')
@@ -337,7 +343,7 @@ class DataLoader:
             in_feat = 'in_features'
 
             temp = json.load(open('data/model_feature_names.json'))
-            model_features = list(set([self.out_feature]+temp.get(in_feat)+temp.get('in_NWM')+temp.get('in_flow_freq')+temp.get('in_scat')+temp.get('in_vaa'))
+            model_features = list(set([self.out_feature]+temp.get(in_feat)+temp.get('in_NWM')+temp.get('in_flow_freq')+temp.get('in_scat'))
                                   -set(self.del_features))+self.add_features+temp.get('id_features')
             # ___________________________________________________
             # to dump variables

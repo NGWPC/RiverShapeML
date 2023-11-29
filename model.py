@@ -153,13 +153,13 @@ class MlModel:
         """
         # Bulid an instance of DataLoader object
         if train_type == "NWIS" and "TW_" in out_feature:
-            data_path = 'data/nwis_width_pred_tar.parquet'
+            data_path = self.target_data_path = 'data/nwis_width_pred_tar.parquet'
         elif train_type == "NWIS" and "Y_" in out_feature:
-            data_path = 'data/nwis_depth__pred_tar.parquet'
+            data_path = self.target_data_path = 'data/nwis_depth_pred_tar.parquet'
         elif train_type == "NWM" and "TW_" in out_feature:
-            data_path = 'data/nwm_width_pred_tar.parquet'
+            data_path = self.target_data_path = 'data/nwm_width_pred_tar.parquet'
         elif train_type == "NWM" and "Y_" in out_feature:
-            data_path = 'data/nwm_depth_pred_tar.parquet'
+            data_path = self.target_data_path = 'data/nwm_depth_pred_tar.parquet'
 
         data_loader = dataloader.DataLoader(data_path=data_path,
                                             target_data_path=self.target_data_path,
@@ -717,6 +717,6 @@ class RunMlModel:
             print('end')
 
 if __name__ == "__main__":
-    RunMlModel.main(['tst610not', -1, "False", "False", 0.6, 15])
-    # RunMlModel.main(sys.argv[1:])
+    # RunMlModel.main(['light_notrans_35', -1, "False", "False", 0.3, 5])
+    RunMlModel.main(sys.argv[1:])
 
