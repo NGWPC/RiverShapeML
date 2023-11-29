@@ -17,12 +17,21 @@ ulimit -v unlimited
 ulimit -s unlimited
 ulimit -u 10000
 
-if [ ! -d /bsuhome/arashmodaresirad/scratch/WD/noT/bankfull_W_D/outputs ]; then
-    echo "outputs floder not found, creating one..."
-    mkdir -p /bsuhome/arashmodaresirad/scratch/WD/noT/bankfull_W_D/outputs;
+# Get the current working directory
+current_dir=$(pwd)
+# Define the relative path to the outputs folder
+relative_path="/outputs"
+# Construct the full path
+output_path="${current_dir}${relative_path}"
+
+if [ ! -d "$output_path" ]; then
+    echo "outputs folder not found, creating one..."
+    mkdir -p "$output_path"
 fi
 
-source /bsuhome/arashmodaresirad/miniconda3/etc/profile.d/conda.sh
+anaconda_base=$(conda info --base)
+anaconda_base="${anaconda_base}/etc/profile.d/conda.sh"
+source "$anaconda_base"
 
 conda activate base
 
