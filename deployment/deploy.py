@@ -97,25 +97,33 @@ class DPModel:
     def process_target(self, dl_obj, target_name: str, vote_flag: bool=False, meta_flag: bool=False, 
                         best_flag: bool=True, file: str='bf', model_type: str='xgb') -> Tuple[str, np.array]:
         
-        dl_obj.addExtraFeatures(target_name)
+        # dl_obj.addExtraFeatures(target_name) # already included in data
         dl_obj.buildPCA(target_name)
         
         if target_name == 'Y_bf':
             model_type = 'xgb'
+            x_transform = False
+            y_transform = False
         elif target_name == 'Y_in':
             model_type = 'lgb'
+            x_transform = False
+            y_transform = False
         elif target_name == 'TW_bf':
             model_type = 'xgb'
+            x_transform = True
+            y_transform = True
         else:
             model_type = 'lgb'
-        # if target_name.startswith("Y"):
-        #     model_type = 'xgb'
-        # else:
-        #     model_type = 'lgb'
+            x_transform = True
+            y_transform = True
 
-        model, feats = self.loadModel(target_name, vote_flag=False, meta_flag=False, best_flag=True, file='bf', model_type=model_type)
+        model, feats = self.loadModel(target_name, vote_flag=False, meta_flag=False, 
+                                      best_flag=True, file='bf', model_type=model_type)
 
         data_in = dl_obj.data[feats]
+        data_in = dl_obj.transformXData(out_feature=target_name, data=data_in, t_type='power', 
+                                        x_transform=x_transform)
+
         y_pred_label = 'owp_' + target_name
         if target_name.endswith("in"):
             y_pred_label = y_pred_label+'chan'
