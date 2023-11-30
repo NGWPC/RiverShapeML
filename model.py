@@ -152,6 +152,7 @@ class MlModel:
                  sample_type = "Sub", pca = False, t_type = 'log', train_type = 'NWM')
         """
         # Bulid an instance of DataLoader object
+        data_path = ''
         if train_type == "NWIS" and "TW_" in out_feature:
             data_path = self.target_data_path = 'data/nwis_width_pred_tar.parquet'
         elif train_type == "NWIS" and "Y_" in out_feature:
@@ -630,7 +631,7 @@ class RunMlModel:
         weighted     = False
         pca          = True 
         t_type       = 'power' # 'log', 'power', 'quant' 
-        train_type   = 'MWIS' # 'NWM'
+        train_type   = 'NWIS' # 'NWM'
         if sample_type == "Sub" and pca:
             sample_type = "Sub_pca"
         if sample_type == "All" and pca:
