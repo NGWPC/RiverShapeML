@@ -171,11 +171,11 @@ class MlModel:
                                             R2_thresh=R2_thresh, count_thresh=count_thresh,
                                             sample_type=sample_type, train_type=train_type) 
         data_loader.readFiles()
-        if pca:
-            data_loader.reduceDim()
         data_loader.splitData()
         self.train_x, self.train_y, self.train_id, self.test_x, self.test_y, self.test_id = data_loader.transformData(t_type=t_type, plot_dist=False)
-
+        if pca:
+            data_loader.reduceDim(self.train_x, self.test_x)
+        
 # --------------------------- Grid Search --------------------------- #
     def findBestParams(self, out_features: str = 'TW_bf', nthreads: int = -1, space: str = 'actual_space',
                         weighted: bool = False) -> Tuple[str, dict, pd.DataFrame]:

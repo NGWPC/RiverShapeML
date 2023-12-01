@@ -196,7 +196,7 @@ class DataLoader:
         return 
 
  # --------------------------- Dimention Reduction --------------------------- #
-    def reduceDim(self) -> None:
+    def reduceDim(self, train_data: pd.DataFrame, test_data: pd.DataFrame) -> None:
         """ Reduce the dimention of data some help addressing  multi-colinearity
         """
         print("\n Begin dimention reduction .... \n")
@@ -220,21 +220,28 @@ class DataLoader:
             ----------
 
             """
+            nonlocal train_data, test_data
+
             pca = PCA(n_components = n_components)
-            out_arr = pca.fit_transform(self.data[feat_list])
+            out_arr = pca.fit_transform(train_data[feat_list])
+            test_arr = pca.transform(test_data[feat_list])
             pickle.dump(pca, open(self.custom_name+'/model/'+'train_'+self.out_feature+'_'+name+'_PCA.pkl', "wb"))
+
             explained_variance = pca.explained_variance_ratio_
             components_matrix = pca.components_
             features_pc = set(self.add_features.copy())
             n_components = out_arr.shape[1]
+
             # Find optimum number of PCs
             for i in range(0, n_components, 1):
                 total_var = np.sum(explained_variance[0:i])
-                self.data[str(name)+"_"+str(i)] = out_arr[:, i]
+                train_data[str(name)+"_"+str(i)] = out_arr[:, i]
+                test_data[str(name)+"_"+str(i)] = test_arr[:, i]
                 self.add_features.append(str(name)+"_"+str(i))
                 if total_var >= 0.95:
                     # num_pc = i
                     break
+
             features_pc = set(self.add_features) - features_pc
             # Filter to important ones
             components_matrix = components_matrix[:i+1, :]
@@ -258,7 +265,7 @@ class DataLoader:
             plt.show()
 
             # Remove transformed features
-            all_col = self.data.columns.tolist()
+            all_col = train_data.columns.tolist()
             new_col = list(set(all_col) - set(feat_list))
             
             # look for when dummy drops    
@@ -268,7 +275,8 @@ class DataLoader:
                 new_col.append('nwm_dummy')
             elif "vaa_dummy" in feat_list:
                 new_col.append('vaa_dummy')
-            self.data = self.data[new_col]
+            train_data = train_data[new_col]
+            test_data = test_data[new_col]
 
             # Update varaibles
             self.del_features += feat_list
@@ -473,7 +481,7 @@ class DataLoader:
 
 # --------------------------- Transformation --------------------------- #
 
-    def transformData(self, t_type: str = 'power', plot_dist: bool = False) -> tuple[pd.DataFrame,
+    def transformData(self, t_type: str = 'power', sub_trans: bool = True, plot_dist: bool = False) -> tuple[pd.DataFrame,
                                                           np.array,
                                                           pd.DataFrame,
                                                           pd.DataFrame,
@@ -513,7 +521,12 @@ class DataLoader:
         """
         print('transforming and plotting ...')
         dump_list = ['R2', 'siteID']
-        
+        pca_feats = self.in_features.copy()
+        if sub_trans:
+            temp = json.load(open('model_space/dimention_space.json'))
+            all_feats = [string for key in temp for string in temp[key]]
+            pca_feats = all_feats
+
         if self.x_transform:
             min_value = 0
             max_value = 500
@@ -528,7 +541,7 @@ class DataLoader:
                 )
             if t_type!='log':
                 # scaler_x = StandardScaler()
-                train_x = self.train[self.in_features].reset_index(drop=True)
+                train_x = self.train[pca_feats].reset_index(drop=True)
                 train_x = pd.DataFrame(scaler.fit_transform(train_x), columns=train_x.columns)
                 train_x_cp = train_x.copy()
                 train_x_t = t_x.fit_transform(train_x)
@@ -541,7 +554,7 @@ class DataLoader:
                     self.plotDist(train_x_cp, train_x, 'train')
                 train_id = self.train[dump_list].reset_index(drop=True)
 
-                test_x = self.test[self.in_features].reset_index(drop=True)
+                test_x = self.test[pca_feats].reset_index(drop=True)
                 # test_x.to_parquet('data/tttt.parquet')
                 test_x = pd.DataFrame(scaler.transform(test_x), columns=test_x.columns)
                 test_x_cp = test_x.copy()
@@ -552,7 +565,7 @@ class DataLoader:
                     self.plotDist(test_x_cp, test_x, 'test')
                 test_id = self.test[dump_list].reset_index(drop=True)
             else:
-                train_x = self.train[self.in_features].reset_index(drop=True)
+                train_x = self.train[pca_feats].reset_index(drop=True)
                 train_x_cp = train_x.copy()
                 # Replace NA and inf
                 train_x = np.log(np.abs(train_x)).fillna(0)
@@ -560,7 +573,7 @@ class DataLoader:
                 if plot_dist:
                     self.plotDist(train_x_cp, train_x, 'train')
                 train_id = self.train[dump_list].reset_index(drop=True)
-                test_x = self.test[self.in_features].reset_index(drop=True)
+                test_x = self.test[pca_feats].reset_index(drop=True)
                 test_x_cp = test_x.copy()
                 # Replace NA and inf
                 test_x = np.log(np.abs(test_x)).fillna(0)
@@ -570,9 +583,9 @@ class DataLoader:
                 test_id = self.test[dump_list].reset_index(drop=True)
 
         else:
-            train_x = self.train[self.in_features].reset_index(drop=True)
+            train_x = self.train[pca_feats].reset_index(drop=True)
             train_id = self.train[dump_list].reset_index(drop=True)
-            test_x = self.test[self.in_features].reset_index(drop=True)
+            test_x = self.test[pca_feats].reset_index(drop=True)
             test_id =  self.test[dump_list].reset_index(drop=True)
 
         if self.y_transform:

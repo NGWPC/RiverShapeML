@@ -129,6 +129,8 @@ class DPModel:
             y_pred_label = y_pred_label+'chan'
         y_pred_label = y_pred_label.lower()
         preds_all = model.predict(data_in)
+        preds_all = dl_obj.transformYData(out_feature=target_name, data=preds_all, t_type='power', 
+                                           y_transform=y_transform)
         
         return y_pred_label, preds_all
 
