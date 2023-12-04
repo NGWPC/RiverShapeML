@@ -64,17 +64,18 @@ class MlModel:
         self.grid_searches             = {}
         temp                           = json.load(open('data/model_feature_names.json'))
         self.target_data_path          = ""
-        self.train_x                   = 0 
+        self.train_x                   = pd.DataFrame([])
         self.train_y                   = 0 
         self.train_id                  = 0 
-        self.test_x                    = 0
+        self.test_x                    = pd.DataFrame([])
         self.test_y                    = 0
         self.test_id                   = 0
         self.train_sub_id              = 0 
         self.x_train                   = 0 
         self.eval_id                   = 0 
         self.x_eval                    = 0
-
+        self.train_x_comp              = pd.DataFrame([])
+        self.test_x_comp               = pd.DataFrame([])
         # ___________________________________________________
         # Free memory
         del temp
@@ -98,7 +99,7 @@ class MlModel:
     def loadData(self, out_feature: str, x_transform: bool = False, 
                  y_transform: bool = False, R2_thresh: float = 0.0, count_thresh: int = 3,
                  sample_type: str = "All", pca: bool = True, t_type: str = 'log',
-                 train_type: str = "NWIS") -> None:
+                 train_type: str = "NWIS", sub_trans: bool = True) -> None:
         """ Load the data and apply data filtering, transformation and 
         feature selection if nessassery
 
@@ -144,12 +145,17 @@ class MlModel:
             Opptions are:
             - NWIS
             - NWM
+        sub_trans: bool
+            apply trans only to pca
+            - True
+            - False
         
         Example
         --------
         >>> MlModel.loadData(out_feature = 'b', x_transform = False, 
                  y_transform = False, R2_thresh = 0.0,
-                 sample_type = "Sub", pca = False, t_type = 'log', train_type = 'NWM')
+                 sample_type = "Sub", pca = False, t_type = 'log', 
+                 train_type = 'NWM', sub_trans = True)
         """
         # Bulid an instance of DataLoader object
         data_path = ''
@@ -172,10 +178,11 @@ class MlModel:
                                             sample_type=sample_type, train_type=train_type) 
         data_loader.readFiles()
         data_loader.splitData()
-        self.train_x, self.train_y, self.train_id, self.test_x, self.test_y, self.test_id = data_loader.transformData(t_type=t_type, plot_dist=False)
+        self.train_x, self.train_y, self.train_id, self.test_x, self.test_y, self.test_id = data_loader.transformData(t_type=t_type, sub_trans=sub_trans, plot_dist=False)
         if pca:
-            data_loader.reduceDim(self.train_x, self.test_x)
-        
+            self.train_x, self.test_x, self.train_x_comp, self.test_x_comp = data_loader.reduceDim(self.train_x, self.test_x)
+            self.train_x_comp = pd.concat([self.train_x_comp, self.train_id], axis=1) 
+            self.test_x_comp = pd.concat([self.test_x_comp, self.test_id], axis=1) 
 # --------------------------- Grid Search --------------------------- #
     def findBestParams(self, out_features: str = 'TW_bf', nthreads: int = -1, space: str = 'actual_space',
                         weighted: bool = False) -> Tuple[str, dict, pd.DataFrame]:
@@ -459,7 +466,7 @@ class MlModel:
             loaded_model.fit(self.x_train, self.y_train)
         else:
             loaded_model.fit(self.x_train, self.y_train, **fit_params)
-        
+        train_columns = self.x_train.columns.tolist() 
         # ___________________________________________________
         # Predict
         preds_t = loaded_model.predict(self.x_train)
@@ -516,7 +523,7 @@ class MlModel:
         pickle.dump(voting_model, open(self.custom_name+"/model/"+str(self.custom_name)+'_'+out_features+"_Voting_Model.pickle.dat", "wb"))
         pickle.dump(meta_model, open(self.custom_name+"/model/"+str(self.custom_name)+'_'+out_features+"_Meta_Model.pickle.dat", "wb"))
 
-        return loaded_model, voting_model, meta_model, self.train_x, self.train_y, self.test_x, self.test_y
+        return loaded_model, voting_model, meta_model, train_columns, self.x_train, self.y_train, self.test_x, self.test_y
     
     def finalFits(self, ml_model: any, voting_model: VotingRegressor, meta_model: StackingRegressor, 
                   out_features: str, best_model: str) -> Tuple[any, 
@@ -629,9 +636,10 @@ class RunMlModel:
         SI           = False # SI system
         sample_type  = "Sub" #"All", "Sub", "test"
         weighted     = False
+        sub_trans    = True
         pca          = True 
         t_type       = 'power' # 'log', 'power', 'quant' 
-        train_type   = 'NWIS' # 'NWM'
+        train_type   = 'NWIS' # 'NWM', 'NWIS'
         if sample_type == "Sub" and pca:
             sample_type = "Sub_pca"
         if sample_type == "All" and pca:
@@ -648,46 +656,59 @@ class RunMlModel:
         temp        = json.load(open('data/model_feature_names.json'))
         target_list = temp.get('out_features')
         del temp
-        # target_list=['Y_in', 'TW_in']
+        # target_list=['TW_in', 'TW_in']
         for target_name in tqdm(target_list):
             if target_name == "Y_bf": 
-                R2_thresh    = 0.85
-                count_thresh = 5
-                x_transform  = False
-                y_transform  = False
+                R2_thresh    = 0.6 #NWM 0.6 #NWIS 0.85
+                count_thresh = 10 #NWM 10  #NWIS 5
+                x_transform  = False #NWM False     #NWIS False
+                y_transform  = False #NWM False     #NWIS False
             elif target_name == "Y_in": 
-                R2_thresh    = 0.85
-                count_thresh = 5
-                x_transform  = False
-                y_transform  = False
+                R2_thresh    = 0.6 #NWM 0.6  #NWIS 0.85
+                count_thresh = 10 #NWM 10  #NWIS 5
+                x_transform  = False #NWM False     #NWIS False
+                y_transform  = False #NWM False     #NWIS False
             elif target_name == "TW_bf": 
-                R2_thresh    = 0.2
-                count_thresh = 8
-                x_transform  = True
-                y_transform  = True
+                R2_thresh    = 0 #NWM 0 #NWIS 0.2
+                count_thresh = 4 #NWM 4 #NWIS 8
+                x_transform  = False #NWM False  #NWIS False
+                y_transform  = False #NWM False  #NWIS False
             elif target_name == "TW_in": 
-                R2_thresh    = 0.2
-                count_thresh = 8
-                x_transform  = True
-                y_transform  = True
+                R2_thresh    = 0 #NWM 0 #NWIS 0.2
+                count_thresh = 10 #NWM 10 #NWIS 8
+                x_transform  = True #NWM True #NWIS False
+                y_transform  = True #NWM True #NWIS False
             # ___________________________________________________
             # Train models 
             print('\n******************* modeling parameter {0} starts here *******************\n'.format(target_name))
+            print("R2_thresh > {0}".format(R2_thresh))
+            print("count_thresh > {0}".format(count_thresh))
+            print("x_transform > {0}".format(x_transform))
+            print("y_transform > {0}".format(y_transform))
             model.loadData(out_feature=target_name, x_transform=x_transform,
                                 y_transform=y_transform, R2_thresh=R2_thresh, count_thresh=count_thresh,
-                                sample_type=sample_type, pca=pca, t_type=t_type, train_type=train_type)     
+                                sample_type=sample_type, pca=pca, t_type=t_type, train_type=train_type, sub_trans=sub_trans)     
             print('end')
             best_model, best_params, best_models = model.findBestParams(out_features=target_name, nthreads=nthreads, 
                                                                                     space=space, weighted=weighted)
             best_model_orig = best_model
-            ml_model, voting_model, meta_model, train_x, train_y, _, _, = model.runMlModel(best_model=best_model, best_params=best_params, 
+            ml_model, voting_model, meta_model, train_columns, train_x, train_y, _, _, = model.runMlModel(best_model=best_model, best_params=best_params, 
                                                 best_models=best_models, weighted=weighted, out_features=target_name, nthreads=nthreads)
             
             print('\n----------------- Results for best model -------------------\n')
             # # ___________________________________________________
             # # # save best model fit
+            x_train = model.train_x_comp[model.train_x_comp['siteID'].isin(model.train_sub_id['siteID'])]
+            x_eval = model.train_x_comp[model.train_x_comp['siteID'].isin(model.eval_id['siteID'])]
+            test_x = model.test_x_comp[model.test_x_comp['siteID'].isin(model.test_id['siteID'])]
+            x_train = x_train.reset_index(drop=True)
+            x_eval = x_eval.reset_index(drop=True)
+            test_x = test_x.reset_index(drop=True)
+            # train_columns = train_x.columns.tolist()
+
             save_obj = sd.SaveOutput(train_id=model.train_sub_id, eval_id=model.eval_id, test_id=model.test_id,
-                                        x_train=model.x_train, x_eval=model.x_eval, test_x=model.test_x,
+                                        x_train=x_train, x_eval=x_eval, test_x=test_x, train_columns=train_columns,
+                                        m_x_train = model.x_train, m_x_eval = model.x_eval, m_x_test = model.test_x,
                                         y_train=model.y_train, y_eval=model.y_eval, test_y=model.test_y,
                                         target_data_path = model.target_data_path, best_model=best_model, loaded_model=ml_model, 
                                         x_transform=x_transform, y_transform=y_transform, t_type=t_type,
@@ -699,7 +720,7 @@ class RunMlModel:
             # # save best model fit
             best_model = 'vote'
             save_obj = sd.SaveOutput(train_id=model.train_sub_id, eval_id=model.eval_id, test_id=model.test_id,
-                                        x_train=model.x_train, x_eval=model.x_eval, test_x=model.test_x,
+                                        x_train=x_train, x_eval=x_eval, test_x=test_x, train_columns=train_columns,
                                         y_train=model.y_train, y_eval=model.y_eval, test_y=model.test_y,
                                         target_data_path = model.target_data_path, best_model=best_model, loaded_model=voting_model, 
                                         x_transform=x_transform, y_transform=y_transform, t_type=t_type,
@@ -711,7 +732,7 @@ class RunMlModel:
             # # plot meta model fit
             best_model = 'meta'
             save_obj = sd.SaveOutput(train_id=model.train_sub_id, eval_id=model.eval_id, test_id=model.test_id,
-                                        x_train=model.x_train, x_eval=model.x_eval, test_x=model.test_x,
+                                        x_train=x_train, x_eval=x_eval, test_x=test_x, train_columns=train_columns,
                                         y_train=model.y_train, y_eval=model.y_eval, test_y=model.test_y,
                                         target_data_path = model.target_data_path, best_model=best_model, loaded_model=meta_model, 
                                         x_transform=x_transform, y_transform=y_transform, t_type=t_type,
@@ -738,6 +759,6 @@ class RunMlModel:
             print('end')
 
 if __name__ == "__main__":
-    # RunMlModel.main(['light_notrans_35', -1, "False", "False", 0.85, 5])
+    # RunMlModel.main(['light_notrans_35', -1, "True", "True", 0.3, 5])
     RunMlModel.main(sys.argv[1:])
 

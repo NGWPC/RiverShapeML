@@ -202,7 +202,8 @@ class DataLoader:
         print("\n Begin dimention reduction .... \n")
         # Load dimention categories
         temp = json.load(open('model_space/dimention_space.json'))
-        
+        train_data_c = train_data.copy()
+        test_data_c = test_data.copy()
         # PCA model
         def buildPCA(feat_list, n_components, name):
             """ Builds a PCA and extracts new dimentions
@@ -299,47 +300,100 @@ class DataLoader:
             # buildPCA(feat_list, 5,'Soil_temp_moist_pc')
 
             # # Soil
+            # print('Reducing Soil ..')
+            # feat_list = temp.get('Soil_char_pc')
+            # buildPCA(feat_list, 5,'Soil_char_pc')
+
+            # Soil
             print('Reducing Soil ..')
-            feat_list = temp.get('Soil_char_pc')
-            buildPCA(feat_list, 5,'Soil_char_pc')
+            feat_list = temp.get('Soil_pc')
+            buildPCA(feat_list, 5,'Soil_pc')
 
-            # # Preciep
-            # print('Reducing Preciep ..')
-            # feat_list = temp.get('Preciep_pc')
-            # buildPCA(feat_list, 5,'Preciep_pc')
+            # Watershed
+            print('Reducing Watershed ..')
+            feat_list = temp.get('Watershed_pc')
+            buildPCA(feat_list, 5,'Watershed_pc')
 
-            # # Topo
-            # print('Reducing Topo ..')
-            # feat_list = temp.get('Topo_pc')
-            # buildPCA(feat_list, 5,'Topo_pc')
+            # Topo
+            print('Reducing Topo ..')
+            feat_list = temp.get('Topo_pc')
+            buildPCA(feat_list, 5,'Topo_pc')
 
             # Flood
             print('Reducing Flood ..')
             feat_list = temp.get('Flood_freq_pc')
             buildPCA(feat_list, 5,'Flood_freq_pc')
 
-            # Land_cover
-            print('Reducing Land cover ..')
-            feat_list = temp.get('Land_cover_pc')
-            buildPCA(feat_list, 5,'Land_cover_pc')
+            # Stream
+            print('Reducing Stream ..')
+            feat_list = temp.get('Stream_pc')
+            buildPCA(feat_list, 2,'Stream_pc')
 
-            # # Human
-            print('Reducing Human ..')
-            feat_list = temp.get('Human_pc')
-            buildPCA(feat_list, 5,'Human_pc')
+            # Human1
+            print('Reducing Human1 ..')
+            feat_list = temp.get('Human1_pc')
+            buildPCA(feat_list, 4,'Human1_pc')
 
-            # Lithology
-            print('Reducing Lithology ..')
-            feat_list = temp.get('Lithology_pc')
-            buildPCA(feat_list, 5,'Lithology_pc')
+            # Human2
+            print('Reducing Human2 ..')
+            feat_list = temp.get('Human2_pc')
+            buildPCA(feat_list, 5,'Human2_pc')
+
+            # Hydraulic
+            print('Reducing Hydraulic ..')
+            feat_list = temp.get('Hydraulic_pc')
+            buildPCA(feat_list, 2,'Hydraulic_pc')
+
+            # Dam
+            print('Reducing Dam ..')
+            feat_list = temp.get('Dam_pc')
+            buildPCA(feat_list, 2,'Dam_pc')
+
+            # # Land_cover
+            # print('Reducing Land cover ..')
+            # feat_list = temp.get('Land_cover_pc')
+            # buildPCA(feat_list, 5,'Land_cover_pc')
+
+            # # # Human
+            # print('Reducing Human ..')
+            # feat_list = temp.get('Human_pc')
+            # buildPCA(feat_list, 5,'Human_pc')
+
+            # # Lithology
+            # print('Reducing Lithology ..')
+            # feat_list = temp.get('Lithology_pc')
+            # buildPCA(feat_list, 5,'Lithology_pc')
         
         if self.sample_type == "All_pca":
             temp = json.load(open('model_space/feature_space.json'))
             feat_list = temp.get('All').get(self.out_feature+'_feats')
             buildPCA(feat_list, None,'PC')
 
+        # Lookup needed PCs
+        pc_columns = [col for col in train_data.columns if '_pc' in col]
+        non_pc_columns = set(train_data.columns) -set(pc_columns)
+        temp_o = json.load(open('model_space/feature_space.json'))
+        temp_pc = temp_o.get(self.sample_type).get(self.out_feature+'_pc_feats')
+        pc_vars = []
+        for pc_var in temp_pc:
+            matched_vars = [variable for variable in train_data.columns if pc_var in variable]
+            pc_vars += matched_vars
+
+        model_features = list(non_pc_columns) + pc_vars
+        train_data = train_data[model_features]
+        test_data = test_data[model_features]
+        
+        train_data_c = train_data_c[self.del_features]
+        test_data_c = test_data_c[self.del_features]
+        train_data_complete = pd.concat([train_data, train_data_c], axis=1)
+        test_data_complete = pd.concat([test_data, test_data_c], axis=1)
+
+        train_data = train_data.reset_index(drop=True)
+        test_data_c = test_data_c.reset_index(drop=True)
+        train_data_complete = train_data_complete.reset_index(drop=True)
+        test_data_complete = test_data_complete.reset_index(drop=True)
         print("\n ------------- End of dimention reduction ----------- \n")
-        return
+        return train_data, test_data, train_data_complete, test_data_complete
         
  # --------------------------- Split train and test --------------------------- #
     
@@ -380,14 +434,15 @@ class DataLoader:
         
         elif self.sample_type == "Sub_pca":
             temp_o = json.load(open('model_space/feature_space.json'))
-            temp = temp_o.get(self.sample_type).get(self.out_feature+'_feats')
-            temp_pc = temp_o.get(self.sample_type).get(self.out_feature+'_pc_feats')
-            pc_vars = []
-            for pc_var in temp_pc:
-                matched_vars = [variable for variable in self.add_features if pc_var in variable]
-                pc_vars += matched_vars
+            temp = temp_o.get("All").get(self.out_feature+'_feats')
+            # temp_pc = temp_o.get(self.sample_type).get(self.out_feature+'_pc_feats')
+            # pc_vars = []
+            # for pc_var in temp_pc:
+            #     matched_vars = [variable for variable in self.add_features if pc_var in variable]
+            #     pc_vars += matched_vars
 
-            model_features = temp + pc_vars
+            #model_features = temp + pc_vars
+            model_features = temp 
             self.in_features = model_features.copy()
             temp = json.load(open('data/model_feature_names.json'))
             model_features += [self.out_feature]+temp.get('id_features')
@@ -479,8 +534,7 @@ class DataLoader:
         return
 
 
-# --------------------------- Transformation --------------------------- #
-
+    # --------------------------- Transformation --------------------------- #
     def transformData(self, t_type: str = 'power', sub_trans: bool = True, plot_dist: bool = False) -> tuple[pd.DataFrame,
                                                           np.array,
                                                           pd.DataFrame,
@@ -521,72 +575,78 @@ class DataLoader:
         """
         print('transforming and plotting ...')
         dump_list = ['R2', 'siteID']
-        pca_feats = self.in_features.copy()
+        trans_feats = []
         if sub_trans:
             temp = json.load(open('model_space/dimention_space.json'))
-            all_feats = [string for key in temp for string in temp[key]]
-            pca_feats = all_feats
-
+            pca_feats = [string for key in temp for string in temp[key]]
+            trans_feats = pca_feats.copy()
+        in_feats = set(self.in_features) - set(trans_feats)
         if self.x_transform:
-            min_value = 0
-            max_value = 500
-            scaler = MinMaxScaler(feature_range=(min_value, max_value))
-            if t_type=='power':
-                # t_x = MinMaxScaler(feature_range=(0, 1))
-                t_x = PowerTransformer()
-            if t_type=='quant':
-                t_x = QuantileTransformer(
-                    n_quantiles=500, output_distribution="normal", 
-                    random_state=self.rand_state
-                )
-            if t_type!='log':
-                # scaler_x = StandardScaler()
-                train_x = self.train[pca_feats].reset_index(drop=True)
-                train_x = pd.DataFrame(scaler.fit_transform(train_x), columns=train_x.columns)
-                train_x_cp = train_x.copy()
-                train_x_t = t_x.fit_transform(train_x)
-                pickle.dump(t_x, open(self.custom_name+'/model/'+'train_x_'+self.out_feature+'_tansformation.pkl', "wb"))
-                pickle.dump(scaler, open(self.custom_name+'/model/'+'train_x_'+self.out_feature+'_scaler_tansformation.pkl', "wb"))
+            trans_feats = self.in_features.copy()
 
-                train_x = pd.DataFrame(data=train_x_t,
-                        columns=train_x.columns)
-                if plot_dist:
-                    self.plotDist(train_x_cp, train_x, 'train')
-                train_id = self.train[dump_list].reset_index(drop=True)
+        min_value = 0
+        max_value = 500
+        scaler = MinMaxScaler(feature_range=(min_value, max_value))
+        if t_type=='power':
+            # t_x = MinMaxScaler(feature_range=(0, 1))
+            t_x = PowerTransformer()
+        if t_type=='quant':
+            t_x = QuantileTransformer(
+                n_quantiles=500, output_distribution="normal", 
+                random_state=self.rand_state
+            )
+        if t_type!='log':
+            # scaler_x = StandardScaler()
+            train_x = self.train[trans_feats].reset_index(drop=True)
+            train_x = pd.DataFrame(scaler.fit_transform(train_x), columns=train_x.columns)
+            train_x_cp = train_x.copy()
+            train_x_t = t_x.fit_transform(train_x)
+            pickle.dump(t_x, open(self.custom_name+'/model/'+'train_x_'+self.out_feature+'_tansformation.pkl', "wb"))
+            pickle.dump(scaler, open(self.custom_name+'/model/'+'train_x_'+self.out_feature+'_scaler_tansformation.pkl', "wb"))
 
-                test_x = self.test[pca_feats].reset_index(drop=True)
-                # test_x.to_parquet('data/tttt.parquet')
-                test_x = pd.DataFrame(scaler.transform(test_x), columns=test_x.columns)
-                test_x_cp = test_x.copy()
-                test_x_t = t_x.transform(test_x)
-                test_x = pd.DataFrame(data=test_x_t,
-                        columns=test_x.columns)
-                if plot_dist:
-                    self.plotDist(test_x_cp, test_x, 'test')
-                test_id = self.test[dump_list].reset_index(drop=True)
-            else:
-                train_x = self.train[pca_feats].reset_index(drop=True)
-                train_x_cp = train_x.copy()
-                # Replace NA and inf
-                train_x = np.log(np.abs(train_x)).fillna(0)
-                train_x.replace([np.inf, -np.inf], -100, inplace=True)
-                if plot_dist:
-                    self.plotDist(train_x_cp, train_x, 'train')
-                train_id = self.train[dump_list].reset_index(drop=True)
-                test_x = self.test[pca_feats].reset_index(drop=True)
-                test_x_cp = test_x.copy()
-                # Replace NA and inf
-                test_x = np.log(np.abs(test_x)).fillna(0)
-                test_x.replace([np.inf, -np.inf], -100, inplace=True)
-                if plot_dist:
-                    self.plotDist(test_x_cp, test_x, 'test')
-                test_id = self.test[dump_list].reset_index(drop=True)
-
-        else:
-            train_x = self.train[pca_feats].reset_index(drop=True)
+            train_x = pd.DataFrame(data=train_x_t,
+                    columns=train_x.columns)
+            if plot_dist:
+                self.plotDist(train_x_cp, train_x, 'train')
             train_id = self.train[dump_list].reset_index(drop=True)
-            test_x = self.test[pca_feats].reset_index(drop=True)
-            test_id =  self.test[dump_list].reset_index(drop=True)
+
+            test_x = self.test[trans_feats].reset_index(drop=True)
+            # test_x.to_parquet('data/tttt.parquet')
+            test_x = pd.DataFrame(scaler.transform(test_x), columns=test_x.columns)
+            test_x_cp = test_x.copy()
+            test_x_t = t_x.transform(test_x)
+            test_x = pd.DataFrame(data=test_x_t,
+                    columns=test_x.columns)
+            if plot_dist:
+                self.plotDist(test_x_cp, test_x, 'test')
+            test_id = self.test[dump_list].reset_index(drop=True)
+        else:
+            train_x = self.train[trans_feats].reset_index(drop=True)
+            train_x_cp = train_x.copy()
+            # Replace NA and inf
+            train_x = np.log(np.abs(train_x)).fillna(0)
+            train_x.replace([np.inf, -np.inf], -100, inplace=True)
+            if plot_dist:
+                self.plotDist(train_x_cp, train_x, 'train')
+            train_id = self.train[dump_list].reset_index(drop=True)
+            test_x = self.test[trans_feats].reset_index(drop=True)
+            test_x_cp = test_x.copy()
+            # Replace NA and inf
+            test_x = np.log(np.abs(test_x)).fillna(0)
+            test_x.replace([np.inf, -np.inf], -100, inplace=True)
+            if plot_dist:
+                self.plotDist(test_x_cp, test_x, 'test')
+            test_id = self.test[dump_list].reset_index(drop=True)
+        
+        if not self.x_transform:
+            train_x = pd.concat([train_x, self.train[in_feats]], axis=1)
+            test_x = pd.concat([test_x, self.test[in_feats]], axis=1)
+        
+        # else:
+        #     train_x = self.train[trans_feats].reset_index(drop=True)
+        #     train_id = self.train[dump_list].reset_index(drop=True)
+        #     test_x = self.test[trans_feats].reset_index(drop=True)
+        #     test_id =  self.test[dump_list].reset_index(drop=True)
 
         if self.y_transform:
             if t_type=='power':
@@ -673,4 +733,6 @@ class DataLoader:
         test_x.to_parquet(self.custom_name+'/metrics/'+'test_x'+'_'+self.out_feature+'.parquet')
         pd.DataFrame({self.out_feature: test_y}).to_parquet(self.custom_name+'/metrics/'+'test_y'+'_'+self.out_feature+'.parquet')
         test_id.to_parquet(self.custom_name+'/metrics/'+'test_id'+'_'+self.out_feature+'.parquet')    
+        train_id = train_id.reset_index(drop=True)
+        test_id = test_id.reset_index(drop=True)
         return train_x, train_y, train_id, test_x, test_y, test_id
