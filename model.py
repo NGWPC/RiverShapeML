@@ -441,12 +441,12 @@ class MlModel:
         # ___________________________________________________
         # Out of the box evaluation of models
         # Fit all models
-        reg_models = lazypredict.Supervised.REGRESSORS
-        lazypredict.Supervised.REGRESSORS = [t for t in reg_models if not t[0].startswith('Quantile')]
-        ob_reg = LazyRegressor(predictions=True)
-        models, predictions = ob_reg.fit(self.x_train, self.x_eval, self.y_train, self.y_eval)
-        print('\n out of the box evaluation of models for target: '+str(self.custom_name)+ '\n')
-        print(models)
+        # reg_models = lazypredict.Supervised.REGRESSORS
+        # lazypredict.Supervised.REGRESSORS = [t for t in reg_models if not t[0].startswith('Quantile')]
+        # ob_reg = LazyRegressor(predictions=True)
+        # models, predictions = ob_reg.fit(self.x_train, self.x_eval, self.y_train, self.y_eval)
+        # print('\n out of the box evaluation of models for target: '+str(self.custom_name)+ '\n')
+        # print(models)
 
         # ___________________________________________________
         # Check witch models are used with weights and fit
@@ -632,14 +632,14 @@ class RunMlModel:
         y_transform  = eval(argv[3])
         R2_thresh    = float(argv[4])
         count_thresh = int(argv[5])
-        space        = 'actual_space' # actual_space / test_space
+        space        = 'test_space' # actual_space / test_space
         SI           = False # SI system
         sample_type  = "Sub" #"All", "Sub", "test"
         weighted     = False
         sub_trans    = True
         pca          = True 
         t_type       = 'power' # 'log', 'power', 'quant' 
-        train_type   = 'NWIS' # 'NWM', 'NWIS'
+        train_type   = 'NWM' # 'NWM', 'NWIS'
         if sample_type == "Sub" and pca:
             sample_type = "Sub_pca"
         if sample_type == "All" and pca:
@@ -721,6 +721,7 @@ class RunMlModel:
             best_model = 'vote'
             save_obj = sd.SaveOutput(train_id=model.train_sub_id, eval_id=model.eval_id, test_id=model.test_id,
                                         x_train=x_train, x_eval=x_eval, test_x=test_x, train_columns=train_columns,
+                                        m_x_train = model.x_train, m_x_eval = model.x_eval, m_x_test = model.test_x,
                                         y_train=model.y_train, y_eval=model.y_eval, test_y=model.test_y,
                                         target_data_path = model.target_data_path, best_model=best_model, loaded_model=voting_model, 
                                         x_transform=x_transform, y_transform=y_transform, t_type=t_type,
@@ -733,6 +734,7 @@ class RunMlModel:
             best_model = 'meta'
             save_obj = sd.SaveOutput(train_id=model.train_sub_id, eval_id=model.eval_id, test_id=model.test_id,
                                         x_train=x_train, x_eval=x_eval, test_x=test_x, train_columns=train_columns,
+                                        m_x_train = model.x_train, m_x_eval = model.x_eval, m_x_test = model.test_x,
                                         y_train=model.y_train, y_eval=model.y_eval, test_y=model.test_y,
                                         target_data_path = model.target_data_path, best_model=best_model, loaded_model=meta_model, 
                                         x_transform=x_transform, y_transform=y_transform, t_type=t_type,
@@ -746,19 +748,19 @@ class RunMlModel:
             print('\n----------------- Feature importance -------------------\n')
             # # ___________________________________________________
             # # plot feature importance
-            try:
-                fimp_object = fimp.FeatureImportance(custom_name, best_model)
-                fimp_object.plotImportance(model=ml_model, out_features=target_name,
-                                            train_x=train_x, train_y=train_y)
-                fimp_object.plotShapImportance(model=ml_model, out_features=target_name, 
-                                                train_x=train_x)
-            except Exception as e:       
-                print("An exception occurred due to shap internal errors!")  
-                print(e)      
+            # try:
+            #     fimp_object = fimp.FeatureImportance(custom_name, best_model)
+            #     fimp_object.plotImportance(model=ml_model, out_features=target_name,
+            #                                 train_x=train_x, train_y=train_y)
+            #     fimp_object.plotShapImportance(model=ml_model, out_features=target_name, 
+            #                                     train_x=train_x)
+            # except Exception as e:       
+            #     print("An exception occurred due to shap internal errors!")  
+            #     print(e)      
             print('\n**************** modeling parameter {0} ends here ****************\n'.format(target_name))
             print('end')
 
 if __name__ == "__main__":
-    # RunMlModel.main(['light_notrans_35', -1, "True", "True", 0.3, 5])
-    RunMlModel.main(sys.argv[1:])
+    RunMlModel.main(['light_notrans_35', -1, "True", "True", 0.3, 5])
+    # RunMlModel.main(sys.argv[1:])
 
