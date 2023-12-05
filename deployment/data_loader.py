@@ -65,12 +65,12 @@ class DataLoader:
     # --------------------------- Add Binary Features --------------------------- #
     def addExtraFeatures(self, target_name: str) -> None:
         # Add VAA dummy
-        self.data['vaa_dummy'] = self.data['roughness'].isnull().values
-        self.data['vaa_dummy'] = self.data['vaa_dummy'] * 1
+        # self.data['vaa_dummy'] = self.data['roughness'].isnull().values
+        # self.data['vaa_dummy'] = self.data['vaa_dummy'] * 1
 
         # Add Scat dummy
-        self.data['scat_dummy'] = self.data['BFICat'].isnull().values
-        self.data['scat_dummy'] = self.data['scat_dummy'] * 1
+        # self.data['scat_dummy'] = self.data['BFICat'].isnull().values
+        # self.data['scat_dummy'] = self.data['scat_dummy'] * 1
 
         # Add discharge dummy
         if target_name.endswith("bf"):
