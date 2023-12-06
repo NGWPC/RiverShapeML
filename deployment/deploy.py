@@ -138,7 +138,7 @@ class DPModel:
         if target_name.endswith("in"):
             y_pred_label = y_pred_label+'chan'
         y_pred_label = y_pred_label.lower()
-        data_in = data_in[model_feats]
+        data_in = data_in[model_feats] # [model.feature_names_in_]# [model_feats]
         preds_all = model.predict(data_in)
         preds_all = dl_obj.transformYData(out_feature=target_name, data=preds_all, t_type='power', 
                                            y_transform=y_transform)
@@ -160,8 +160,8 @@ class RunMlModel:
         nthreads     = int(argv[0])
         SI           = True
         rand_state   = 105
-        os.chdir('/mnt/d/Lynker/FEMA_HECRAS/bankfull_W_D/deployment')
-        
+        #os.chdir('/mnt/d/Lynker/FEMA_HECRAS/bankfull_W_D/deployment')
+
         # Load data
         dl_obj = dataloader.DataLoader(rand_state)
         dl_obj.readFiles()
@@ -185,10 +185,6 @@ class RunMlModel:
         
         results = []
 
-        for target_name in tqdm(target_list):
-            result = deploy_obj.process_target(dl_obj, target_name, vote_flag, meta_flag, best_flag, file, model_type)
-            results.append(result)
-
         # Parallelize the for loop
         results = Parallel(n_jobs=nthreads, backend="multiprocessing")(delayed(deploy_obj.process_target)(dl_obj, target_name, vote_flag, meta_flag, best_flag, file, model_type) for target_name in tqdm(target_list))
         
@@ -209,5 +205,4 @@ class RunMlModel:
         return
 
 if __name__ == "__main__":
-    RunMlModel.main([-1])
-    # RunMlModel.main(sys.argv[1:])
+    RunMlModel.main(sys.argv[1:])

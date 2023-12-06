@@ -138,7 +138,7 @@ class DataLoader:
             pca =  pickle.load(open(pca_item, "rb"))
             temp_data = self.data[temp.get(text[1:-1])]
             new_data_pca = pca.transform(temp_data)
-            max_n = min(5, len(temp.get(text[1:-1])) - 1)
+            max_n = min(5, len(temp.get(text[1:-1])))
             for i in range(0, max_n, 1):
                 self.data[str(text[1:-1])+"_"+str(i)] = new_data_pca[:, i]
 

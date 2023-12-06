@@ -1,66 +1,66 @@
 [
     {
+        "value": "streamleve"
+    },
+    {
+        "value": "hwnodesqkm"
+    },
+    {
+        "value": "AREASQKM"
+    },
+    {
+        "value": "LAI"
+    },
+    {
+        "value": "gws_tavg"
+    },
+    {
+        "value": "bf_ff"
+    },
+    {
         "value": "ArbolateSu"
     },
     {
         "value": "roughness"
     },
     {
-        "value": "WtDepWs"
-    },
-    {
-        "value": "LAI"
-    },
-    {
-        "value": "vaa_dummy"
-    },
-    {
-        "value": "qsb_tavg"
-    },
-    {
-        "value": "RckDepWs"
-    },
-    {
-        "value": "BFIWs"
-    },
-    {
-        "value": "TotDASqKM"
-    },
-    {
-        "value": "elevation_diff"
-    },
-    {
-        "value": "bd_mean_0_5_r250"
-    },
-    {
-        "value": "gws_tavg"
-    },
-    {
-        "value": "streamleve"
-    },
-    {
-        "value": "scat_dummy"
-    },
-    {
-        "value": "Pathlength"
+        "value": "slope"
     },
     {
         "value": "StreamOrde"
     },
     {
+        "value": "elevation_diff"
+    },
+    {
+        "value": "RckDepWs"
+    },
+    {
+        "value": "TotDASqKM"
+    },
+    {
+        "value": "BFIWs"
+    },
+    {
         "value": "nwm_dummy"
     },
     {
-        "value": "bf_ff"
+        "value": "WtDepWs"
     },
     {
-        "value": "slope"
+        "value": "qsb_tavg"
     },
     {
-        "value": "AREASQKM"
+        "value": "Pathlength"
     },
     {
-        "value": "hwnodesqkm"
+        "value": "bd_mean_0_5_r250"
+    },
+    {
+        "value": "scat_dummy"
+    },
+    {
+        "value": "vaa_dummy"
     },
     {
         "value": "Topo_pc_0"

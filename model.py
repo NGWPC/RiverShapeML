@@ -441,12 +441,12 @@ class MlModel:
         # ___________________________________________________
         # Out of the box evaluation of models
         # Fit all models
-        # reg_models = lazypredict.Supervised.REGRESSORS
-        # lazypredict.Supervised.REGRESSORS = [t for t in reg_models if not t[0].startswith('Quantile')]
-        # ob_reg = LazyRegressor(predictions=True)
-        # models, predictions = ob_reg.fit(self.x_train, self.x_eval, self.y_train, self.y_eval)
-        # print('\n out of the box evaluation of models for target: '+str(self.custom_name)+ '\n')
-        # print(models)
+        reg_models = lazypredict.Supervised.REGRESSORS
+        lazypredict.Supervised.REGRESSORS = [t for t in reg_models if not t[0].startswith('Quantile')]
+        ob_reg = LazyRegressor(predictions=True)
+        models, predictions = ob_reg.fit(self.x_train, self.x_eval, self.y_train, self.y_eval)
+        print('\n out of the box evaluation of models for target: '+str(self.custom_name)+ '\n')
+        print(models)
 
         # ___________________________________________________
         # Check witch models are used with weights and fit
@@ -540,11 +540,14 @@ class MlModel:
         def preserve_order(item):
             return {"value": item}
         # Convert the list elements into a JSON-serializable format with ordered keys
-        serialized_list = [preserve_order(item) for item in concated_x.columns.to_list()]
+        serialized_list = [preserve_order(item) for item in concated_x.columns]
         # Save the list to a JSON file
         with open('model_space/model_feats'+'_'+out_features+'_'+'.json', 'w') as json_file:
             json.dump(serialized_list, json_file, indent=4)
-            
+        # Test
+        # serialized_list = [preserve_order(item) for item in ml_model.feature_names_in_]
+        # with open('model_space/model_feats'+'_'+out_features+'_2'+'.json', 'w') as json_file:
+        #     json.dump(serialized_list, json_file, indent=4)
         # Save models
         pickle.dump(ml_model, open(self.custom_name+"/model/"+str(self.custom_name)+'_'+out_features+"_"+str(best_model)+"_final_Best_Model.pickle.dat", "wb"))
         pickle.dump(voting_model, open(self.custom_name+"/model/"+str(self.custom_name)+'_'+out_features+"_final_Voting_Model.pickle.dat", "wb"))
@@ -636,20 +639,19 @@ class RunMlModel:
             taken from bash script
         """
         custom_name = argv[0]
-        # target_name = argv[1] 
         nthreads     = int(argv[1])
         x_transform  = eval(argv[2])
         y_transform  = eval(argv[3])
         R2_thresh    = float(argv[4])
         count_thresh = int(argv[5])
-        space        = 'test_space' # actual_space / test_space
+        space        = 'actual_space' # actual_space / test_space
         SI           = False # SI system
         sample_type  = "Sub" #"All", "Sub", "test"
         weighted     = False
         sub_trans    = True
         pca          = True 
         t_type       = 'power' # 'log', 'power', 'quant' 
-        train_type   = 'NWM' # 'NWM', 'NWIS'
+        train_type   = 'NWIS' # 'NWM', 'NWIS'
         if sample_type == "Sub" and pca:
             sample_type = "Sub_pca"
         if sample_type == "All" and pca:
@@ -757,20 +759,20 @@ class RunMlModel:
 
             print('\n----------------- Feature importance -------------------\n')
             # # ___________________________________________________
-            # # plot feature importance
-            # try:
-            #     fimp_object = fimp.FeatureImportance(custom_name, best_model)
-            #     fimp_object.plotImportance(model=ml_model, out_features=target_name,
-            #                                 train_x=train_x, train_y=train_y)
-            #     fimp_object.plotShapImportance(model=ml_model, out_features=target_name, 
-            #                                     train_x=train_x)
-            # except Exception as e:       
-            #     print("An exception occurred due to shap internal errors!")  
-            #     print(e)      
+            # plot feature importance
+            try:
+                fimp_object = fimp.FeatureImportance(custom_name, best_model)
+                fimp_object.plotImportance(model=ml_model, out_features=target_name,
+                                            train_x=train_x, train_y=train_y)
+                fimp_object.plotShapImportance(model=ml_model, out_features=target_name, 
+                                                train_x=train_x)
+            except Exception as e:       
+                print("An exception occurred due to shap internal errors!")  
+                print(e)      
             print('\n**************** modeling parameter {0} ends here ****************\n'.format(target_name))
             print('end')
 
 if __name__ == "__main__":
-    RunMlModel.main(['light_notrans_35', -1, "True", "True", 0.3, 5])
-    # RunMlModel.main(sys.argv[1:])
+    # RunMlModel.main(['light_notrans_35', -1, "True", "True", 0.3, 5])
+    RunMlModel.main(sys.argv[1:])
 

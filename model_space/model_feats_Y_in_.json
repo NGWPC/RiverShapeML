@@ -3,61 +3,61 @@
         "value": "streamleve"
     },
     {
-        "value": "roughness"
-    },
-    {
-        "value": "elevation_diff"
-    },
-    {
         "value": "hwnodesqkm"
     },
     {
         "value": "AREASQKM"
     },
     {
-        "value": "nwm_dummy"
-    },
-    {
-        "value": "Pathlength"
-    },
-    {
-        "value": "scat_dummy"
-    },
-    {
-        "value": "BFIWs"
-    },
-    {
-        "value": "TotDASqKM"
-    },
-    {
-        "value": "qsb_tavg"
-    },
-    {
         "value": "LAI"
-    },
-    {
-        "value": "StreamOrde"
-    },
-    {
-        "value": "bd_mean_0_5_r250"
-    },
-    {
-        "value": "slope"
-    },
-    {
-        "value": "in_ff"
-    },
-    {
-        "value": "WtDepWs"
     },
     {
         "value": "gws_tavg"
     },
     {
-        "value": "RckDepWs"
+        "value": "in_ff"
+    },
+    {
+        "value": "roughness"
     },
     {
         "value": "ArbolateSu"
+    },
+    {
+        "value": "slope"
+    },
+    {
+        "value": "StreamOrde"
+    },
+    {
+        "value": "elevation_diff"
+    },
+    {
+        "value": "RckDepWs"
+    },
+    {
+        "value": "TotDASqKM"
+    },
+    {
+        "value": "BFIWs"
+    },
+    {
+        "value": "nwm_dummy"
+    },
+    {
+        "value": "WtDepWs"
+    },
+    {
+        "value": "qsb_tavg"
+    },
+    {
+        "value": "Pathlength"
+    },
+    {
+        "value": "bd_mean_0_5_r250"
+    },
+    {
+        "value": "scat_dummy"
     },
     {
         "value": "vaa_dummy"
