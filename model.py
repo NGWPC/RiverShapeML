@@ -535,6 +535,16 @@ class MlModel:
         ml_model.fit(concated_x, concated_y)
         voting_model.fit(concated_x, concated_y)
         meta_model.fit(concated_x, concated_y)
+
+        # Lets keep record on input varibales and order
+        def preserve_order(item):
+            return {"value": item}
+        # Convert the list elements into a JSON-serializable format with ordered keys
+        serialized_list = [preserve_order(item) for item in concated_x.columns.to_list()]
+        # Save the list to a JSON file
+        with open('model_space/model_feats'+'_'+out_features+'_'+'.json', 'w') as json_file:
+            json.dump(serialized_list, json_file, indent=4)
+            
         # Save models
         pickle.dump(ml_model, open(self.custom_name+"/model/"+str(self.custom_name)+'_'+out_features+"_"+str(best_model)+"_final_Best_Model.pickle.dat", "wb"))
         pickle.dump(voting_model, open(self.custom_name+"/model/"+str(self.custom_name)+'_'+out_features+"_final_Voting_Model.pickle.dat", "wb"))

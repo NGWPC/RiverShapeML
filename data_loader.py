@@ -284,85 +284,50 @@ class DataLoader:
 
             return
         if self.sample_type == "Sub_pca":
-            # # Vegetation
-            # print('Reducing Vegetation ..')
-            # feat_list = temp.get('Vegetation_pc')
-            # buildPCA(feat_list, 5, 'Vegetation_pc')
+            # Flood
+            print('Reducing Flood ..')
+            feat_list = temp.get('Flood_freq_pc')
+            buildPCA(feat_list, 5,'Flood_freq_pc')
 
-            # # Discharge
-            # print('Reducing Discharge ..')
-            # feat_list = temp.get('Discharge_pc')
-            # buildPCA(feat_list, 5, 'Discharge_pc')
+            # Land_cover
+            print('Reducing Land cover ..')
+            feat_list = temp.get('Land_cover_pc')
+            buildPCA(feat_list, 5,'Land_cover_pc')
 
-            # # Soil_temp_moist
-            # print('Reducing Soil_temp_moist ..')
-            # feat_list = temp.get('Soil_temp_moist_pc')
-            # buildPCA(feat_list, 5,'Soil_temp_moist_pc')
-
-            # # Soil
-            # print('Reducing Soil ..')
-            # feat_list = temp.get('Soil_char_pc')
-            # buildPCA(feat_list, 5,'Soil_char_pc')
+            # Lithology
+            print('Reducing Lithology ..')
+            feat_list = temp.get('Lithology_pc')
+            buildPCA(feat_list, 5,'Lithology_pc')
 
             # Soil
             print('Reducing Soil ..')
             feat_list = temp.get('Soil_pc')
             buildPCA(feat_list, 5,'Soil_pc')
 
-            # Watershed
-            print('Reducing Watershed ..')
-            feat_list = temp.get('Watershed_pc')
-            buildPCA(feat_list, 5,'Watershed_pc')
+            # Human
+            print('Reducing Human ..')
+            feat_list = temp.get('Human_pc')
+            buildPCA(feat_list, 5,'Human_pc')
+
+            # Dam
+            print('Reducing Dam ..')
+            feat_list = temp.get('Dam_pc')
+            buildPCA(feat_list, 3,'Dam_pc')
 
             # Topo
             print('Reducing Topo ..')
             feat_list = temp.get('Topo_pc')
             buildPCA(feat_list, 5,'Topo_pc')
 
-            # Flood
-            print('Reducing Flood ..')
-            feat_list = temp.get('Flood_freq_pc')
-            buildPCA(feat_list, 5,'Flood_freq_pc')
+            # Watershed
+            print('Reducing Watershed ..')
+            feat_list = temp.get('Watershed_pc')
+            buildPCA(feat_list, 3,'Watershed_pc')
 
             # Stream
             print('Reducing Stream ..')
             feat_list = temp.get('Stream_pc')
             buildPCA(feat_list, 2,'Stream_pc')
-
-            # Human1
-            print('Reducing Human1 ..')
-            feat_list = temp.get('Human1_pc')
-            buildPCA(feat_list, 4,'Human1_pc')
-
-            # Human2
-            print('Reducing Human2 ..')
-            feat_list = temp.get('Human2_pc')
-            buildPCA(feat_list, 5,'Human2_pc')
-
-            # Hydraulic
-            print('Reducing Hydraulic ..')
-            feat_list = temp.get('Hydraulic_pc')
-            buildPCA(feat_list, 2,'Hydraulic_pc')
-
-            # Dam
-            print('Reducing Dam ..')
-            feat_list = temp.get('Dam_pc')
-            buildPCA(feat_list, 2,'Dam_pc')
-
-            # # Land_cover
-            # print('Reducing Land cover ..')
-            # feat_list = temp.get('Land_cover_pc')
-            # buildPCA(feat_list, 5,'Land_cover_pc')
-
-            # # # Human
-            # print('Reducing Human ..')
-            # feat_list = temp.get('Human_pc')
-            # buildPCA(feat_list, 5,'Human_pc')
-
-            # # Lithology
-            # print('Reducing Lithology ..')
-            # feat_list = temp.get('Lithology_pc')
-            # buildPCA(feat_list, 5,'Lithology_pc')
         
         if self.sample_type == "All_pca":
             temp = json.load(open('model_space/feature_space.json'))
@@ -584,6 +549,15 @@ class DataLoader:
         if self.x_transform:
             trans_feats = self.in_features.copy()
 
+        # Lets keep record on input varibales and order
+        def preserve_order(item):
+            return {"value": item}
+        # Convert the list elements into a JSON-serializable format with ordered keys
+        serialized_list = [preserve_order(item) for item in trans_feats]
+        # Save the list to a JSON file
+        with open('model_space/trans_feats'+'_'+self.out_feature+"_"+'.json', 'w') as json_file:
+            json.dump(serialized_list, json_file, indent=4)
+
         min_value = 0
         max_value = 500
         scaler = MinMaxScaler(feature_range=(min_value, max_value))
@@ -642,11 +616,8 @@ class DataLoader:
             train_x = pd.concat([train_x, self.train[in_feats]], axis=1)
             test_x = pd.concat([test_x, self.test[in_feats]], axis=1)
         
-        # else:
-        #     train_x = self.train[trans_feats].reset_index(drop=True)
-        #     train_id = self.train[dump_list].reset_index(drop=True)
-        #     test_x = self.test[trans_feats].reset_index(drop=True)
-        #     test_id =  self.test[dump_list].reset_index(drop=True)
+        # duplicated_columns = train_x.columns[train_x.columns.duplicated()]
+        # print(duplicated_columns)
 
         if self.y_transform:
             if t_type=='power':

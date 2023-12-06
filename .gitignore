@@ -26,7 +26,7 @@ model_space/bu_dimention_space.json
 /deployment/test.ipynb
 Untitled-1.ipynb
 /model_space/config1.zip
-/data/nwm_conus_input.parquet
+deployment/data/nwm_conus_input.parquet
 
 # Folders
 Images/paper/*
@@ -46,6 +46,7 @@ maps/*
 tst610not/*
 Coastal/*
 vpu12/*
+deployment/models/*
 deployment/data/vpu12/*
 conus/data/*
 light_notrans_35/*

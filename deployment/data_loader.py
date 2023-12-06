@@ -25,7 +25,7 @@ class DataLoader:
     >>> DataLoader(rand_state = 105, data_path = 'data/input.parquet')
         
     """
-    def __init__(self, rand_state: int, data_path: str = 'data/input.parquet') -> None:
+    def __init__(self, rand_state: int, data_path: str = 'data/nwm_conus_input.parquet') -> None:
         pd.options.display.max_columns  = 60
         self.data_path                  = data_path
         self.data                       = pd.DataFrame([])
@@ -45,8 +45,9 @@ class DataLoader:
         """
         try:
             self.data = pd.read_parquet(self.data_path, engine='pyarrow')
+            self.data = self.data.head(100)
         except:
-            print('Wrong address or data format. Please use parquet file.')
+            print('Wrong address or data format. Please use correct parquet file.')
         
         self.data = self.data[set(self.data.columns.to_list()) - set(['geometry','NHDFlowline','full_cats',
                                                                       'gridcode','number_unique_peaks','non_zero_years',
@@ -65,12 +66,12 @@ class DataLoader:
     # --------------------------- Add Binary Features --------------------------- #
     def addExtraFeatures(self, target_name: str) -> None:
         # Add VAA dummy
-        # self.data['vaa_dummy'] = self.data['roughness'].isnull().values
-        # self.data['vaa_dummy'] = self.data['vaa_dummy'] * 1
+        self.data['vaa_dummy'] = self.data['roughness'].isnull().values
+        self.data['vaa_dummy'] = self.data['vaa_dummy'] * 1
 
         # Add Scat dummy
-        # self.data['scat_dummy'] = self.data['BFICat'].isnull().values
-        # self.data['scat_dummy'] = self.data['scat_dummy'] * 1
+        self.data['scat_dummy'] = self.data['BFICat'].isnull().values
+        self.data['scat_dummy'] = self.data['scat_dummy'] * 1
 
         # Add discharge dummy
         if target_name.endswith("bf"):
@@ -137,14 +138,16 @@ class DataLoader:
             pca =  pickle.load(open(pca_item, "rb"))
             temp_data = self.data[temp.get(text[1:-1])]
             new_data_pca = pca.transform(temp_data)
-            for i in range(0, 5, 1):
+            max_n = min(5, len(temp.get(text[1:-1])) - 1)
+            for i in range(0, max_n, 1):
                 self.data[str(text[1:-1])+"_"+str(i)] = new_data_pca[:, i]
 
-        return 
+        return self.data
     
     # --------------------------- Data transformation --------------------------- #     
-    # PCA model
-    def transformXData(self, out_feature, data, t_type: str = 'power', x_transform: bool = False)  -> pd.DataFrame:
+    # Input and output transformation
+    def transformXData(self, out_feature: str, trans_feats : list,
+                        t_type: str = 'power', x_transform: bool = False)  -> pd.DataFrame:
         """ Apply scaling and normalization to data
         
         Parameters:
@@ -157,35 +160,37 @@ class DataLoader:
 
         """
         print('transforming and plotting ...')
-        data = data.reset_index(drop=True)
+        self.data.reset_index(drop=True)
+        trans_data = self.data[trans_feats]
 
-        if x_transform:
-            if t_type!='log':
-                def applyScalerX(arr):
-                    min_max_scaler = pickle.load(open('models/train_x_'+out_feature+'_scaler_tansformation.pkl', "rb"))
-                    # min_max_scaler = pickle.load(open('/mnt/d/Lynker/R2_out/New/'+folder+'/conus-fhg/'+file+'/model/'+'train_'+arr.name+'_scaled.pkl', "rb"))
-                    data_minmax = min_max_scaler.transform(arr.values.reshape(-1, 1))
-                    return data_minmax.flatten()
-                
-                trans =  pickle.load(open('models/train_x_'+out_feature+'_tansformation.pkl', "rb"))
-                scaler_data = data.apply(applyScalerX)
-                trans_data = trans.transform(scaler_data)
-                data = pd.DataFrame(trans_data, columns=data.columns)
+        # Always perform transformation on PCA
+        in_features = self.data.columns.tolist()
+        in_feats = set(in_features) - set(trans_feats)
 
+        if t_type!='log':
+            trans =  pickle.load(open('models/train_x_'+out_feature+'_tansformation.pkl', "rb"))
+            min_max_scaler = pickle.load(open('models/train_x_'+out_feature+'_scaler_tansformation.pkl', "rb"))
+            scaler_data = min_max_scaler.transform(trans_data)
+            data_transformed = trans.transform(scaler_data)
+            data_transformed = pd.DataFrame(data_transformed, columns=trans_data.columns)
+            if not x_transform:
+                self.data = pd.concat([data_transformed, self.data[in_feats]], axis=1)
             else:
-                # Replace NA and inf
-                data = np.log(np.abs(data)).fillna(0)
-                data.replace([np.inf, -np.inf], -100, inplace=True)
+                self.data = data_transformed.copy()
+        else:
+            # Replace NA and inf
+            self.data = np.log(np.abs(self.data)).fillna(0)
+            self.data.replace([np.inf, -np.inf], -100, inplace=True)
 
         # Tests
-        is_inf_data = data.isin([np.inf, -np.inf]).any().any()
+        is_inf_data = self.data.isin([np.inf, -np.inf]).any().any()
         if is_inf_data:
             print('---- found inf in X {0} !!!!'.format(out_feature))
-        has_missing_data  = data.isna().any().any()
+        has_missing_data  = self.data.isna().any().any()
         if has_missing_data:
             print('---- found nan in X {0} !!!!'.format(out_feature))
 
-        return data
+        return 
     
     def transformYData(self, out_feature, data, t_type: str = 'power', y_transform: bool = False)  -> np.array:
         """ Builds a PCA and extracts new dimensions
