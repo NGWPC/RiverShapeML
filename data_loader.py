@@ -184,6 +184,8 @@ class DataLoader:
         if impute == "zero":
             self.data = self.data.fillna(-1) # a temporary brute force way to deal with NAN
         if impute == "median":
+            median_values_df = pd.DataFrame(self.data.median(), columns=['Median'])
+            median_values_df.to_parquet(self.custom_name+'/metrics/'+'median_imput_'+self.out_feature+'.parquet')
             self.data = self.data.reset_index(drop=True)
             # self.data = self.data.replace(-1, np.nan)
             number_to_replace = -1

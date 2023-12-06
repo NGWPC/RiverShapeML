@@ -50,7 +50,7 @@ deployment/models/*
 deployment/data/vpu12/*
 conus/data/*
 light_notrans_35/*
-
+paper/*
 
 # Distribution / packaging
 .Python
