@@ -174,10 +174,6 @@ class RunDeploy:
         dl_obj.imputeData()
         # has_missing_y = np.isnan(dl_obj.data).any()
         rows_with_nan = dl_obj.data[dl_obj.data.isnull().any(axis=1)]
-        
-        print("Rows with NaN values:")
-        print(rows_with_nan)
-
 
         # Load targets
         temp        = json.load(open('data/model_feature_names.json'))

@@ -95,7 +95,7 @@ class MlModel:
         if not os.path.isdir(os.path.join(os.getcwd(),'cache/')):
             os.mkdir(os.path.join(os.getcwd(),'cache/'))
         
-# --------------------------- Load train and test data files --------------------------- #    
+    # --------------------------- Load train and test data files --------------------------- #    
     def loadData(self, out_feature: str, x_transform: bool = False, 
                  y_transform: bool = False, R2_thresh: float = 0.0, count_thresh: int = 3,
                  sample_type: str = "All", pca: bool = True, t_type: str = 'log',
@@ -183,7 +183,8 @@ class MlModel:
             self.train_x, self.test_x, self.train_x_comp, self.test_x_comp = data_loader.reduceDim(self.train_x, self.test_x)
             self.train_x_comp = pd.concat([self.train_x_comp, self.train_id], axis=1) 
             self.test_x_comp = pd.concat([self.test_x_comp, self.test_id], axis=1) 
-# --------------------------- Grid Search --------------------------- #
+    
+    # --------------------------- Grid Search --------------------------- #
     def findBestParams(self, out_features: str = 'TW_bf', nthreads: int = -1, space: str = 'actual_space',
                         weighted: bool = False) -> Tuple[str, dict, pd.DataFrame]:
         """ Find the best parameters of the all ML models through k-fold
@@ -441,12 +442,12 @@ class MlModel:
         # ___________________________________________________
         # Out of the box evaluation of models
         # Fit all models
-        reg_models = lazypredict.Supervised.REGRESSORS
-        lazypredict.Supervised.REGRESSORS = [t for t in reg_models if not t[0].startswith('Quantile')]
-        ob_reg = LazyRegressor(predictions=True)
-        models, predictions = ob_reg.fit(self.x_train, self.x_eval, self.y_train, self.y_eval)
-        print('\n out of the box evaluation of models for target: '+str(self.custom_name)+ '\n')
-        print(models)
+        # reg_models = lazypredict.Supervised.REGRESSORS
+        # lazypredict.Supervised.REGRESSORS = [t for t in reg_models if not t[0].startswith('Quantile')]
+        # ob_reg = LazyRegressor(predictions=True)
+        # models, predictions = ob_reg.fit(self.x_train, self.x_eval, self.y_train, self.y_eval)
+        # print('\n out of the box evaluation of models for target: '+str(self.custom_name)+ '\n')
+        # print(models)
 
         # ___________________________________________________
         # Check witch models are used with weights and fit
@@ -510,8 +511,10 @@ class MlModel:
         # base_model.append(('orth', temp))
 
 
+        # top_model = RandomForestRegressor(random_state=self.rand_state, n_jobs=nthreads,
+        #                                   max_depth=9, max_features='log2', max_samples=0.6, n_estimators=13000)#ExtraTreesRegressor(random_state=self.rand_state, n_jobs=nthreads)#LinearRegression()
         top_model = RandomForestRegressor(random_state=self.rand_state, n_jobs=nthreads,
-                                          max_depth=9, max_features='log2', max_samples=0.6, n_estimators=13000)#ExtraTreesRegressor(random_state=self.rand_state, n_jobs=nthreads)#LinearRegression()
+                                          max_depth=2, max_features='log2', max_samples=0.6, n_estimators=100)
         voting_model = VotingRegressor(estimators=base_model, n_jobs=nthreads)
         meta_model = StackingRegressor(estimators=base_model, final_estimator=top_model, cv=5, 
                                        passthrough=True, n_jobs=nthreads)
@@ -644,7 +647,7 @@ class RunMlModel:
         y_transform  = eval(argv[3])
         R2_thresh    = float(argv[4])
         count_thresh = int(argv[5])
-        space        = 'actual_space' # actual_space / test_space
+        space        = 'test_space' # actual_space / test_space
         SI           = False # SI system
         sample_type  = "Sub" #"All", "Sub", "test"
         weighted     = False
@@ -668,7 +671,7 @@ class RunMlModel:
         temp        = json.load(open('data/model_feature_names.json'))
         target_list = temp.get('out_features')
         del temp
-        target_list=['TW_in']
+        # target_list=['TW_in']
         for target_name in tqdm(target_list):
             if target_name == "Y_bf": 
                 R2_thresh    = 0.85 #NWM 0.6 #NWIS 0.85
@@ -730,47 +733,47 @@ class RunMlModel:
             print('\n----------------- Results for vote model -------------------\n')
             # # ___________________________________________________
             # # save best model fit
-            best_model = 'vote'
-            save_obj = sd.SaveOutput(train_id=model.train_sub_id, eval_id=model.eval_id, test_id=model.test_id,
-                                        x_train=x_train, x_eval=x_eval, test_x=test_x, train_columns=train_columns,
-                                        m_x_train = model.x_train, m_x_eval = model.x_eval, m_x_test = model.test_x,
-                                        y_train=model.y_train, y_eval=model.y_eval, test_y=model.test_y,
-                                        target_data_path = model.target_data_path, best_model=best_model, loaded_model=voting_model, 
-                                        x_transform=x_transform, y_transform=y_transform, t_type=t_type,
-                                        out_feature=target_name, custom_name=custom_name, SI=SI)
-            save_obj.processData()
+            # best_model = 'vote'
+            # save_obj = sd.SaveOutput(train_id=model.train_sub_id, eval_id=model.eval_id, test_id=model.test_id,
+            #                             x_train=x_train, x_eval=x_eval, test_x=test_x, train_columns=train_columns,
+            #                             m_x_train = model.x_train, m_x_eval = model.x_eval, m_x_test = model.test_x,
+            #                             y_train=model.y_train, y_eval=model.y_eval, test_y=model.test_y,
+            #                             target_data_path = model.target_data_path, best_model=best_model, loaded_model=voting_model, 
+            #                             x_transform=x_transform, y_transform=y_transform, t_type=t_type,
+            #                             out_feature=target_name, custom_name=custom_name, SI=SI)
+            # save_obj.processData()
 
-            print('\n----------------- Results for meta model -------------------\n')
-            # # ___________________________________________________
-            # # plot meta model fit
-            best_model = 'meta'
-            save_obj = sd.SaveOutput(train_id=model.train_sub_id, eval_id=model.eval_id, test_id=model.test_id,
-                                        x_train=x_train, x_eval=x_eval, test_x=test_x, train_columns=train_columns,
-                                        m_x_train = model.x_train, m_x_eval = model.x_eval, m_x_test = model.test_x,
-                                        y_train=model.y_train, y_eval=model.y_eval, test_y=model.test_y,
-                                        target_data_path = model.target_data_path, best_model=best_model, loaded_model=meta_model, 
-                                        x_transform=x_transform, y_transform=y_transform, t_type=t_type,
-                                        out_feature=target_name, custom_name=custom_name, SI=SI)
-            save_obj.processData()
+            # print('\n----------------- Results for meta model -------------------\n')
+            # # # ___________________________________________________
+            # # # plot meta model fit
+            # best_model = 'meta'
+            # save_obj = sd.SaveOutput(train_id=model.train_sub_id, eval_id=model.eval_id, test_id=model.test_id,
+            #                             x_train=x_train, x_eval=x_eval, test_x=test_x, train_columns=train_columns,
+            #                             m_x_train = model.x_train, m_x_eval = model.x_eval, m_x_test = model.test_x,
+            #                             y_train=model.y_train, y_eval=model.y_eval, test_y=model.test_y,
+            #                             target_data_path = model.target_data_path, best_model=best_model, loaded_model=meta_model, 
+            #                             x_transform=x_transform, y_transform=y_transform, t_type=t_type,
+            #                             out_feature=target_name, custom_name=custom_name, SI=SI)
+            # save_obj.processData()
             
-            # ___________________________________________________
-            # Final training
-            model.finalFits(ml_model, voting_model, meta_model, target_name, best_model_orig)
+            # # ___________________________________________________
+            # # Final training
+            # model.finalFits(ml_model, voting_model, meta_model, target_name, best_model_orig)
 
-            print('\n----------------- Feature importance -------------------\n')
+            # print('\n----------------- Feature importance -------------------\n')
             # # ___________________________________________________
             # plot feature importance
-            try:
-                fimp_object = fimp.FeatureImportance(custom_name, best_model)
-                fimp_object.plotImportance(model=ml_model, out_features=target_name,
-                                            train_x=train_x, train_y=train_y)
-                fimp_object.plotShapImportance(model=ml_model, out_features=target_name, 
-                                                train_x=train_x)
-            except Exception as e:       
-                print("An exception occurred due to shap internal errors!")  
-                print(e)      
-            print('\n**************** modeling parameter {0} ends here ****************\n'.format(target_name))
-            print('end')
+            # try:
+            #     fimp_object = fimp.FeatureImportance(custom_name, best_model)
+            #     fimp_object.plotImportance(model=ml_model, out_features=target_name,
+            #                                 train_x=train_x, train_y=train_y)
+            #     fimp_object.plotShapImportance(model=ml_model, out_features=target_name, 
+            #                                     train_x=train_x)
+            # except Exception as e:       
+            #     print("An exception occurred due to shap internal errors!")  
+            #     print(e)      
+            # print('\n**************** modeling parameter {0} ends here ****************\n'.format(target_name))
+            # print('end')
 
 if __name__ == "__main__":
     RunMlModel.main(['light_notrans_35', -1, "True", "True", 0.3, 5])
