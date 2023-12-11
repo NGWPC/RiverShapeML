@@ -45,7 +45,8 @@ class DataLoader:
         """
         try:
             self.data = pd.read_parquet(self.data_path, engine='pyarrow')
-            self.data = self.data.head(100)
+            self.data = self.data.iloc[2500000:2647455]
+            self.data.reset_index(drop=True, inplace=True)
         except:
             print('Wrong address or data format. Please use correct parquet file.')
         
@@ -53,7 +54,7 @@ class DataLoader:
                                                                       'gridcode','number_unique_peaks','non_zero_years',
                                                                       'toCOMID','Hydroseq','RPUID','FromNode',
                                                                       'ToNode','VPUID','hy_cats','geometry_poly',
-                                                                      'REACHCODE','sourcefc','comid','FEATUREID'])]
+                                                                      'REACHCODE','sourcefc','comid'])]
         # Find string columns (debug)
         # string_columns = []
         # # Iterate through each column and check if it contains string values
@@ -216,7 +217,8 @@ class DataLoader:
                 
                 trans =  pickle.load(open('models/train_y_'+out_feature+'_tansformation.pkl', "rb"))
                 #scaler_data = data.apply(applyScalerY)
-                data = trans.transform(data)
+                data = pd.DataFrame(data, columns=[out_feature])
+                data = trans.transform(data) # .reshape(-1,1)
 
             else:
                 # Replace NA and inf

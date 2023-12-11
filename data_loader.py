@@ -194,7 +194,6 @@ class DataLoader:
                 if number_to_replace in self.data[column_name].values:
                     median_value = self.data[column_name].median()
                     self.data[column_name] = self.data[column_name].replace(number_to_replace, median_value)
-
         return 
 
  # --------------------------- Dimention Reduction --------------------------- #
@@ -559,7 +558,6 @@ class DataLoader:
         # Save the list to a JSON file
         with open('model_space/trans_feats'+'_'+self.out_feature+"_"+'.json', 'w') as json_file:
             json.dump(serialized_list, json_file, indent=4)
-
         min_value = 0
         max_value = 500
         scaler = MinMaxScaler(feature_range=(min_value, max_value))
@@ -620,7 +618,6 @@ class DataLoader:
         
         # duplicated_columns = train_x.columns[train_x.columns.duplicated()]
         # print(duplicated_columns)
-
         if self.y_transform:
             if t_type=='power':
                 # t_y = MinMaxScaler(feature_range=(0, 1))
@@ -708,4 +705,5 @@ class DataLoader:
         test_id.to_parquet(self.custom_name+'/metrics/'+'test_id'+'_'+self.out_feature+'.parquet')    
         train_id = train_id.reset_index(drop=True)
         test_id = test_id.reset_index(drop=True)
+
         return train_x, train_y, train_id, test_x, test_y, test_id

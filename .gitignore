@@ -72,6 +72,9 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+deployment/data/ml_exports*
+deployment/data/conus_width_depth_ml.parquet
+deployment/data/ml_inputs.parquet
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
