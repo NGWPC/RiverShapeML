@@ -166,14 +166,12 @@ class RunDeploy:
         nthreads     = int(argv[0])
         SI           = True
         rand_state   = 105
-        os.chdir('/mnt/d/Lynker/FEMA_HECRAS/bankfull_W_D/deployment')
+        # os.chdir('/mnt/d/Lynker/FEMA_HECRAS/bankfull_W_D/deployment')
 
         # Load data
         dl_obj = dataloader.DataLoader(rand_state)
         dl_obj.readFiles()
         dl_obj.imputeData()
-        # has_missing_y = np.isnan(dl_obj.data).any()
-        rows_with_nan = dl_obj.data[dl_obj.data.isnull().any(axis=1)]
 
         # Load targets
         temp        = json.load(open('data/model_feature_names.json'))
@@ -194,10 +192,6 @@ class RunDeploy:
         results = []
 
         # Parallelize the for loop
-        # results = []
-        # for target_name in tqdm(target_list):
-        #     result = deploy_obj.process_target(dl_obj, target_name, vote_flag, meta_flag, best_flag, file, model_type)
-        #     results.append(result)
         results = Parallel(n_jobs=nthreads, backend="multiprocessing")(delayed(deploy_obj.process_target)(dl_obj, target_name, vote_flag, meta_flag, best_flag, file, model_type) for target_name in tqdm(target_list))
         
         # Unpack the results
@@ -219,5 +213,4 @@ class RunDeploy:
         return
 
 if __name__ == "__main__":
-    RunDeploy.main([ -1])
-    # RunDeploy.main(sys.argv[1:])
+    RunDeploy.main(sys.argv[1:])
