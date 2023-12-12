@@ -26,6 +26,7 @@ model_space/bu_dimention_space.json
 /deployment/test.ipynb
 Untitled-1.ipynb
 /model_space/config1.zip
+/model_space/config2.zip
 deployment/data/nwm_conus_input.parquet
 
 # Folders
@@ -50,7 +51,7 @@ deployment/models/*
 deployment/data/vpu12/*
 conus/data/*
 light_notrans_35/*
-
+paper/*
 
 # Distribution / packaging
 .Python
@@ -72,6 +73,9 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+deployment/data/ml_exports*
+deployment/data/conus_width_depth_ml.parquet
+deployment/data/ml_inputs.parquet
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

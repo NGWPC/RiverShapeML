@@ -111,27 +111,33 @@ class DPModel:
         # dl_obj.addExtraFeatures(target_name) # already included in data
         
         if target_name == 'Y_bf':
-            model_type = 'rf'
+            model_type = 'xgb'
             x_transform = False
             y_transform = False
         elif target_name == 'Y_in':
-            model_type = 'rf'
+            model_type = 'xgb'
             x_transform = False
             y_transform = False
         elif target_name == 'TW_bf':
-            model_type = 'rf'
+            model_type = 'xgb'
             x_transform = False
             y_transform = False
         else:
-            model_type = 'rf'
-            x_transform = True
-            y_transform = True
+            model_type = 'xgb'
+            x_transform = False
+            y_transform = False
 
         model, trans_feats, model_feats = self.loadModel(target_name, vote_flag=False, meta_flag=False, 
-                                      best_flag=True, file='light_notrans_35', model_type=model_type)
+                                      best_flag=True, file='NWM', model_type=model_type)
 
         dl_obj.transformXData(out_feature=target_name, trans_feats=trans_feats,
                                 t_type='power', x_transform=x_transform)
+        # has_missing_y = np.isnan(dl_obj.data).any()
+        rows_with_nan = dl_obj.data[dl_obj.data.isnull().any(axis=1)]
+        # if has_missing_y:
+        print("Part2 Rows with NaN values:")
+        print(rows_with_nan)
+
         data_in = dl_obj.buildPCA(target_name)
 
         y_pred_label = 'owp_' + target_name
@@ -147,7 +153,7 @@ class DPModel:
 
 
 # --------------------------- A driver class --------------------------- #           
-class RunMlModel:
+class RunDeploy:
     @staticmethod
     def main(argv):
         """ The driver class to run ML models
@@ -160,7 +166,7 @@ class RunMlModel:
         nthreads     = int(argv[0])
         SI           = True
         rand_state   = 105
-        #os.chdir('/mnt/d/Lynker/FEMA_HECRAS/bankfull_W_D/deployment')
+        # os.chdir('/mnt/d/Lynker/FEMA_HECRAS/bankfull_W_D/deployment')
 
         # Load data
         dl_obj = dataloader.DataLoader(rand_state)
@@ -179,7 +185,7 @@ class RunMlModel:
         best_flag   = True
         file        = 'bf'
         model_type  = 'xgb'
-        log_y_t     = True
+        log_y_t     = False
         
         deploy_obj = DPModel(rand_state)
         
@@ -198,11 +204,13 @@ class RunMlModel:
             if SI:
                 dl_obj.data[y_pred_label] = dl_obj.data[y_pred_label] * 0.3048
     
-        out_vars.append('id')
+        out_vars.append('FEATUREID')
         out_df = dl_obj.data[out_vars]
-        out_df.to_parquet('data/ml_exports.parquet')
+        out_df.loc[out_df['owp_tw_inchan'] > out_df['owp_tw_bf'], 'owp_tw_inchan'] = out_df['owp_tw_bf']
+        out_df.loc[out_df['owp_y_inchan'] > out_df['owp_y_bf'], 'owp_y_inchan'] = out_df['owp_y_bf']
+        out_df.to_parquet('data/ml_exports2647454.parquet')
         print("\n ------------- ML estimates complete ----------- \n")
         return
 
 if __name__ == "__main__":
-    RunMlModel.main(sys.argv[1:])
+    RunDeploy.main(sys.argv[1:])

@@ -1,3 +1,18 @@
+Rows with NaN values:
+Empty DataFrame
+Columns: [slopelenkm, PctSilicicWs, WtDepWs, ManureWs, PctHbWet2011Ws, PctBl2011Ws, COMID, rp_50, qs_tavg, PctAlluvCoastWs, PctGrs2011Ws, qsb_tavg, ph_mean_0_5_r250, PctGlacLakeFineWs, LAI, nwm_50_ap, alpha_mean_0_5_r250, rp_35, nwm_75_ap, PctFrstLoss2011Ws, RckDepWs, NWM_2, HydrlCondWs, silt_mean_0_5_r250, HLR, streamleve, avgsurft_tavg, rp_100, NWM_1.5, rp_95, DIVISION_encode, nwm_min, RockNWs, PctWdWet2011Ws, def, theta_r_mean_0_5_r250, K2OWs, rp_1, Pathlength, PctCarbResidWs, RdCrsSlpWtdWs, PctUrbOp2011Ws, rp_90, PctCoastCrsWs, rp_200, DamNIDStorWs, PctShrb2011Ws, RdCrsWs, rp_2, PctColluvSedWs, hb_mean_0_5_r250, elevation_ave, rp_85, PctGlacTilCrsWs, rp_5, vaa_dummy, PctExtruVolWs, PopDen2010Ws, ksat_mean_0_5_r250, nwm_25, DamDensWs, nwm_min_ap, RunoffWs, hwnodesqkm, PROVINCE_encode, WaterInputWs, PctUrbLo2011Ws, PctUrbMd2011Ws, soil, PctCrop2011Ws, lat, nwm_50, DamNrmStorWs, PDSI, PctGlacTilClayWs, nwm_max, StreamOrde, PctEolFineWs, PctHydricWs, ecanop_tavg, long, Sinuosity, n_mean_0_5_r250, FEATUREID, elevation_diff, PctGlacLakeCrsWs, RdDensWs, lambda_mean_0_5_r250, PctGlacTilLoamWs, nwm_max_ap, ArbolateSu, PctIce2011Ws, aet, TotDASqKM, FertWs, sand_mean_0_5_r250, PctNonCarbResidWs, theta_s_mean_0_5_r250, Fe2O3Ws, bd_mean_0_5_r250, ...]
+Index: []
+
+[0 rows x 147 columns]
+transforming and plotting ...
+Part2 Rows with NaN values:
+Empty DataFrame
+Columns: [rp_5, rp_10, rp_15, rp_25, rp_35, rp_50, rp_60, rp_75, rp_85, rp_90, rp_95, rp_98, rp_99, rp_100, rp_200, rp_500, rp_1000, WaterInputWs, PctConif2011Ws, PctCrop2011Ws, PctDecid2011Ws, PctGrs2011Ws, PctHay2011Ws, PctMxFst2011Ws, PctShrb2011Ws, PctUrbHi2011Ws, PctUrbLo2011Ws, PctUrbMd2011Ws, PctUrbOp2011Ws, Fe2O3Ws, HydrlCondWs, CompStrgthWs, PctAlluvCoastWs, PctCarbResidWs, PctColluvSedWs, PctGlacLakeCrsWs, PctGlacLakeFineWs, PctGlacTilClayWs, PctGlacTilCrsWs, PctGlacTilLoamWs, PctNonCarbResidWs, PctSilicicWs, alpha_mean_0_5_r250, clay_mean_0_5_r250, hb_mean_0_5_r250, ksat_mean_0_5_r250, lambda_mean_0_5_r250, n_mean_0_5_r250, om_mean_0_5_r250, ph_mean_0_5_r250, sand_mean_0_5_r250, silt_mean_0_5_r250, theta_r_mean_0_5_r250, theta_s_mean_0_5_r250, FertWs, ManureWs, AgKffactWs, CanalDensWs, HUDen2010Ws, PopDen2010Ws, RdCrsWs, RdCrsSlpWtdWs, RdDensWs, DamDensWs, DamNIDStorWs, DamNrmStorWs, elevation_ave, long, lat, aet, DIVISION_encode, PROVINCE_encode, def, PDSI, pet, ppt, soil, HLR, WetIndexWs, PctWdWet2011Ws, LENGTHKM, slopelenkm, K2OWs, rp_1, WtDepWs, Pathlength, Sinuosity, nwm_dummy, PctAlkIntruVolWs, FEATUREID, PctHbWet2011Ws, PctCoastCrsWs, PctBl2011Ws, elevation_diff, COMID, qs_tavg, rp_2, qsb_tavg, nwm_max_ap, ArbolateSu, ...]
+Index: []
+
+[0 rows x 147 columns]
+transforming and plotting ...
+--------------- End of Y transformation ---------------
 
  ------------- ML estimates complete ----------- 
 

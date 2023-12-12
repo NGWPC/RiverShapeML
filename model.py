@@ -95,7 +95,7 @@ class MlModel:
         if not os.path.isdir(os.path.join(os.getcwd(),'cache/')):
             os.mkdir(os.path.join(os.getcwd(),'cache/'))
         
-# --------------------------- Load train and test data files --------------------------- #    
+    # --------------------------- Load train and test data files --------------------------- #    
     def loadData(self, out_feature: str, x_transform: bool = False, 
                  y_transform: bool = False, R2_thresh: float = 0.0, count_thresh: int = 3,
                  sample_type: str = "All", pca: bool = True, t_type: str = 'log',
@@ -183,7 +183,8 @@ class MlModel:
             self.train_x, self.test_x, self.train_x_comp, self.test_x_comp = data_loader.reduceDim(self.train_x, self.test_x)
             self.train_x_comp = pd.concat([self.train_x_comp, self.train_id], axis=1) 
             self.test_x_comp = pd.concat([self.test_x_comp, self.test_id], axis=1) 
-# --------------------------- Grid Search --------------------------- #
+    
+    # --------------------------- Grid Search --------------------------- #
     def findBestParams(self, out_features: str = 'TW_bf', nthreads: int = -1, space: str = 'actual_space',
                         weighted: bool = False) -> Tuple[str, dict, pd.DataFrame]:
         """ Find the best parameters of the all ML models through k-fold
@@ -510,8 +511,10 @@ class MlModel:
         # base_model.append(('orth', temp))
 
 
+        # top_model = RandomForestRegressor(random_state=self.rand_state, n_jobs=nthreads,
+        #                                   max_depth=9, max_features='log2', max_samples=0.6, n_estimators=13000)#ExtraTreesRegressor(random_state=self.rand_state, n_jobs=nthreads)#LinearRegression()
         top_model = RandomForestRegressor(random_state=self.rand_state, n_jobs=nthreads,
-                                          max_depth=9, max_features='log2', max_samples=0.6, n_estimators=13000)#ExtraTreesRegressor(random_state=self.rand_state, n_jobs=nthreads)#LinearRegression()
+                                          max_depth=2, max_features='log2', max_samples=0.6, n_estimators=100)
         voting_model = VotingRegressor(estimators=base_model, n_jobs=nthreads)
         meta_model = StackingRegressor(estimators=base_model, final_estimator=top_model, cv=5, 
                                        passthrough=True, n_jobs=nthreads)
@@ -668,28 +671,28 @@ class RunMlModel:
         temp        = json.load(open('data/model_feature_names.json'))
         target_list = temp.get('out_features')
         del temp
-        # target_list=['TW_in', 'TW_in']
+        # target_list=['TW_in']
         for target_name in tqdm(target_list):
             if target_name == "Y_bf": 
-                R2_thresh    = 0.6 #NWM 0.6 #NWIS 0.85
-                count_thresh = 10 #NWM 10  #NWIS 5
+                R2_thresh    = 0.85 #NWM 0.6 #NWIS 0.85
+                count_thresh = 5 #NWM 10  #NWIS 5
                 x_transform  = False #NWM False     #NWIS False
                 y_transform  = False #NWM False     #NWIS False
             elif target_name == "Y_in": 
-                R2_thresh    = 0.6 #NWM 0.6  #NWIS 0.85
-                count_thresh = 10 #NWM 10  #NWIS 5
+                R2_thresh    = 0.85 #NWM 0.6  #NWIS 0.85
+                count_thresh = 5 #NWM 10  #NWIS 5
                 x_transform  = False #NWM False     #NWIS False
                 y_transform  = False #NWM False     #NWIS False
             elif target_name == "TW_bf": 
-                R2_thresh    = 0 #NWM 0 #NWIS 0.2
-                count_thresh = 4 #NWM 4 #NWIS 8
+                R2_thresh    = 0.2 #NWM 0 #NWIS 0.2
+                count_thresh = 8 #NWM 4 #NWIS 8
                 x_transform  = False #NWM False  #NWIS False
                 y_transform  = False #NWM False  #NWIS False
             elif target_name == "TW_in": 
-                R2_thresh    = 0 #NWM 0 #NWIS 0.2
-                count_thresh = 10 #NWM 10 #NWIS 8
-                x_transform  = True #NWM True #NWIS False
-                y_transform  = True #NWM True #NWIS False
+                R2_thresh    = 0.2 #NWM 0 #NWIS 0.2
+                count_thresh = 8 #NWM 10 #NWIS 8
+                x_transform  = False #NWM True #NWIS False
+                y_transform  = False #NWM True #NWIS False
             # ___________________________________________________
             # Train models 
             print('\n******************* modeling parameter {0} starts here *******************\n'.format(target_name))
@@ -728,8 +731,8 @@ class RunMlModel:
             save_obj.processData()
 
             print('\n----------------- Results for vote model -------------------\n')
-            # # ___________________________________________________
-            # # save best model fit
+            # ___________________________________________________
+            # save best model fit
             best_model = 'vote'
             save_obj = sd.SaveOutput(train_id=model.train_sub_id, eval_id=model.eval_id, test_id=model.test_id,
                                         x_train=x_train, x_eval=x_eval, test_x=test_x, train_columns=train_columns,
@@ -758,7 +761,7 @@ class RunMlModel:
             model.finalFits(ml_model, voting_model, meta_model, target_name, best_model_orig)
 
             print('\n----------------- Feature importance -------------------\n')
-            # # ___________________________________________________
+            # ___________________________________________________
             # plot feature importance
             try:
                 fimp_object = fimp.FeatureImportance(custom_name, best_model)
