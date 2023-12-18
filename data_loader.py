@@ -339,15 +339,20 @@ class DataLoader:
 
         # Lookup needed PCs
         pc_columns = [col for col in train_data.columns if '_pc' in col]
-        non_pc_columns = set(train_data.columns) -set(pc_columns)
+        # non_pc_columns = set(train_data.columns) -set(pc_columns)
         temp_o = json.load(open('model_space/feature_space.json'))
         temp_pc = temp_o.get(self.sample_type).get(self.out_feature+'_pc_feats')
+        temp = temp_o.get(self.sample_type).get(self.out_feature+'_feats')
         pc_vars = []
         for pc_var in temp_pc:
             matched_vars = [variable for variable in train_data.columns if pc_var in variable]
             pc_vars += matched_vars
 
-        model_features = list(non_pc_columns) + pc_vars
+        model_features = list(temp) + pc_vars
+        # Drop NWM features as input for NWM training only
+        if self.train_type == "NWM":
+            model_features = set(model_features) - set(["NWM_2","NWM_1.5"])
+        train_data = train_data[model_features]
         train_data = train_data[model_features]
         test_data = test_data[model_features]
         

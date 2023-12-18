@@ -19,6 +19,8 @@
     },
     "All": {
         "TW_bf_feats": [
+            "Sinuosity",
+            "NWM_2",
             "elevation_ave",
             "elevation_diff",
             "lat",
@@ -50,6 +52,8 @@
             "nwm_dummy",
             "vaa_dummy",
             "scat_dummy",
+            "gldas_dummy",
+            "terra_dummy",
             "BFIWs",
             "WetIndexWs",
             "WtDepWs",
@@ -125,6 +129,8 @@
             "RdDensWs"
         ],
         "TW_in_feats": [
+            "Sinuosity",
+            "NWM_1.5",
             "elevation_ave",
             "elevation_diff",
             "lat",
@@ -156,6 +162,8 @@
             "nwm_dummy",
             "vaa_dummy",
             "scat_dummy",
+            "gldas_dummy",
+            "terra_dummy",
             "BFIWs",
             "WetIndexWs",
             "WtDepWs",
@@ -231,6 +239,8 @@
             "RdDensWs"
         ],
         "Y_bf_feats": [
+            "Sinuosity",
+            "NWM_2",
             "elevation_ave",
             "elevation_diff",
             "lat",
@@ -262,6 +272,8 @@
             "nwm_dummy",
             "vaa_dummy",
             "scat_dummy",
+            "gldas_dummy",
+            "terra_dummy",
             "BFIWs",
             "WetIndexWs",
             "WtDepWs",
@@ -337,6 +349,8 @@
             "RdDensWs"
         ],
         "Y_in_feats": [
+            "Sinuosity",
+            "NWM_1.5",
             "elevation_ave",
             "elevation_diff",
             "lat",
@@ -368,6 +382,8 @@
             "nwm_dummy",
             "vaa_dummy",
             "scat_dummy",
+            "gldas_dummy",
+            "terra_dummy",
             "BFIWs",
             "WetIndexWs",
             "WtDepWs",
