@@ -511,10 +511,10 @@ class MlModel:
         # base_model.append(('orth', temp))
 
 
-        # top_model = RandomForestRegressor(random_state=self.rand_state, n_jobs=nthreads,
-        #                                   max_depth=9, max_features='log2', max_samples=0.6, n_estimators=13000)#ExtraTreesRegressor(random_state=self.rand_state, n_jobs=nthreads)#LinearRegression()
         top_model = RandomForestRegressor(random_state=self.rand_state, n_jobs=nthreads,
-                                          max_depth=2, max_features='log2', max_samples=0.6, n_estimators=100)
+                                          max_depth=9, max_features='log2', max_samples=0.6, n_estimators=13000)#ExtraTreesRegressor(random_state=self.rand_state, n_jobs=nthreads)#LinearRegression()
+        # top_model = RandomForestRegressor(random_state=self.rand_state, n_jobs=nthreads,
+        #                                   max_depth=2, max_features='log2', max_samples=0.6, n_estimators=100)
         voting_model = VotingRegressor(estimators=base_model, n_jobs=nthreads)
         meta_model = StackingRegressor(estimators=base_model, final_estimator=top_model, cv=5, 
                                        passthrough=True, n_jobs=nthreads)
