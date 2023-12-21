@@ -20,7 +20,6 @@
     "All": {
         "TW_bf_feats": [
             "Sinuosity",
-            "NWM_2",
             "elevation_ave",
             "elevation_diff",
             "lat",
@@ -130,7 +129,6 @@
         ],
         "TW_in_feats": [
             "Sinuosity",
-            "NWM_1.5",
             "elevation_ave",
             "elevation_diff",
             "lat",
@@ -240,7 +238,6 @@
         ],
         "Y_bf_feats": [
             "Sinuosity",
-            "NWM_2",
             "elevation_ave",
             "elevation_diff",
             "lat",
@@ -350,7 +347,6 @@
         ],
         "Y_in_feats": [
             "Sinuosity",
-            "NWM_1.5",
             "elevation_ave",
             "elevation_diff",
             "lat",
