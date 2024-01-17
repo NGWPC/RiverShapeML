@@ -117,7 +117,7 @@ class DataLoader:
                                                                       'toCOMID','Hydroseq','RPUID','FromNode',
                                                                       'ToNode','VPUID','hy_cats','geometry_poly',
                                                                       'REACHCODE','sourcefc','comid','FEATUREID'])]
-         # Data imputation 
+        # Data imputation 
         impute = "median"
         if impute == "zero":
             self.data = self.data.fillna(-1) # a temporary brute force way to deal with NAN
@@ -130,7 +130,9 @@ class DataLoader:
             self.data = self.data.fillna(-1)
             for column_name in self.data.columns:
                 if number_to_replace in self.data[column_name].values:
-                    median_value = self.data[column_name].median()
+                    vals = pd.Series(self.data[column_name])
+                    vals = vals[vals != -1]
+                    median_value = vals.median()
                     self.data[column_name] = self.data[column_name].replace(number_to_replace, median_value)
         
         # Find string columns (debug)
@@ -325,7 +327,7 @@ class DataLoader:
             # Watershed
             print('Reducing Watershed ..')
             feat_list = temp.get('Watershed_pc')
-            buildPCA(feat_list, 3,'Watershed_pc')
+            buildPCA(feat_list, 2,'Watershed_pc')
 
             # Stream
             print('Reducing Stream ..')

@@ -93,9 +93,10 @@ class DataLoader:
             self.data = self.data.fillna(-1) # a temporary brute force way to deal with NAN
         if impute == "median":
             median_values_df = pd.read_parquet('models/median_imput.parquet')
-            columns_to_fill = self.data.columns[self.data.isnull().any()].tolist()
-            self.data[columns_to_fill] = self.data[columns_to_fill].fillna(median_values_df.iloc[0])
-            self.data = self.data.fillna(-1)
+            for col in self.data.columns:
+                if col in median_values_df.index:
+                    median_value = median_values_df.loc[col, 'Median']
+                    self.data[col].fillna(median_value, inplace=True)
         return
 
     # --------------------------- Dimention Reduction --------------------------- #     
