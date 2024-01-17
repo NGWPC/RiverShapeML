@@ -201,19 +201,7 @@
         "value": "elevation_ave"
     },
     {
-        "value": "long"
-    },
-    {
-        "value": "lat"
-    },
-    {
         "value": "aet"
-    },
-    {
-        "value": "DIVISION_encode"
-    },
-    {
-        "value": "PROVINCE_encode"
     },
     {
         "value": "def"
@@ -229,9 +217,6 @@
     },
     {
         "value": "soil"
-    },
-    {
-        "value": "HLR"
     },
     {
         "value": "WetIndexWs"

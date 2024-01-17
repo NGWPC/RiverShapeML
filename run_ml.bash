@@ -1,18 +1,7 @@
 #!/bin/bash
 # Conda
-# my directory source /bsuhome/arashmodaresirad/miniconda3/etc/profile.d/conda.sh
-#Account and Email Information
-#SBATCH -A arashmodaresirad ## User ID
-#SBATCH --mail-type=end
-#SBATCH --mail-user=arashmodaresirad@u.boisestate.edu
+# source /home/arashmod/miniconda3/etc/profile.d/conda.sh
 
-#SBATCH -J not       # job name
-#SBATCH -o outputs/R30C5_not_results_final.o%j # output and error file name (%j expands to jobID)
-#SBATCH -e outputs/R30C5_not_errors_final.e%j
-#SBATCH -p bsudfq # queue (partition)
-#SBATCH -n 2               # Run one process
-#SBATCH --cpus-per-task=28 # allow job to multithread across all cores
-#SBATCH -t 10-00:00:00      # run time (d-hh:mm:ss)
 ulimit -v unlimited
 ulimit -s unlimited
 ulimit -u 10000
