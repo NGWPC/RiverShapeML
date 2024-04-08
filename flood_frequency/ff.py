@@ -125,8 +125,9 @@ class FloodFreq:
             observations_data['value_time']= pd.to_datetime(observations_data['value_time'])
             observations_data['value'] = observations_data['value'].astype(float)
             observations_data = observations_data.loc[observations_data['value']>= 0]
+            
             return observations_data
-        
+
         try:
             observations_data = service.get(
                 sites=siteID,
@@ -136,36 +137,43 @@ class FloodFreq:
             observations_data['value'] = observations_data['value'].astype(float)
             observations_data = observations_data.loc[observations_data['value']>= 0]
             flag = 0
+            annual_max = observations_data[['value_time','value']].dropna().resample('Y', on='value_time').max()
+            if len(annual_max) == 1:
+                flag = 1
+                observations_data = seccondQuery(siteID)
+                if observations_data is None:
+                    ff1 = annual_max.loc[(annual_max['RI'] == 1)]
+                    return siteID, ff1['value'].values[0], 1.5*ff1['value'].values[0], 'ft3/s', 5
         except:
             observations_data = seccondQuery(siteID)
             if observations_data is None:
-                return None, None, None, 4
+                return siteID, None, None, None, 4
             flag = 1
             unit = ['ft3/s']
-
         # define the true objective function
-        def objective(x:float, a:float, b:float, f:float) -> float:
+        def objective(x, a, b, f):
             return (a * x) + (b * x**2) + f
-        def objective2(x:float, a:float, b:float) -> float:
-            return (a * x) + b
-         
-        def annualMax(observations_data: pd.DataFrame) -> pd.DataFrame:
+        def objective2(x, a, b):
+            return (a * x) + b 
+
+        def annualMax(observations_data):
             annual_max = observations_data[['value_time','value']].dropna().resample('Y', on='value_time').max()
             annual_max = annual_max.dropna(axis='rows')
             annual_max = annual_max.reset_index(drop=True)
             annual_max['value'] = annual_max['value'].astype(float)
             annual_max['max_rank'] = annual_max['value'].rank(method='max', ascending=False)
-            annual_max['RI'] = (len(annual_max)+1)/annual_max['max_rank']
+            annual_max['RI'] = (len(annual_max))/annual_max['max_rank']
             annual_max['P'] = 1/annual_max['RI'] 
             return annual_max
-
+        
+        # return observations_data, flag
         # get data if hydrotools fail
         if len(observations_data) == 0 or flag == 1:
             observations_data = seccondQuery(siteID)
             flag = 1
             unit = ['ft3/s']
             if observations_data is None:
-                return None, None, None, 4
+                return siteID, None, None, None, 4
             annual_max = annualMax(observations_data)
             
             # if it only has 2 year reccord
@@ -181,39 +189,83 @@ class FloodFreq:
                 y_line = objective2(x_line, a, b)
                 ff = pd.DataFrame({"RI":x_line,"Q":y_line})
                 ff2 = ff.loc[ff['RI'] == 2]
-                ff1 = annual_max.iloc[(annual_max['RI']-1).abs().argsort()[:1]]
-                return ff1['value'].values[0], ff2['Q'].values[0], unit, flag
+                ff1 = annual_max.loc[(annual_max['RI'] == 1)]
+                return siteID, ff1['value'].values[0], ff2['Q'].values[0], unit, flag
             # if it only has 1 year reccord
             elif len(annual_max) < 2: 
                 flag = 3  
-                return None, None, None, flag
+                ff1 = annual_max.loc[(annual_max['RI'] == 1)]
+                return siteID, ff1['value'].values[0], 1.5*ff1['value'].values[0], 'ft3/s', 5
         else: 
             flag = 0
             unit = observations_data['measurement_unit'].unique()
             annual_max = annualMax(observations_data)
-
-        popt, _ = curve_fit(objective, annual_max['RI'], annual_max['value'])
-        # summarize the parameter values
-        a, b, f = popt
-        # plot input vs output
-        # fig, ax = plt.subplots(figsize = (9, 6))
-        # ax.scatter(annual_max['RI'], annual_max['value'], alpha=0.7, edgecolors="k")
-        # ax.set_xscale("log")
-        # ax.set_yscale("log")
-        x_line = np.arange(0, 25, 1)
-        # calculate the output for the range
-        y_line = objective(x_line, a, b, f)
-
-        # create a line plot for the mapping function
-        # ax.plot(x_line, y_line, '--', color='red')
-        ff = pd.DataFrame({"RI":x_line,"Q":y_line})
+            annual_max = annual_max.loc[annual_max['RI'] <= 3]
+            # if it only has 2 year reccord
+            if len(annual_max) == 2: 
+                annual_max = annualMax(observations_data)
+                flag = 2 #01053680
+                unit = 'ft3/s'
+                def objective(x, a, b):
+                    return (a * x) + b 
+                popt, _ = curve_fit(objective, annual_max['RI'], annual_max['value'])
+                # summarize the parameter values
+                a, b = popt
+                x_line = np.arange(0, 25, 1)
+                y_line = objective2(x_line, a, b)
+                ff = pd.DataFrame({"RI":x_line,"Q":y_line})
+                ff2 = ff.loc[ff['RI'] == 2]
+                ff1 = annual_max.iloc[(annual_max['RI']-1).abs().argsort()[:1]]
+                return siteID, ff1['value'].values[0], ff2['Q'].values[0], unit, flag
+            # if it only has 1 year reccord
+            elif len(annual_max) < 2: 
+                flag = 3  
+                return siteID, None, None, None, flag
+    
+        closest_lower2 = annual_max[annual_max['RI'] < 2]['RI'].max()
+        # Find the closest value greater than the given value
+        closest_greater2 = annual_max[annual_max['RI'] > 2]['RI'].min()
         
-        # return 2 and 1 year flood frequncy 
-        ff2 = ff.loc[ff['RI'] == 2]
+
+        if not(np.isnan(closest_lower2)) and not(np.isnan(closest_greater2)):
+            filtered_df = annual_max[(annual_max['RI'] == closest_lower2) | (annual_max['RI'] == closest_greater2)]
+            popt, _ = curve_fit(objective2, filtered_df['RI'], filtered_df['value'])
+            a, b = popt
+            x_line = np.arange(0, 25, 1)
+            # calculate the output for the range
+            y_line = objective2(x_line, a, b)
+            # create a line plot for the mapping function
+            # ax.plot(x_line, y_line, '--', color='red')
+            ff = pd.DataFrame({"RI":x_line,"Q":y_line})
+            # return 2 and 1 year flood frequncy 
+            ff2 = ff.loc[ff['RI'] == 2]
+        else:
+            # return flag
+            popt, _ = curve_fit(objective, annual_max['RI'], annual_max['value'])
+            # summarize the parameter values
+            a, b, f = popt
+            # plot input vs output
+            # fig, ax = plt.subplots(figsize = (9, 6))
+            # ax.scatter(annual_max['RI'], annual_max['value'], alpha=0.7, edgecolors="k")
+            # ax.set_xscale("log")
+            # ax.set_yscale("log")
+            x_line = np.arange(0, 25, 1)
+            # calculate the output for the range
+            y_line = objective(x_line, a, b, f)
+
+            # create a line plot for the mapping function
+            # ax.plot(x_line, y_line, '--', color='red')
+            ff = pd.DataFrame({"RI":x_line,"Q":y_line})
+            
+            # return 2 and 1 year flood frequncy 
+            ff2 = ff.loc[ff['RI'] == 2]
         #ff1 = ff.loc[ff['RI'] == 1]
-        ff1 = annual_max.iloc[(annual_max['RI']-1).abs().argsort()[:1]]
+        ff1 = annual_max.loc[(annual_max['RI'] == 1)]
         
-        return ff1['value'].values[0], ff2['Q'].values[0], unit[0], flag
+        return siteID, ff1['value'].values[0], ff2['Q'].values[0], unit[0], flag
+
+    
+
 
 class GetFloodFreq: 
     @staticmethod
@@ -221,39 +273,39 @@ class GetFloodFreq:
         # Bulid an instance of flood frequency object
         FF = FloodFreq()
         target_sites = FF.findStations()
-        ff_dic = []
-        count = 0
-        count2 = 0
-        for site in tqdm(target_sites):
-            try:
-                out_ff1, out_ff2, unit, flag = FF.getFloodFrequency(site)
-                error = None
 
-            except Exception:
-                out_ff1, out_ff2, unit, flag = None, None, None, 4
-                error = traceback.format_exc()
+        def saveToParquet(df, iteration):
+        # Save DataFrame to parquet file
+            df.to_parquet(f'data/ff_out/TW_results_iteration_{iteration}.parquet')
 
-            ff_dic.append(
-                {
-                    'siteID': site,
-                    'bf_ff': out_ff2,
-                    'in_ff': out_ff1,
-                    'unit': unit,
-                    'flag': flag,
-                    # 'error': error
-                }
-            )
-            if count % 500 == 0:
-                print('Saving batch {0}'.format(count2))
-                ff_df = pd.DataFrame(ff_dic)
-                ff_df.to_csv('ff'+str(count2)+'.csv', index=False) 
-                ff_dic = [] 
-                count2 += 1
-            count += 1
+        # Function to process a single row and return flood frequency data
+        def processRow(row):
+            return pd.Series(FF.getFloodFrequency(row['siteID']))
+        # Initialize a counter
+        row_counter = 0
+        result_dfs = []
 
-        count2 += 1
-        ff_df = pd.DataFrame(ff_dic)
-        ff_df.to_csv('ff'+str(count2)+'.csv', index=False)
+        for index, row in tqdm(target_sites.iterrows()):
+            # Process the row and get flood frequency data
+            # result_df = process_row(row)
+            result_dfs.append(processRow(row).values)
+            
+            row_counter += 1
+
+            # Check if 100 rows have been processed
+            if row_counter % 100 == 0:
+                new_df = pd.DataFrame(result_dfs, columns=['siteID', 'in_ff', 'bf_ff', 'unit', 'flag'])
+                saveToParquet(new_df, row_counter)
+
+                result_dfs = []
+                if os.path.exists('nwisiv_cache.sqlite'):
+                    # Delete the sql file
+                    os.remove('nwisiv_cache.sqlite')
+
+        # After processing all rows, if there are remaining results, save them
+        if result_dfs:
+            new_df = pd.DataFrame(result_dfs, columns=['siteID', 'in_ff', 'bf_ff', 'unit', 'flag'])
+            saveToParquet(new_df, row_counter)
 
 if __name__ == "__main__":
     GetFloodFreq.main([])
