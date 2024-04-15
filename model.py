@@ -303,7 +303,7 @@ class MlModel:
                 param[k] = temp
                 del temp
             grid_search = GridSearchCV(estimator=model, param_grid=param, n_jobs = nthreads, cv = cv,
-                                       scoring="neg_root_mean_squared_error",)
+                                       scoring="neg_root_mean_squared_error")
             if model_key == 'ard' or model_key == 'knr' or model_key == 'mlp':
                 grid_search.fit(self.train_x, self.train_y)
             else:
