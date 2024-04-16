@@ -29,6 +29,8 @@ Untitled-1.ipynb
 /model_space/config1.zip
 /model_space/config2.zip
 deployment/data/nwm_conus_input.parquet
+!data/nwm_width_pred_tar_up.parquet
+!data/nwm_depth_pred_tar_up.parquet
 
 # Folders
 WD_up/*
