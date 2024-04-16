@@ -159,6 +159,13 @@ class MlModel:
         """
         # Bulid an instance of DataLoader object
         data_path = ''
+        # New data here <---------------------
+        # if "TW_" in out_feature:
+        #     data_path = self.target_data_path = 'data/width_tar_perd.parquet'
+        # elif "Y_" in out_feature:
+        #     data_path = self.target_data_path = 'data/depth_tar_perd.parquet'
+        # ------------------------------------
+
         if train_type == "NWIS" and "TW_" in out_feature:
             data_path = self.target_data_path = 'data/nwis_width_pred_tar.parquet'
         elif train_type == "NWIS" and "Y_" in out_feature:
@@ -442,12 +449,12 @@ class MlModel:
         # ___________________________________________________
         # Out of the box evaluation of models
         # Fit all models
-        # reg_models = lazypredict.Supervised.REGRESSORS
-        # lazypredict.Supervised.REGRESSORS = [t for t in reg_models if not t[0].startswith('Quantile')]
-        # ob_reg = LazyRegressor(predictions=True)
-        # models, predictions = ob_reg.fit(self.x_train, self.x_eval, self.y_train, self.y_eval)
-        # print('\n out of the box evaluation of models for target: '+str(self.custom_name)+ '\n')
-        # print(models)
+        reg_models = lazypredict.Supervised.REGRESSORS
+        lazypredict.Supervised.REGRESSORS = [t for t in reg_models if not t[0].startswith('Quantile')]
+        ob_reg = LazyRegressor(predictions=True)
+        models, predictions = ob_reg.fit(self.x_train, self.x_eval, self.y_train, self.y_eval)
+        print('\n out of the box evaluation of models for target: '+str(self.custom_name)+ '\n')
+        print(models)
 
         # ___________________________________________________
         # Check witch models are used with weights and fit
@@ -647,14 +654,14 @@ class RunMlModel:
         y_transform  = eval(argv[3])
         R2_thresh    = float(argv[4])
         count_thresh = int(argv[5])
-        space        = 'test_space' # actual_space / test_space
+        space        = 'actual_space' # actual_space / test_space
         SI           = False # SI system
         sample_type  = "Sub" #"All", "Sub", "test"
         weighted     = False
         sub_trans    = True
         pca          = True 
         t_type       = 'power' # 'log', 'power', 'quant' 
-        train_type   = 'NWIS' # 'NWM', 'NWIS'
+        train_type   = 'NWM' # 'NWM', 'NWIS'
         if sample_type == "Sub" and pca:
             sample_type = "Sub_pca"
         if sample_type == "All" and pca:
@@ -671,28 +678,28 @@ class RunMlModel:
         temp        = json.load(open('data/model_feature_names.json'))
         target_list = temp.get('out_features')
         del temp
-        # target_list=['TW_in']
+        target_list=['TW_in', 'TW_bf']
         for target_name in tqdm(target_list):
             if target_name == "Y_bf": 
-                R2_thresh    = 0.85 #NWM 0.6 #NWIS 0.85
-                count_thresh = 5 #NWM 10  #NWIS 5
-                x_transform  = False #NWM False     #NWIS False
-                y_transform  = False #NWM False     #NWIS False
+                R2_thresh    = 0.85 #---------# #NWM 0.6 #NWIS 0.85
+                count_thresh = 5 #---------# #NWM 10  #NWIS 5
+                x_transform  = False #---------# #NWM False     #NWIS False
+                y_transform  = False #---------# #NWM False     #NWIS False
             elif target_name == "Y_in": 
-                R2_thresh    = 0.85 #NWM 0.6  #NWIS 0.85
-                count_thresh = 5 #NWM 10  #NWIS 5
-                x_transform  = False #NWM False     #NWIS False
-                y_transform  = False #NWM False     #NWIS False
+                R2_thresh    = 0.85 #---------# #NWM 0.6  #NWIS 0.85
+                count_thresh = 5 #---------# #NWM 10  #NWIS 5
+                x_transform  = False #---------# #NWM False     #NWIS False
+                y_transform  = False #---------# #NWM False     #NWIS False
             elif target_name == "TW_bf": 
-                R2_thresh    = 0.2 #NWM 0 #NWIS 0.2
-                count_thresh = 8 #NWM 4 #NWIS 8
-                x_transform  = False #NWM False  #NWIS False
-                y_transform  = False #NWM False  #NWIS False
+                R2_thresh    = 0.2 #---------# #NWM 0.2 #NWIS 0.2
+                count_thresh = 8 #---------# #NWM 8 #NWIS 8
+                x_transform  = False #---------# #NWM False  #NWIS False
+                y_transform  = False #---------# #NWM False  #NWIS False
             elif target_name == "TW_in": 
-                R2_thresh    = 0.2 #NWM 0 #NWIS 0.2
-                count_thresh = 8 #NWM 10 #NWIS 8
-                x_transform  = False #NWM True #NWIS False
-                y_transform  = False #NWM True #NWIS False
+                R2_thresh    = 0.3 #NWM 0.5#---------# #NWM 0.3 #NWIS 0.2
+                count_thresh = 6 #NWM 10 #---------# #NWM 6 #NWIS 8
+                x_transform  = False  #NWM False#---------# #NWM True #NWIS False
+                y_transform  = False  #NWM False #---------# #NWM True #NWIS False
             # ___________________________________________________
             # Train models 
             print('\n******************* modeling parameter {0} starts here *******************\n'.format(target_name))
@@ -776,6 +783,6 @@ class RunMlModel:
             print('end')
 
 if __name__ == "__main__":
-    RunMlModel.main(['light_notrans_35', -1, "True", "True", 0.3, 5])
-    # RunMlModel.main(sys.argv[1:])
+    # RunMlModel.main(['light_notrans_35', -1, "False", "False", 0.3, 5])
+    RunMlModel.main(sys.argv[1:])
 

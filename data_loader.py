@@ -117,6 +117,14 @@ class DataLoader:
                                                                       'toCOMID','Hydroseq','RPUID','FromNode',
                                                                       'ToNode','VPUID','hy_cats','geometry_poly',
                                                                       'REACHCODE','sourcefc','comid','FEATUREID'])]
+        # New data here <---------------------
+        # self.data["NWM_1.5"] = self.data["rp_1.5"]
+        # self.data["NWM_2"] = self.data["rp_2"]
+        # if self.train_type == "NWM" and self.out_feature.endswith("in"):
+        #     self.data['in_ff'] = self.data["NWM_1.5"]
+        # if self.train_type == "NWM" and self.out_feature.endswith("bf"):
+        #     self.data['bf_ff'] = self.data["NWM_2"]
+        #--------------------------------------
         # Data imputation 
         impute = "median"
         if impute == "zero":

@@ -150,6 +150,12 @@ class DPModel:
                                            y_transform=y_transform)
         
         return y_pred_label, preds_all
+    
+    def checkBounds(self, df):
+        df.loc[df['owp_tw_inchan'] > df['owp_tw_bf'], 'owp_tw_inchan'] = 7.2*df['owp_tw_bf']
+        df.loc[df['owp_y_inchan'] > df['owp_y_bf'], 'owp_y_inchan'] = df['owp_y_bf']
+
+
 
 
 # --------------------------- A driver class --------------------------- #           
