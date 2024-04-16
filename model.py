@@ -171,9 +171,9 @@ class MlModel:
         elif train_type == "NWIS" and "Y_" in out_feature:
             data_path = self.target_data_path = 'data/nwis_depth_pred_tar.parquet'
         elif train_type == "NWM" and "TW_" in out_feature:
-            data_path = self.target_data_path = 'data/nwm_width_pred_tar.parquet'
+            data_path = self.target_data_path = 'data/nwm_width_pred_tar_up.parquet'
         elif train_type == "NWM" and "Y_" in out_feature:
-            data_path = self.target_data_path = 'data/nwm_depth_pred_tar.parquet'
+            data_path = self.target_data_path = 'data/nwm_depth_pred_tar_up.parquet'
 
         data_loader = dataloader.DataLoader(data_path=data_path,
                                             target_data_path=self.target_data_path,
@@ -678,7 +678,7 @@ class RunMlModel:
         temp        = json.load(open('data/model_feature_names.json'))
         target_list = temp.get('out_features')
         del temp
-        target_list=['TW_in', 'TW_bf']
+        target_list=['TW_in','TW_bf']
         for target_name in tqdm(target_list):
             if target_name == "Y_bf": 
                 R2_thresh    = 0.85 #---------# #NWM 0.6 #NWIS 0.85
