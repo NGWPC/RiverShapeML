@@ -1,164 +1,74 @@
 [
     {
-        "value": "elevation_diff"
-    },
-    {
-        "value": "bd_mean_0_5_r250"
-    },
-    {
-        "value": "roughness"
-    },
-    {
-        "value": "gws_tavg"
-    },
-    {
-        "value": "LAI"
-    },
-    {
-        "value": "RckDepWs"
-    },
-    {
-        "value": "scat_dummy"
-    },
-    {
-        "value": "slope"
-    },
-    {
-        "value": "hwnodesqkm"
-    },
-    {
-        "value": "BFIWs"
-    },
-    {
-        "value": "StreamOrde"
-    },
-    {
-        "value": "WtDepWs"
-    },
-    {
-        "value": "in_ff"
-    },
-    {
-        "value": "nwm_dummy"
-    },
-    {
-        "value": "Pathlength"
-    },
-    {
-        "value": "AREASQKM"
-    },
-    {
-        "value": "ArbolateSu"
-    },
-    {
-        "value": "TotDASqKM"
+        "value": "terra_dummy"
     },
     {
         "value": "qsb_tavg"
     },
     {
-        "value": "streamleve"
-    },
-    {
-        "value": "vaa_dummy"
-    },
-    {
-        "value": "Topo_pc_0"
-    },
-    {
-        "value": "Topo_pc_1"
-    },
-    {
-        "value": "Topo_pc_2"
-    },
-    {
-        "value": "Topo_pc_3"
-    },
-    {
-        "value": "Topo_pc_4"
-    },
-    {
-        "value": "Watershed_pc_0"
-    },
-    {
-        "value": "Watershed_pc_1"
-    },
-    {
-        "value": "Watershed_pc_2"
-    },
-    {
-        "value": "Stream_pc_0"
-    },
-    {
-        "value": "Stream_pc_1"
-    },
-    {
-        "value": "Human_pc_0"
-    },
-    {
-        "value": "Human_pc_1"
-    },
-    {
-        "value": "Human_pc_2"
-    },
-    {
-        "value": "Human_pc_3"
-    },
-    {
-        "value": "Human_pc_4"
-    },
-    {
-        "value": "Soil_pc_0"
-    },
-    {
-        "value": "Soil_pc_1"
-    },
-    {
-        "value": "Soil_pc_2"
-    },
-    {
-        "value": "Soil_pc_3"
-    },
-    {
-        "value": "Soil_pc_4"
-    },
-    {
-        "value": "Dam_pc_0"
-    },
-    {
-        "value": "Dam_pc_1"
-    },
-    {
-        "value": "Dam_pc_2"
-    },
-    {
-        "value": "Lithology_pc_0"
-    },
-    {
-        "value": "Lithology_pc_1"
-    },
-    {
-        "value": "Lithology_pc_2"
-    },
-    {
-        "value": "Lithology_pc_3"
-    },
-    {
-        "value": "Lithology_pc_4"
-    },
-    {
-        "value": "Land_cover_pc_0"
-    },
-    {
-        "value": "Land_cover_pc_1"
-    },
-    {
-        "value": "Land_cover_pc_2"
+        "value": "roughness"
     },
     {
         "value": "Land_cover_pc_3"
     },
     {
-        "value": "Land_cover_pc_4"
+        "value": "in_ff"
+    },
+    {
+        "value": "vaa_dummy"
+    },
+    {
+        "value": "Land_cover_pc_1"
+    },
+    {
+        "value": "Sinuosity"
+    },
+    {
+        "value": "StreamOrde"
+    },
+    {
+        "value": "Dam_pc_1"
+    },
+    {
+        "value": "Topo_pc_1"
+    },
+    {
+        "value": "Topo_pc_0"
+    },
+    {
+        "value": "Lithology_pc_1"
+    },
+    {
+        "value": "ArbolateSu"
+    },
+    {
+        "value": "Soil_pc_1"
+    },
+    {
+        "value": "BFIWs"
+    },
+    {
+        "value": "Human_pc_4"
+    },
+    {
+        "value": "Lithology_pc_2"
+    },
+    {
+        "value": "TotDASqKM"
+    },
+    {
+        "value": "scat_dummy"
+    },
+    {
+        "value": "nwm_dummy"
+    },
+    {
+        "value": "WtDepWs"
+    },
+    {
+        "value": "LAI"
+    },
+    {
+        "value": "gldas_dummy"
     }
 ]

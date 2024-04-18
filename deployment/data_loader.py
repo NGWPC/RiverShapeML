@@ -40,12 +40,12 @@ class DataLoader:
         if not os.path.isdir(os.path.join(os.getcwd(),'model_space/')):
             os.mkdir(os.path.join(os.getcwd(),'model_space/'))
 
-    def readFiles(self) -> None:
+    def readFiles(self, start, end) -> None:
         """ Read files from the directories
         """
         try:
             self.data = pd.read_parquet(self.data_path, engine='pyarrow')
-            self.data = self.data.iloc[2500000:2647455]
+            self.data = self.data.iloc[start:end] # self.data = self.data.iloc[2500000:2647455]
             self.data.reset_index(drop=True, inplace=True)
         except:
             print('Wrong address or data format. Please use correct parquet file.')
