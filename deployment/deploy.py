@@ -175,13 +175,16 @@ class RunDeploy:
         # os.chdir('/mnt/d/Lynker/FEMA_HECRAS/bankfull_W_D/deployment')
 
         # Load data
+        start = 0 
+        end = 500000
         dl_obj = dataloader.DataLoader(rand_state)
-        dl_obj.readFiles()
+        dl_obj.readFiles(start, end)
         dl_obj.imputeData()
 
         # Load targets
         temp        = json.load(open('data/model_feature_names.json'))
-        target_list = temp.get('out_features')
+        # target_list = temp.get('out_features')
+        target_list = ['TW_bf', 'TW_in']
         out_vars    = []
         del temp
 
@@ -213,8 +216,8 @@ class RunDeploy:
         out_vars.append('FEATUREID')
         out_df = dl_obj.data[out_vars]
         out_df.loc[out_df['owp_tw_inchan'] > out_df['owp_tw_bf'], 'owp_tw_inchan'] = out_df['owp_tw_bf']
-        out_df.loc[out_df['owp_y_inchan'] > out_df['owp_y_bf'], 'owp_y_inchan'] = out_df['owp_y_bf']
-        out_df.to_parquet('data/ml_exports2647454.parquet')
+        # out_df.loc[out_df['owp_y_inchan'] > out_df['owp_y_bf'], 'owp_y_inchan'] = out_df['owp_y_bf']
+        out_df.to_parquet('data/tw_exports'+str(end)+'.parquet')
         print("\n ------------- ML estimates complete ----------- \n")
         return
 
