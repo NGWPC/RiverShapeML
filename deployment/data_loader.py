@@ -25,7 +25,8 @@ class DataLoader:
     >>> DataLoader(rand_state = 105, data_path = 'data/input.parquet')
         
     """
-    def __init__(self, rand_state: int, data_path: str = 'data/nwm_conus_input.parquet') -> None:
+    # ml_inputs  nwm_conus_input
+    def __init__(self, rand_state: int, data_path: str = 'data/ml_inputs.parquet') -> None:
         pd.options.display.max_columns  = 60
         self.data_path                  = data_path
         self.data                       = pd.DataFrame([])
@@ -141,7 +142,8 @@ class DataLoader:
             pca =  pickle.load(open(pca_item, "rb"))
             temp_data = self.data[temp.get(text[1:-1])]
             new_data_pca = pca.transform(temp_data)
-            max_n = min(5, len(temp.get(text[1:-1])))
+            max_n = min(5, new_data_pca.shape[1])
+            # max_n = min(5, len(temp.get(text[1:-1])))
             for i in range(0, max_n, 1):
                 self.data[str(text[1:-1])+"_"+str(i)] = new_data_pca[:, i]
 
