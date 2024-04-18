@@ -152,11 +152,12 @@ class DPModel:
         return y_pred_label, preds_all
     
     def checkBounds(self, df):
-        df.loc[df['owp_tw_inchan'] > df['owp_tw_bf'], 'owp_tw_inchan'] = 7.2*df['owp_tw_bf']
-        df.loc[df['owp_y_inchan'] > df['owp_y_bf'], 'owp_y_inchan'] = df['owp_y_bf']
+        mask = df['owp_tw_inchan'] > df['owp_tw_bf']
+        df.loc[mask, ['owp_tw_bf', 'owp_tw_inchan']] = df.loc[mask, ['owp_tw_inchan', 'owp_tw_bf']].values
 
-
-
+        # mask = df['owp_y_inchan'] > df['owp_y_bf']
+        # df.loc[mask, ['owp_y_bf', 'owp_y_inchan']] = df.loc[mask, ['owp_y_inchan', 'owp_y_bf']].values
+        return df
 
 # --------------------------- A driver class --------------------------- #           
 class RunDeploy:
@@ -172,11 +173,11 @@ class RunDeploy:
         nthreads     = int(argv[0])
         SI           = True
         rand_state   = 105
-        # os.chdir('/mnt/d/Lynker/FEMA_HECRAS/bankfull_W_D/deployment')
+        os.chdir('/mnt/d/Lynker/FEMA_HECRAS/bankfull_W_D/deployment')
 
         # Load data
         start = 0 
-        end = 500000
+        end = 50#500000
         dl_obj = dataloader.DataLoader(rand_state)
         dl_obj.readFiles(start, end)
         dl_obj.imputeData()
@@ -201,7 +202,12 @@ class RunDeploy:
         results = []
 
         # Parallelize the for loop
-        results = Parallel(n_jobs=nthreads, backend="multiprocessing")(delayed(deploy_obj.process_target)(dl_obj, target_name, vote_flag, meta_flag, best_flag, file, model_type) for target_name in tqdm(target_list))
+        for target_name in tqdm(target_list):
+            # Call the deploy_obj.process_target function with the specified arguments
+            result = deploy_obj.process_target(dl_obj, target_name, vote_flag, meta_flag, best_flag, file, model_type)
+            # Append the result to the results list
+            results.append(result)
+        # results = Parallel(n_jobs=nthreads, backend="multiprocessing")(delayed(deploy_obj.process_target)(dl_obj, target_name, vote_flag, meta_flag, best_flag, file, model_type) for target_name in tqdm(target_list))
         
         # Unpack the results
         for y_pred_label, preds_all in results:
@@ -215,11 +221,11 @@ class RunDeploy:
     
         out_vars.append('FEATUREID')
         out_df = dl_obj.data[out_vars]
-        out_df.loc[out_df['owp_tw_inchan'] > out_df['owp_tw_bf'], 'owp_tw_inchan'] = out_df['owp_tw_bf']
-        # out_df.loc[out_df['owp_y_inchan'] > out_df['owp_y_bf'], 'owp_y_inchan'] = out_df['owp_y_bf']
+        out_df = deploy_obj.checkBounds(out_df)
         out_df.to_parquet('data/tw_exports'+str(end)+'.parquet')
         print("\n ------------- ML estimates complete ----------- \n")
         return
 
 if __name__ == "__main__":
-    RunDeploy.main(sys.argv[1:])
+    # RunDeploy.main(sys.argv[1:])
+    RunDeploy.main([-1])

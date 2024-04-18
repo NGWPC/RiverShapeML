@@ -214,7 +214,7 @@ class DataLoader:
         """
         print("\n Begin dimention reduction .... \n")
         # Load dimention categories
-        temp = json.load(open('model_space/dimention_space.json'))
+        temp = json.load(open('model_space/dimension_space.json'))
         train_data_c = train_data.copy()
         test_data_c = test_data.copy()
         # PCA model

@@ -9,3 +9,4 @@ model_space
 output_bash.out
 __pycache__
 test.ipynb
+wd_env.yaml
