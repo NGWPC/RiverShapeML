@@ -1,14 +1,74 @@
 transforming and plotting ...
+---- found nan in X TW_in !!!!
 Part2 Rows with NaN values:
-Empty DataFrame
-Columns: [rp_5, rp_10, rp_15, rp_25, rp_35, rp_50, rp_60, rp_75, rp_85, rp_90, rp_95, rp_98, rp_99, rp_100, rp_200, rp_500, rp_1000, WaterInputWs, PctConif2011Ws, PctCrop2011Ws, PctDecid2011Ws, PctGrs2011Ws, PctHay2011Ws, PctMxFst2011Ws, PctShrb2011Ws, PctUrbHi2011Ws, PctUrbLo2011Ws, PctUrbMd2011Ws, PctUrbOp2011Ws, Fe2O3Ws, HydrlCondWs, CompStrgthWs, PctAlluvCoastWs, PctCarbResidWs, PctColluvSedWs, PctGlacLakeCrsWs, PctGlacLakeFineWs, PctGlacTilClayWs, PctGlacTilCrsWs, PctGlacTilLoamWs, PctNonCarbResidWs, PctSilicicWs, alpha_mean_0_5_r250, clay_mean_0_5_r250, hb_mean_0_5_r250, ksat_mean_0_5_r250, lambda_mean_0_5_r250, n_mean_0_5_r250, om_mean_0_5_r250, ph_mean_0_5_r250, sand_mean_0_5_r250, silt_mean_0_5_r250, theta_r_mean_0_5_r250, theta_s_mean_0_5_r250, FertWs, ManureWs, AgKffactWs, CanalDensWs, HUDen2010Ws, PopDen2010Ws, RdCrsWs, RdCrsSlpWtdWs, RdDensWs, DamDensWs, DamNIDStorWs, DamNrmStorWs, elevation_ave, long, lat, aet, DIVISION_encode, PROVINCE_encode, def, PDSI, pet, ppt, soil, HLR, WetIndexWs, PctWdWet2011Ws, LENGTHKM, slopelenkm, COMID, roughness, nwm_max_ap, PctCoastCrsWs, scat_dummy, NWM_2, WtDepWs, gws_tavg, Pathlength, AREASQKM, nwm_25_ap, RunoffWs, PctEolCrsWs, PctExtruVolWs, PctHbWet2011Ws, PctEolFineWs, PctOw2011Ws, tmax, ...]
-Index: []
+            rp_5     rp_10     rp_15     rp_25     rp_35     rp_50     rp_60  \
+5600   -0.205128 -0.201566 -0.196035 -0.193441 -0.189144 -0.184765 -0.179146   
+5601   -0.205128 -0.201566 -0.196035 -0.193441 -0.189144 -0.184765 -0.179146   
+5602   -0.205128 -0.201566 -0.196035 -0.193441 -0.189144 -0.184765 -0.179146   
+5603   -0.205128 -0.201566 -0.196035 -0.193441 -0.189144 -0.184765 -0.179146   
+5604   -0.205128 -0.201566 -0.196035 -0.193441 -0.189144 -0.184765 -0.179146   
+...          ...       ...       ...       ...       ...       ...       ...   
+147341 -0.205128 -0.201566 -0.196035 -0.193441 -0.189144 -0.184765 -0.179146   
+147342 -0.205128 -0.201566 -0.196035 -0.193441 -0.189144 -0.184765 -0.179146   
+147343 -0.205128 -0.201566 -0.196035 -0.193441 -0.189144 -0.184765 -0.179146   
+147344 -0.205128 -0.201566 -0.196035 -0.193441 -0.189144 -0.184765 -0.179146   
+147345 -0.205128 -0.201566 -0.196035 -0.193441 -0.189144 -0.184765 -0.179146   
 
-[0 rows x 147 columns]
+          rp_75     rp_85     rp_90     rp_95     rp_98     rp_99    rp_100  \
+5600   -0.17993 -0.176866 -0.174741 -0.173112 -0.172277 -0.171772 -0.172953   
+5601   -0.17993 -0.176866 -0.174741 -0.173112 -0.172277 -0.171772 -0.172953   
+5602   -0.17993 -0.176866 -0.174741 -0.173112 -0.172277 -0.171772 -0.172953   
+5603   -0.17993 -0.176866 -0.174741 -0.173112 -0.172277 -0.171772 -0.172953   
+5604   -0.17993 -0.176866 -0.174741 -0.173112 -0.172277 -0.171772 -0.172953   
+...         ...       ...       ...       ...       ...       ...       ...   
+147341 -0.17993 -0.176866 -0.174741 -0.173112 -0.172277 -0.171772 -0.172953   
+147342 -0.17993 -0.176866 -0.174741 -0.173112 -0.172277 -0.171772 -0.172953   
+147343 -0.17993 -0.176866 -0.174741 -0.173112 -0.172277 -0.171772 -0.172953   
+147344 -0.17993 -0.176866 -0.174741 -0.173112 -0.172277 -0.171772 -0.172953   
+147345 -0.17993 -0.176866 -0.174741 -0.173112 -0.172277 -0.171772 -0.172953   
+
+          rp_200  ...    esoil_tavg  gldas_dummy  nwm_50  elevation_diff  \
+5600   -0.166836  ...  6.180562e-06            1     4.0            15.0   
+5601   -0.166836  ...  6.289359e-06            1     4.0            61.0   
+5602   -0.166836  ...  6.180562e-06            1     4.0            37.0   
+5603   -0.166836  ...  6.180562e-06            1     4.0            25.0   
+5604   -0.166836  ...  6.180562e-06            1     4.0            37.0   
+...          ...  ...           ...          ...     ...             ...   
+147341 -0.166836  ...  1.096365e-05            1     4.0           533.0   
+147342 -0.166836  ...  2.041246e-07            1     4.0           114.0   
+147343 -0.166836  ...  8.432973e-06            1     4.0           523.0   
+147344 -0.166836  ...  6.121617e-06            1     4.0           158.0   
+147345 -0.166836  ...  3.782659e-06            1     4.0           386.0   
+
+        nwm_75_ap  PctOw2011Ws  nwm_max_ap  PctCoastCrsWs  scat_dummy  \
+5600       144.55      0.00000   459.21725            0.0           1   
+5601       144.55      0.00000   459.21725            0.0           1   
+5602       144.55      0.00000   459.21725            0.0           1   
+5603       144.55      0.00000   459.21725            0.0           1   
+5604       144.55      0.00000   459.21725            0.0           1   
+...           ...          ...         ...            ...         ...   
+147341     144.55      0.00421   459.21725            0.0           1   
+147342     144.55      0.00000   459.21725            0.0           1   
+147343     144.55      0.00000   459.21725            0.0           1   
+147344     144.55      0.00000   459.21725            0.0           1   
+147345     144.55      0.00000   459.21725            0.0           1   
+
+          BFIWs  RunoffWs  nwm_min_ap  PctEolFineWs  Sinuosity    NWM_1.5  
+5600    79.0000   23.0000      15.566           0.0   0.846515  63.304739  
+5601    79.0000   23.0000      15.566           0.0   0.846515  63.304739  
+5602    79.0000   23.0000      15.566           0.0   0.846515  63.304739  
+5603    79.0000   23.0000      15.566           0.0   0.846515  63.304739  
+5604    79.0000   23.0000      15.566           0.0   0.846515  63.304739  
+...         ...       ...         ...           ...        ...        ...  
+147341  79.3751  512.9915      15.566           0.0   0.846515  63.304739  
+147342  42.5066    8.0000      15.566           0.0   0.846515  63.304739  
+147343  71.0008  276.0000      15.566           0.0   0.846515  63.304739  
+147344  72.0000  252.5245      15.566           0.0   0.846515  63.304739  
+147345  62.0000   29.0000      15.566           0.0   0.846515  63.304739  
+
+[2829 rows x 150 columns]
 transforming and plotting ...
-Part2 Rows with NaN values:
-Empty DataFrame
-Columns: [rp_5, rp_10, rp_15, rp_25, rp_35, rp_50, rp_60, rp_75, rp_85, rp_90, rp_95, rp_98, rp_99, rp_100, rp_200, rp_500, rp_1000, WaterInputWs, PctConif2011Ws, PctCrop2011Ws, PctDecid2011Ws, PctGrs2011Ws, PctHay2011Ws, PctMxFst2011Ws, PctShrb2011Ws, PctUrbHi2011Ws, PctUrbLo2011Ws, PctUrbMd2011Ws, PctUrbOp2011Ws, Fe2O3Ws, HydrlCondWs, CompStrgthWs, PctAlluvCoastWs, PctCarbResidWs, PctColluvSedWs, PctGlacLakeCrsWs, PctGlacLakeFineWs, PctGlacTilClayWs, PctGlacTilCrsWs, PctGlacTilLoamWs, PctNonCarbResidWs, PctSilicicWs, alpha_mean_0_5_r250, clay_mean_0_5_r250, hb_mean_0_5_r250, ksat_mean_0_5_r250, lambda_mean_0_5_r250, n_mean_0_5_r250, om_mean_0_5_r250, ph_mean_0_5_r250, sand_mean_0_5_r250, silt_mean_0_5_r250, theta_r_mean_0_5_r250, theta_s_mean_0_5_r250, FertWs, ManureWs, AgKffactWs, CanalDensWs, HUDen2010Ws, PopDen2010Ws, RdCrsWs, RdCrsSlpWtdWs, RdDensWs, DamDensWs, DamNIDStorWs, DamNrmStorWs, elevation_ave, long, lat, aet, DIVISION_encode, PROVINCE_encode, def, PDSI, pet, ppt, soil, HLR, WetIndexWs, PctWdWet2011Ws, LENGTHKM, slopelenkm, COMID, roughness, nwm_max_ap, PctCoastCrsWs, scat_dummy, NWM_2, WtDepWs, gws_tavg, Pathlength, AREASQKM, nwm_25_ap, RunoffWs, PctEolCrsWs, PctExtruVolWs, PctHbWet2011Ws, PctEolFineWs, PctOw2011Ws, tmax, ...]
-Index: []
+--------------- End of Y transformation ---------------
 
-[0 rows x 147 columns]
+ ------------- ML estimates complete ----------- 
+
