@@ -176,8 +176,8 @@ class RunDeploy:
         os.chdir('/mnt/d/Lynker/FEMA_HECRAS/bankfull_W_D/deployment')
 
         # Load data
-        start = 0 
-        end = 50#500000
+        start = 2500000
+        end = 2647455
         dl_obj = dataloader.DataLoader(rand_state)
         dl_obj.readFiles(start, end)
         dl_obj.imputeData()
@@ -202,12 +202,12 @@ class RunDeploy:
         results = []
 
         # Parallelize the for loop
-        for target_name in tqdm(target_list):
-            # Call the deploy_obj.process_target function with the specified arguments
-            result = deploy_obj.process_target(dl_obj, target_name, vote_flag, meta_flag, best_flag, file, model_type)
-            # Append the result to the results list
-            results.append(result)
-        # results = Parallel(n_jobs=nthreads, backend="multiprocessing")(delayed(deploy_obj.process_target)(dl_obj, target_name, vote_flag, meta_flag, best_flag, file, model_type) for target_name in tqdm(target_list))
+        # for target_name in tqdm(target_list):
+        #     # Call the deploy_obj.process_target function with the specified arguments
+        #     result = deploy_obj.process_target(dl_obj, target_name, vote_flag, meta_flag, best_flag, file, model_type)
+        #     # Append the result to the results list
+        #     results.append(result)
+        results = Parallel(n_jobs=nthreads, backend="multiprocessing")(delayed(deploy_obj.process_target)(dl_obj, target_name, vote_flag, meta_flag, best_flag, file, model_type) for target_name in tqdm(target_list))
         
         # Unpack the results
         for y_pred_label, preds_all in results:
@@ -227,5 +227,5 @@ class RunDeploy:
         return
 
 if __name__ == "__main__":
-    # RunDeploy.main(sys.argv[1:])
-    RunDeploy.main([-1])
+    RunDeploy.main(sys.argv[1:])
+    # RunDeploy.main([-1])

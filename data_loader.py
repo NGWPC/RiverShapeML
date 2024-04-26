@@ -208,18 +208,18 @@ class DataLoader:
        
         return 
 
- # --------------------------- Dimention Reduction --------------------------- #
+ # --------------------------- Dimension Reduction --------------------------- #
     def reduceDim(self, train_data: pd.DataFrame, test_data: pd.DataFrame) -> None:
-        """ Reduce the dimention of data some help addressing  multi-colinearity
+        """ Reduce the dimension of data some help addressing  multi-colinearity
         """
-        print("\n Begin dimention reduction .... \n")
-        # Load dimention categories
+        print("\n Begin dimension reduction .... \n")
+        # Load dimension categories
         temp = json.load(open('model_space/dimension_space.json'))
         train_data_c = train_data.copy()
         test_data_c = test_data.copy()
         # PCA model
         def buildPCA(feat_list, n_components, name):
-            """ Builds a PCA and extracts new dimentions
+            """ Builds a PCA and extracts new dimensions
             
             Parameters:
             ----------
@@ -375,7 +375,7 @@ class DataLoader:
         test_data_c = test_data_c.reset_index(drop=True)
         train_data_complete = train_data_complete.reset_index(drop=True)
         test_data_complete = test_data_complete.reset_index(drop=True)
-        print("\n ------------- End of dimention reduction ----------- \n")
+        print("\n ------------- End of dimension reduction ----------- \n")
         return train_data, test_data, train_data_complete, test_data_complete
         
  # --------------------------- Split train and test --------------------------- #
@@ -560,7 +560,7 @@ class DataLoader:
         dump_list = ['R2', 'siteID']
         trans_feats = []
         if sub_trans:
-            temp = json.load(open('model_space/dimention_space.json'))
+            temp = json.load(open('model_space/dimension_space.json'))
             pca_feats = [string for key in temp for string in temp[key]]
             trans_feats = pca_feats.copy()
         in_feats = set(self.in_features) - set(trans_feats)
