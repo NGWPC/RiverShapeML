@@ -31,6 +31,8 @@ Untitled-1.ipynb
 deployment/data/nwm_conus_input.parquet
 !data/nwm_width_pred_tar_up.parquet
 !data/nwm_depth_pred_tar_up.parquet
+!data/nwis_width_pred_tar_up.parquet
+!data/nwis_depth_pred_tar_up.parquet
 
 # Folders
 WD_up/*
