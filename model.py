@@ -167,9 +167,9 @@ class MlModel:
         # ------------------------------------
 
         if train_type == "NWIS" and "TW_" in out_feature:
-            data_path = self.target_data_path = 'data/nwis_width_pred_tar.parquet'
+            data_path = self.target_data_path = 'data/nwis_width_pred_tar_up.parquet'
         elif train_type == "NWIS" and "Y_" in out_feature:
-            data_path = self.target_data_path = 'data/nwis_depth_pred_tar.parquet'
+            data_path = self.target_data_path = 'data/nwis_depth_pred_tar_up.parquet'
         elif train_type == "NWM" and "TW_" in out_feature:
             data_path = self.target_data_path = 'data/nwm_width_pred_tar_up.parquet'
         elif train_type == "NWM" and "Y_" in out_feature:
@@ -193,7 +193,7 @@ class MlModel:
     
     # --------------------------- Grid Search --------------------------- #
     def findBestParams(self, out_features: str = 'TW_bf', nthreads: int = -1, space: str = 'actual_space',
-                        weighted: bool = False) -> Tuple[str, dict, pd.DataFrame]:
+                        weighted: bool = False) -> Tuple[str, dict, pd.DataFrame, dict]:
         """ Find the best parameters of the all ML models through k-fold
         cross validation and prevent overfit
 
@@ -242,6 +242,7 @@ class MlModel:
         # ___________________________________________________
         # Build an isntance of each model with defaults
         xgb_reg = xgb.XGBRegressor(seed=self.rand_state, nthread=nthreads)
+        xgb_cons_reg = xgb.XGBRegressor(seed=self.rand_state, nthread=nthreads)
         
         rf_reg = RandomForestRegressor(random_state=self.rand_state, n_jobs=nthreads)
        
@@ -340,21 +341,27 @@ class MlModel:
         df = df[columns]
 
         # ___________________________________________________
-        # retrun the best
+        # return the best
         best_model = df.iloc[0].get('estimator')
         best_params = df.iloc[0].get('params')
         print("best model {0}".format(best_model))
         print("best params {0}".format(best_params))
 
         # ___________________________________________________
+        # return the xgb
+        # xgb_model = df[df['estimator'] == 'xgb'].iloc[0].get('estimator')
+        xgb_params = df[df['estimator'] == 'xgb'].iloc[0].get('params')
+
+        # ___________________________________________________
         # get best of all models
         best_models = df.loc[df.groupby("estimator")[sort_by].idxmax()]
         best_models = best_models[['estimator', sort_by, 'params']]
-        return best_model, best_params, best_models
+        return best_model, best_params, best_models, xgb_params
 
 # --------------------------- Run Best Model --------------------------- #
-    def runMlModel(self, best_model: str, best_params: dict, best_models: pd.DataFrame, 
+    def runMlModel(self, best_model: str, best_params: dict, best_models: pd.DataFrame, xgb_params: dict,
                    weighted: bool, out_features: str, nthreads: int = -1) -> Tuple[any, 
+                                                                                   any, 
                                                                                    VotingRegressor,
                                                                                    StackingRegressor,
                                                                                    pd.DataFrame,
@@ -488,6 +495,31 @@ class MlModel:
         # loaded_model = pickle.load(open("model/"+out_features+"_gb_model.pickle.dat", "rb"))
         
         # ___________________________________________________
+        # Constrained models
+        dtrain = xgb.DMatrix(self.x_train, label=self.y_train)
+        dtest = xgb.DMatrix(self.x_eval, label=self.y_eval)
+        constrained_model = np.nan
+        def constrained_mse_obj(preds, dtrain):
+            # labels = dtrain.get_label()
+            labels = np.clip(dtrain.get_label(), 0, 250)  # Constrain labels between 0 and 250
+            preds = np.clip(preds, 0, 250)  # Constrain predictions between 0 and 250
+            errors = preds - labels
+            gradient = errors
+            hessian = np.ones_like(gradient)
+            return gradient, hessian
+
+        # constrained_model = xgb.train(xgb_params, dtrain, evals=[(dtest, 'test')],
+        #                               #early_stopping_rounds=0.1*xgb_params['n_estimators']) 
+        #                               obj=lambda preds, dtrain: constrained_mse_obj(preds, dtrain))
+
+        # constrained_model = model_obj.modelName('xgb_const', xgb_params)
+        # constrained_model.fit(dtrain, eval_set=[(dtest, 'test')],
+        #                 early_stopping_rounds=0.1*best_params['n_estimators'], verbose=False, **fit_params)
+        # Predict
+        # preds_t = constrained_model.predict(dtrain)
+        # rs_DNN_t = round(rsquared(self.y_train, preds_t.flatten()), 2)
+        # print("Constrained Training acc {0}".format(rs_DNN_t))
+        # ___________________________________________________
         # Meta learner & voting
         def loadBaseModel(model_df):
             temp_model_obj = ModelSwitch(self.rand_state, nthreads)
@@ -533,16 +565,15 @@ class MlModel:
         pickle.dump(voting_model, open(self.custom_name+"/model/"+str(self.custom_name)+'_'+out_features+"_Voting_Model.pickle.dat", "wb"))
         pickle.dump(meta_model, open(self.custom_name+"/model/"+str(self.custom_name)+'_'+out_features+"_Meta_Model.pickle.dat", "wb"))
 
-        return loaded_model, voting_model, meta_model, train_columns, self.x_train, self.y_train, self.test_x, self.test_y
+        return loaded_model, constrained_model, voting_model, meta_model, train_columns, self.x_train, self.y_train, self.test_x, self.test_y
     
-    def finalFits(self, ml_model: any, voting_model: VotingRegressor, meta_model: StackingRegressor, 
-                  out_features: str, best_model: str) -> Tuple[any, 
-                                                                VotingRegressor,
-                                                                StackingRegressor]:
+    def finalFits(self, ml_model: any, constrained_model: any, voting_model: VotingRegressor, meta_model: StackingRegressor, 
+                  out_features: str, best_model: str) -> None:
         concated_x = pd.concat([self.train_x, self.test_x], axis=0)
         concated_x = concated_x.reset_index(drop=True)
         concated_y = np.concatenate([self.train_y, self.test_y])
         ml_model.fit(concated_x, concated_y)
+        # constrained_model.fit(xgb.DMatrix(concated_x, label=concated_y))
         voting_model.fit(concated_x, concated_y)
         meta_model.fit(concated_x, concated_y)
 
@@ -560,6 +591,7 @@ class MlModel:
         #     json.dump(serialized_list, json_file, indent=4)
         # Save models
         pickle.dump(ml_model, open(self.custom_name+"/model/"+str(self.custom_name)+'_'+out_features+"_"+str(best_model)+"_final_Best_Model.pickle.dat", "wb"))
+        # pickle.dump(constrained_model, open(self.custom_name+"/model/"+str(self.custom_name)+'_'+out_features+"_xgb_constrained_final_Best_Model.pickle.dat", "wb"))
         pickle.dump(voting_model, open(self.custom_name+"/model/"+str(self.custom_name)+'_'+out_features+"_final_Voting_Model.pickle.dat", "wb"))
         pickle.dump(meta_model, open(self.custom_name+"/model/"+str(self.custom_name)+'_'+out_features+"_final_Meta_Model.pickle.dat", "wb"))
 
@@ -585,6 +617,12 @@ class ModelSwitch:
         default = "Incorrect model"
         return getattr(self, str(model), lambda: default)(best_params)
  
+    def xgb_const(self, best_params):
+        return xgb.XGBRegressor(random_state = self.rand_state, learning_rate = best_params['learning_rate'],
+                max_depth = best_params['max_depth'], n_estimators = best_params['n_estimators'],
+                colsample_bytree = best_params['colsample_bytree'], nthread=self.nthreads,
+                min_child_weight = best_params['min_child_weight'], gamma = best_params['gamma'],
+                subsample = best_params['subsample'])#, objective = 'reg:squarederror')
     def xgb(self, best_params):
         return xgb.XGBRegressor(random_state = self.rand_state, learning_rate = best_params['learning_rate'],
                 max_depth = best_params['max_depth'], n_estimators = best_params['n_estimators'],
@@ -678,26 +716,26 @@ class RunMlModel:
         temp        = json.load(open('data/model_feature_names.json'))
         target_list = temp.get('out_features')
         del temp
-        target_list=['TW_in','TW_bf']
+        target_list=['Y_in']
         for target_name in tqdm(target_list):
             if target_name == "Y_bf": 
-                R2_thresh    = 0.85 #---------# #NWM 0.6 #NWIS 0.85
-                count_thresh = 5 #---------# #NWM 10  #NWIS 5
+                R2_thresh    = 0.01 #---------# #NWM 0.6 #NWIS 0.85
+                count_thresh = 3 #---------# #NWM 10  #NWIS 5
                 x_transform  = False #---------# #NWM False     #NWIS False
                 y_transform  = False #---------# #NWM False     #NWIS False
             elif target_name == "Y_in": 
-                R2_thresh    = 0.85 #---------# #NWM 0.6  #NWIS 0.85
-                count_thresh = 5 #---------# #NWM 10  #NWIS 5
+                R2_thresh    = 0.01 #---------# #NWM 0.6  #NWIS 0.85
+                count_thresh = 3 #---------# #NWM 10  #NWIS 5
                 x_transform  = False #---------# #NWM False     #NWIS False
                 y_transform  = False #---------# #NWM False     #NWIS False
             elif target_name == "TW_bf": 
-                R2_thresh    = 0.2 #---------# #NWM 0.2 #NWIS 0.2
-                count_thresh = 8 #---------# #NWM 8 #NWIS 8
+                R2_thresh    = 0.01 #---------# #NWM 0.2 #NWIS 0.2
+                count_thresh = 3 #---------# #NWM 8 #NWIS 8
                 x_transform  = False #---------# #NWM False  #NWIS False
                 y_transform  = False #---------# #NWM False  #NWIS False
             elif target_name == "TW_in": 
-                R2_thresh    = 0.3 #NWM 0.5#---------# #NWM 0.3 #NWIS 0.2
-                count_thresh = 6 #NWM 10 #---------# #NWM 6 #NWIS 8
+                R2_thresh    = 0.01 #NWM 0.5#---------# #NWM 0.3 #NWIS 0.2
+                count_thresh = 3 #NWM 10 #---------# #NWM 6 #NWIS 8
                 x_transform  = False  #NWM False#---------# #NWM True #NWIS False
                 y_transform  = False  #NWM False #---------# #NWM True #NWIS False
             # ___________________________________________________
@@ -711,11 +749,11 @@ class RunMlModel:
                                 y_transform=y_transform, R2_thresh=R2_thresh, count_thresh=count_thresh,
                                 sample_type=sample_type, pca=pca, t_type=t_type, train_type=train_type, sub_trans=sub_trans)     
             print('end')
-            best_model, best_params, best_models = model.findBestParams(out_features=target_name, nthreads=nthreads, 
+            best_model, best_params, best_models, xgb_params = model.findBestParams(out_features=target_name, nthreads=nthreads, 
                                                                                     space=space, weighted=weighted)
             best_model_orig = best_model
-            ml_model, voting_model, meta_model, train_columns, train_x, train_y, _, _, = model.runMlModel(best_model=best_model, best_params=best_params, 
-                                                best_models=best_models, weighted=weighted, out_features=target_name, nthreads=nthreads)
+            ml_model, constrained_model, voting_model, meta_model, train_columns, train_x, train_y, _, _, = model.runMlModel(best_model=best_model, best_params=best_params, 
+                                        xgb_params=xgb_params, best_models=best_models, weighted=weighted, out_features=target_name, nthreads=nthreads)
             
             print('\n----------------- Results for best model -------------------\n')
             # # ___________________________________________________
@@ -765,7 +803,7 @@ class RunMlModel:
             
             # ___________________________________________________
             # Final training
-            model.finalFits(ml_model, voting_model, meta_model, target_name, best_model_orig)
+            model.finalFits(ml_model, constrained_model, voting_model, meta_model, target_name, best_model_orig)
 
             print('\n----------------- Feature importance -------------------\n')
             # ___________________________________________________
