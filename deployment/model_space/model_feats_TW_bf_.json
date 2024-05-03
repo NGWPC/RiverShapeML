@@ -1,71 +1,47 @@
 [
     {
-        "value": "RckDepWs"
-    },
-    {
-        "value": "terra_dummy"
-    },
-    {
-        "value": "qsb_tavg"
-    },
-    {
-        "value": "roughness"
-    },
-    {
-        "value": "vaa_dummy"
-    },
-    {
-        "value": "Soil_pc_3"
-    },
-    {
-        "value": "Sinuosity"
-    },
-    {
         "value": "StreamOrde"
-    },
-    {
-        "value": "slope"
-    },
-    {
-        "value": "bf_ff"
-    },
-    {
-        "value": "Topo_pc_1"
-    },
-    {
-        "value": "Topo_pc_2"
-    },
-    {
-        "value": "Topo_pc_0"
     },
     {
         "value": "ArbolateSu"
     },
     {
+        "value": "RckDepWs"
+    },
+    {
+        "value": "Sinuosity"
+    },
+    {
         "value": "BFIWs"
+    },
+    {
+        "value": "Topo_pc_0"
     },
     {
         "value": "Watershed_pc_0"
     },
     {
-        "value": "Lithology_pc_2"
-    },
-    {
-        "value": "TotDASqKM"
-    },
-    {
-        "value": "scat_dummy"
-    },
-    {
-        "value": "nwm_dummy"
+        "value": "rp_100"
     },
     {
         "value": "WtDepWs"
     },
     {
-        "value": "Human_pc_3"
+        "value": "TotDASqKM"
     },
     {
-        "value": "gldas_dummy"
+        "value": "bf_ff"
+    },
+    {
+        "value": "roughness"
+    },
+    {
+        "value": "Topo_pc_1"
+    },
+    {
+        "value": "slope"
+    },
+    {
+        "value": "qsb_tavg"
     }
 ]

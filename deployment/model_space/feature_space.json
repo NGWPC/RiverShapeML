@@ -630,6 +630,7 @@
         "TW_bf_feats": [
             "bf_ff", 
             "NWM_2",
+            "rp_100",
             "TotDASqKM",
             "ArbolateSu",
             "StreamOrde",
@@ -639,85 +640,55 @@
             "roughness",
             "qsb_tavg",
             "BFIWs",
-            "Sinuosity",
-            "gldas_dummy",
-            "terra_dummy",
-            "nwm_dummy",
-            "vaa_dummy",
-            "scat_dummy"
+            "Sinuosity"
         ],
         "TW_bf_pc_feats": [
             "Topo_pc_0",
             "Topo_pc_1",
-            "Watershed_pc_0",
-            "Soil_pc_3",
-            "Topo_pc_2",
-            "Human_pc_3",
-            "Lithology_pc_2",
-            "Watershed_pc_2"
+            "Watershed_pc_0"
         ],
         "TW_in_feats": [
             "Sinuosity",
             "TotDASqKM",
             "in_ff", 
             "NWM_1.5",
+            "rp_100",
             "BFIWs",
             "qsb_tavg",
             "ArbolateSu", 
             "roughness",
             "StreamOrde",
             "WtDepWs",
-            "LAI",
-            "gldas_dummy",
-            "terra_dummy",
-            "nwm_dummy",
-            "vaa_dummy",
-            "scat_dummy"
+            "LAI"
         ],
         "TW_in_pc_feats": [
             "Topo_pc_1",
             "Lithology_pc_2",
-            "Topo_pc_0",
-            "Human_pc_4",
-            "Soil_pc_1",
-            "Dam_pc_1",
-            "Land_cover_pc_1",
-            "Land_cover_pc_3",
-            "Lithology_pc_1"
+            "Topo_pc_0"
         ],
         "Y_bf_feats": [
             "Sinuosity",
             "bf_ff", 
             "NWM_2",
+            "rp_100",
             "BFIWs",
             "ArbolateSu", 
             "TotDASqKM",
             "slope",
             "StreamOrde",
             "LAI",
-            "elevation_diff",
-            "gldas_dummy",
-            "terra_dummy",
-            "nwm_dummy",
-            "vaa_dummy",
-            "scat_dummy"
+            "elevation_diff"
         ],
         "Y_bf_pc_feats": [
             "Topo_pc_0",
             "Soil_pc_0",
-            "Topo_pc_1",
-            "Lithology_pc_2",
-            "Lithology_pc_3",
-            "Land_cover_pc_3",
-            "Soil_pc_3",
-            "Human_pc_4",
-            "Land_cover_pc_1",
-            "Land_cover_pc_0"
+            "Topo_pc_1"
         ],
         "Y_in_feats": [
             "Sinuosity",
             "in_ff",
             "NWM_1.5", 
+            "rp_100",
             "TotDASqKM",
             "ArbolateSu", 
             "Pathlength",
@@ -725,23 +696,12 @@
             "LAI",
             "qsb_tavg",
             "roughness",
-            "gldas_dummy",
-            "terra_dummy",
-            "nwm_dummy",
-            "vaa_dummy",
-            "scat_dummy"
+            "StreamOrde"
         ],
         "Y_in_pc_feats": [
             "Topo_pc_0",
             "Land_cover_pc_1",
-            "Watershed_pc_0",
-            "Topo_pc_2",
-            "Lithology_pc_0",
-            "Watershed_pc_1",
-            "Soil_pc_1",
-            "Human_pc_1",
-            "Topo_pc_1",
-            "Lithology_pc_2"
+            "Watershed_pc_0"
         ]
     }
 }
