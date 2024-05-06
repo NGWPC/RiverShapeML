@@ -176,8 +176,8 @@ class RunDeploy:
         os.chdir('/mnt/d/Lynker/FEMA_HECRAS/bankfull_W_D/deployment')
 
         # Load data
-        start = 1000000#2500000
-        end = 1500000#2647455
+        start = 0#2500000
+        end = 500000#2647455
         print(end)
         dl_obj = dataloader.DataLoader(rand_state)
         dl_obj.readFiles(start, end)
