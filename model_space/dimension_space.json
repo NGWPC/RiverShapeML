@@ -47,8 +47,7 @@
         "PctSilicicWs"
     ],
     "Soil_pc": [
-        "alpha_mean_0_5_r250",
-        "clay_mean_0_5_r250",
+        "alpha_mean_0_5_r250",     
         "hb_mean_0_5_r250",
         "ksat_mean_0_5_r250",
         "lambda_mean_0_5_r250",

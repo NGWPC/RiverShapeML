@@ -640,7 +640,10 @@
             "roughness",
             "qsb_tavg",
             "BFIWs",
-            "Sinuosity"
+            "Sinuosity",
+            "clay_mean_0_5_r250",
+            "lat",
+            "long"
         ],
         "TW_bf_pc_feats": [
             "Topo_pc_0",
@@ -659,7 +662,10 @@
             "roughness",
             "StreamOrde",
             "WtDepWs",
-            "LAI"
+            "LAI",
+            "clay_mean_0_5_r250",
+            "lat",
+            "long"
         ],
         "TW_in_pc_feats": [
             "Topo_pc_1",
@@ -677,7 +683,9 @@
             "slope",
             "StreamOrde",
             "LAI",
-            "elevation_diff"
+            "elevation_diff",
+            "lat",
+            "long"
         ],
         "Y_bf_pc_feats": [
             "Topo_pc_0",
@@ -696,7 +704,10 @@
             "LAI",
             "qsb_tavg",
             "roughness",
-            "StreamOrde"
+            "StreamOrde",
+            "clay_mean_0_5_r250",
+            "lat",
+            "long"
         ],
         "Y_in_pc_feats": [
             "Topo_pc_0",
