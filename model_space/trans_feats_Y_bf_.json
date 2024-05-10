@@ -126,9 +126,6 @@
         "value": "alpha_mean_0_5_r250"
     },
     {
-        "value": "clay_mean_0_5_r250"
-    },
-    {
         "value": "hb_mean_0_5_r250"
     },
     {
@@ -198,10 +195,10 @@
         "value": "elevation_ave"
     },
     {
-        "value": "long"
+        "value": "lat"
     },
     {
-        "value": "lat"
+        "value": "long"
     },
     {
         "value": "aet"
