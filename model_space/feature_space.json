@@ -630,7 +630,6 @@
         "TW_bf_feats": [
             "bf_ff", 
             "NWM_2",
-            "rp_100",
             "TotDASqKM",
             "ArbolateSu",
             "StreamOrde",
@@ -640,10 +639,7 @@
             "roughness",
             "qsb_tavg",
             "BFIWs",
-            "Sinuosity",
-            "clay_mean_0_5_r250",
-            "lat",
-            "long"
+            "Sinuosity"
         ],
         "TW_bf_pc_feats": [
             "Topo_pc_0",
@@ -655,17 +651,13 @@
             "TotDASqKM",
             "in_ff", 
             "NWM_1.5",
-            "rp_100",
             "BFIWs",
             "qsb_tavg",
             "ArbolateSu", 
             "roughness",
             "StreamOrde",
             "WtDepWs",
-            "LAI",
-            "clay_mean_0_5_r250",
-            "lat",
-            "long"
+            "LAI"
         ],
         "TW_in_pc_feats": [
             "Topo_pc_1",
@@ -676,16 +668,13 @@
             "Sinuosity",
             "bf_ff", 
             "NWM_2",
-            "rp_100",
             "BFIWs",
             "ArbolateSu", 
             "TotDASqKM",
             "slope",
             "StreamOrde",
             "LAI",
-            "elevation_diff",
-            "lat",
-            "long"
+            "elevation_diff"
         ],
         "Y_bf_pc_feats": [
             "Topo_pc_0",
@@ -696,7 +685,6 @@
             "Sinuosity",
             "in_ff",
             "NWM_1.5", 
-            "rp_100",
             "TotDASqKM",
             "ArbolateSu", 
             "Pathlength",
@@ -704,10 +692,7 @@
             "LAI",
             "qsb_tavg",
             "roughness",
-            "StreamOrde",
-            "clay_mean_0_5_r250",
-            "lat",
-            "long"
+            "StreamOrde"
         ],
         "Y_in_pc_feats": [
             "Topo_pc_0",

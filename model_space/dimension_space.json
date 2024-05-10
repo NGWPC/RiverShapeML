@@ -77,6 +77,8 @@
     ],
     "Topo_pc": [
         "elevation_ave", 
+        "lat",
+        "long",
         "aet",
         "DIVISION_encode",
         "PROVINCE_encode",
