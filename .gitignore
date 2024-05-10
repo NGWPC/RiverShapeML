@@ -35,6 +35,7 @@ deployment/data/nwm_conus_input.parquet
 !data/nwis_depth_pred_tar_up.parquet
 
 # Folders
+revision/*
 WD_up/*
 older test/*
 Images/paper/*

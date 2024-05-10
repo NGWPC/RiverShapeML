@@ -311,7 +311,7 @@ class MlModel:
                 param[k] = temp
                 del temp
             grid_search = GridSearchCV(estimator=model, param_grid=param, n_jobs = nthreads, cv = cv,
-                                       scoring="neg_root_mean_squared_error")
+                                       scoring="neg_mean_squared_error") # neg_root_mean_squared_error
             if model_key == 'ard' or model_key == 'knr' or model_key == 'mlp':
                 grid_search.fit(self.train_x, self.train_y)
             else:
@@ -475,8 +475,8 @@ class MlModel:
         fit_params = dict(sample_weight=y_weights)
 
         if best_model == 'xgb':
-            loaded_model.fit(self.x_train, self.y_train, eval_metric=["mae", "rmse"], eval_set=eval_set, 
-                             early_stopping_rounds=0.1*best_params['n_estimators'], verbose=False, **fit_params)
+            loaded_model.fit(self.x_train, self.y_train, eval_set=eval_set, 
+                             early_stopping_rounds=0.1*best_params['n_estimators'], verbose=False, **fit_params) #, eval_metric=["mae", "rmse"]
         elif best_model == 'ard' or best_model == 'knr' or best_model == 'mlp':
             loaded_model.fit(self.x_train, self.y_train)
         else:
@@ -628,7 +628,7 @@ class ModelSwitch:
                 max_depth = best_params['max_depth'], n_estimators = best_params['n_estimators'],
                 colsample_bytree = best_params['colsample_bytree'], nthread=self.nthreads,
                 min_child_weight = best_params['min_child_weight'], gamma = best_params['gamma'],
-                subsample = best_params['subsample'])
+                subsample = best_params['subsample'])#, objective = 'reg:linear')
     def rf(self, best_params):
         return RandomForestRegressor(random_state=self.rand_state, n_jobs=self.nthreads,
                 max_depth = best_params['max_depth'], max_features = best_params['max_features'], 
@@ -698,7 +698,7 @@ class RunMlModel:
         weighted     = False
         sub_trans    = True
         pca          = True 
-        t_type       = 'power' # 'log', 'power', 'quant' 
+        t_type       = 's_scaler' # 'log', 'power', 'quant' 
         train_type   = 'NWM' # 'NWM', 'NWIS'
         if sample_type == "Sub" and pca:
             sample_type = "Sub_pca"
@@ -722,22 +722,22 @@ class RunMlModel:
                 R2_thresh    = 0.01 #---------# #NWM 0.6 #NWIS 0.85
                 count_thresh = 3 #---------# #NWM 10  #NWIS 5
                 x_transform  = False #---------# #NWM False     #NWIS False
-                y_transform  = False #---------# #NWM False     #NWIS False
+                y_transform  = True #---------# #NWM False     #NWIS False
             elif target_name == "Y_in": 
                 R2_thresh    = 0.01 #---------# #NWM 0.6  #NWIS 0.85
                 count_thresh = 3 #---------# #NWM 10  #NWIS 5
                 x_transform  = False #---------# #NWM False     #NWIS False
-                y_transform  = False #---------# #NWM False     #NWIS False
+                y_transform  = True #---------# #NWM False     #NWIS False
             elif target_name == "TW_bf": 
                 R2_thresh    = 0.01 #---------# #NWM 0.2 #NWIS 0.2
                 count_thresh = 3 #---------# #NWM 8 #NWIS 8
                 x_transform  = False #---------# #NWM False  #NWIS False
-                y_transform  = False #---------# #NWM False  #NWIS False
+                y_transform  = True #---------# #NWM False  #NWIS False
             elif target_name == "TW_in": 
                 R2_thresh    = 0.01 #NWM 0.5#---------# #NWM 0.3 #NWIS 0.2
                 count_thresh = 3 #NWM 10 #---------# #NWM 6 #NWIS 8
                 x_transform  = False  #NWM False#---------# #NWM True #NWIS False
-                y_transform  = False  #NWM False #---------# #NWM True #NWIS False
+                y_transform  = True  #NWM False #---------# #NWM True #NWIS False
             # ___________________________________________________
             # Train models 
             print('\n******************* modeling parameter {0} starts here *******************\n'.format(target_name))

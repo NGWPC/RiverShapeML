@@ -113,19 +113,19 @@ class DPModel:
         if target_name == 'Y_bf':
             model_type = 'xgb'
             x_transform = False
-            y_transform = False
+            y_transform = True
         elif target_name == 'Y_in':
             model_type = 'xgb'
             x_transform = False
-            y_transform = False
+            y_transform = True
         elif target_name == 'TW_bf':
             model_type = 'xgb'
             x_transform = False
-            y_transform = False
+            y_transform = True
         else:
             model_type = 'xgb'
             x_transform = False
-            y_transform = False
+            y_transform = True
 
         model, trans_feats, model_feats = self.loadModel(target_name, vote_flag=False, meta_flag=False, 
                                       best_flag=True, file='NWM', model_type=model_type)
