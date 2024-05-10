@@ -644,6 +644,8 @@ class DataLoader:
                     n_quantiles=500, output_distribution="normal", 
                     random_state=self.rand_state
                 )
+            if t_type=='s_scaler':
+                t_y = StandardScaler()
             if t_type!='log':
                 # scaler_y = StandardScaler()
                 train_y = self.train[[self.out_feature]].reset_index(drop=True)
