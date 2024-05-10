@@ -630,7 +630,6 @@
         "TW_bf_feats": [
             "bf_ff", 
             "NWM_2",
-            "rp_100",
             "TotDASqKM",
             "ArbolateSu",
             "StreamOrde",
@@ -652,7 +651,6 @@
             "TotDASqKM",
             "in_ff", 
             "NWM_1.5",
-            "rp_100",
             "BFIWs",
             "qsb_tavg",
             "ArbolateSu", 
