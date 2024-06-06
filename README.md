@@ -23,6 +23,23 @@ git clone https://github.com/LynkerIntel/bankfull_W_D.git
 ### Example
 
 > you can run the model using following command:
+
+```shell
+./run_ml.bash -c my_model -n -1 -x False -y False -r 0.6 -t 5
+```
+where 
+
+-c: custom model run name
+
+-n: number of cores to be used
+
+-x: whether to transform input variables
+
+-y: whether to transform input variables
+
+-r: coefficient of determination threshold to remove stations below it
+
+-t: threshold for the least number of observations to have in the station
 ...
 
 ## Overview
