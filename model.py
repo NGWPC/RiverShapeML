@@ -576,7 +576,7 @@ class MlModel:
         # constrained_model.fit(xgb.DMatrix(concated_x, label=concated_y))
         voting_model.fit(concated_x, concated_y)
         meta_model.fit(concated_x, concated_y)
-        pd.geoDataFrame
+        
         # Lets keep record on input varibales and order
         def preserve_order(item):
             return {"value": item}
