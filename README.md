@@ -1,4 +1,11 @@
 # bankfull_W_D
+
+<!-- badges: start -->
+[maintenance-status](https://img.shields.io/badge/maintenance-deprecated-red.svg)
+<!-- badges: end -->
+
+## **All current and future work is being maintained in [NOAA-OWP ML chennel shape repository](https://github.com/NOAA-OWP/channel-shape-ML/tree/master/channel-WD)**
+
 A machine learning approach for estimation of bankfull width and depth
 
 **Check out our [website](https://sites.google.com/u.boisestate.edu/channel-width-depth?usp=sharing) that provides details of our approuch.** 
