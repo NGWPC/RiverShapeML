@@ -1,8 +1,6 @@
 # bankfull_W_D
 
-<!-- badges: start -->
-[maintenance-status](https://img.shields.io/badge/maintenance-deprecated-red.svg)
-<!-- badges: end -->
+![maintenance-status](https://img.shields.io/badge/maintenance-deprecated-red.svg)
 
 ## **All current and future work is being maintained in [NOAA-OWP ML chennel shape repository](https://github.com/NOAA-OWP/channel-shape-ML/tree/master/channel-WD)**
 
