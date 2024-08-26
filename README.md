@@ -53,7 +53,7 @@ Here we use the USGS “HYDRoacoustic dataset in support of the Surface Water Oc
 
 1. Build an ML model that uses climate, land surface, subsurface and topological attributes aggregated over divide and incremental catchements to predict **channel depth and width at bankfull** 
 
-![Channel](assets/images/channel.jpg)
+![Channel](assets/images/channel.png)
 
 2. Build an ML model that uses climate, land surface, subsurface and topological attributes aggregated over divide and incremental catchements to predict **channel depth and width at inchannel**. This is often the part that is not captured by the DEM or sattelite imagery due to presence of water at all times.
 
