@@ -1,7 +1,6 @@
 # RiverShapeML
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13715359.svg)](https://doi.org/10.5281/zenodo.13715359)
-
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13715359.svg)](https://doi.org/10.5281/zenodo.13715359) 
 ![scikit-learn](https://img.shields.io/badge/scikit--learn-%23F7931E.svg?style=for-the-badge&logo=scikit-learn&logoColor=white)
 
 ## **All machine learning models developed in this project are shared in the NOAA-OWP HydrofabricML repository, contributing to the Enterprise Hydrofabric Solution.**
