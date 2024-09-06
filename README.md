@@ -121,13 +121,6 @@ The ML model establishes a relation between different attributes that are agrreg
 python3 ./preprocess/filter_adcp.py
 ```
 
-- filttering GEE data
-
-```shell
-python3 ./preprocess/gee_exports.py
-```
-
-
 ### Approximation of bankfull and inchannel discharge
 
 To get an estimate of discharges associated with to bankfull and inchannel conditions we calculate flood frequencies using an algorithem consitent with literature and the flow data is exracted from two USGS query systems. The outputs are is shown below that plots etimated bankfull and inchannel discharge and comapres it to ADCP recorded discharge values:
