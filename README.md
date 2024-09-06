@@ -1,16 +1,15 @@
-# bankfull_W_D
+# RiverShapeML
 
-![maintenance-status](https://img.shields.io/badge/maintenance-deprecated-red.svg)
+![scikit-learn](https://img.shields.io/badge/scikit--learn-%23F7931E.svg?style=for-the-badge&logo=scikit-learn&logoColor=white)
 
-## **All current and future work is being maintained in [NOAA-OWP ML chennel shape repository](https://github.com/NOAA-OWP/channel-shape-ML/tree/master/channel-WD)**
+## **All machine learning models developed in this project are shared in the NOAA-OWP HydrofabricML repository, contributing to the Enterprise Hydrofabric Solution.**
 
-A machine learning approach for estimation of bankfull width and depth
-
-**Check out our [website](https://sites.google.com/u.boisestate.edu/channel-width-depth?usp=sharing) that provides details of our approuch.** 
+A machine learning approach for estimation of bankfull width and depth 
 
 - [Repo](#Repository)
   * [Cloning](#Cloning)
-  * [Example](#Example)
+  * [Training](#Training)
+  * [Deployment](#Deployment)
 - [Overview](#Overview)
 - [Input data](#Input-data)
   * [Preprocessing](#Preprocess-data)
@@ -22,12 +21,12 @@ A machine learning approach for estimation of bankfull width and depth
 ### Cloning
 
 ```shell
-git clone https://github.com/LynkerIntel/bankfull_W_D.git
+git clone https://github.com/lynker-spatial/RiverShapeML.git
 ```
 
-### Example
+### Training
 
-> you can run the model using following command:
+> One can train the model using following command:
 
 ```shell
 ./run_ml.bash -c my_model -n -1 -x False -y False -r 0.6 -t 5
@@ -46,6 +45,19 @@ where
 
 -t: threshold for the least number of observations to have in the station
 ...
+
+### Deployment
+
+> To deploy the ML model 
+
+```shell
+cd deployment
+bash conda_setup.bash -n -1 
+```
+Where:  
+
+**-n** is the number of cores to be used in parallel. An integer depends on the number of cores. Use -1 for utilizing all
+
 
 ## Overview
 
