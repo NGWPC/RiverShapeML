@@ -362,7 +362,7 @@ class MlModel:
 
 # --------------------------- Run Best Model --------------------------- #
     def runMlModel(self, best_model: str, best_params: dict, best_models: pd.DataFrame, xgb_params: dict,
-                   weighted: bool, out_features: str, nthreads: int = -1) -> Tuple[any, 
+                   weighted: bool, out_features: str, ensemble:bool, nthreads: int = -1) -> Tuple[any, 
                                                                                    any, 
                                                                                    VotingRegressor,
                                                                                    StackingRegressor,
@@ -558,26 +558,27 @@ class MlModel:
         #                                   max_depth=2, max_features='log2', max_samples=0.6, n_estimators=100)
         voting_model = VotingRegressor(estimators=base_model, n_jobs=nthreads)
         meta_model = StackingRegressor(estimators=base_model, final_estimator=top_model, cv=5, 
-                                       passthrough=True, n_jobs=nthreads)
-        voting_model.fit(self.x_train, self.y_train)
-        meta_model.fit(self.x_train, self.y_train)
-
-        # ___________________________________________________
-        # Save meta learner & voting
-        pickle.dump(voting_model, open(self.custom_name+"/model/"+str(self.custom_name)+'_'+out_features+"_Voting_Model.pickle.dat", "wb"))
-        pickle.dump(meta_model, open(self.custom_name+"/model/"+str(self.custom_name)+'_'+out_features+"_Meta_Model.pickle.dat", "wb"))
+                                        passthrough=True, n_jobs=nthreads)
+        if ensemble:
+            voting_model.fit(self.x_train, self.y_train)
+            meta_model.fit(self.x_train, self.y_train)
+            # ___________________________________________________
+            # Save meta learner & voting
+            pickle.dump(voting_model, open(self.custom_name+"/model/"+str(self.custom_name)+'_'+out_features+"_Voting_Model.pickle.dat", "wb"))
+            pickle.dump(meta_model, open(self.custom_name+"/model/"+str(self.custom_name)+'_'+out_features+"_Meta_Model.pickle.dat", "wb"))
 
         return loaded_model, constrained_model, voting_model, meta_model, train_columns, self.x_train, self.y_train, self.test_x, self.test_y
     
     def finalFits(self, ml_model: any, constrained_model: any, voting_model: VotingRegressor, meta_model: StackingRegressor, 
-                  out_features: str, best_model: str) -> None:
+                  out_features: str, best_model: str, ensemble: bool) -> None:
         concated_x = pd.concat([self.train_x, self.test_x], axis=0)
         concated_x = concated_x.reset_index(drop=True)
         concated_y = np.concatenate([self.train_y, self.test_y])
         ml_model.fit(concated_x, concated_y)
         # constrained_model.fit(xgb.DMatrix(concated_x, label=concated_y))
-        voting_model.fit(concated_x, concated_y)
-        meta_model.fit(concated_x, concated_y)
+        if ensemble:
+            voting_model.fit(concated_x, concated_y)
+            meta_model.fit(concated_x, concated_y)
         
         # Lets keep record on input varibales and order
         def preserve_order(item):
@@ -594,8 +595,9 @@ class MlModel:
         # Save models
         pickle.dump(ml_model, open(self.custom_name+"/model/"+str(self.custom_name)+'_'+out_features+"_"+str(best_model)+"_final_Best_Model.pickle.dat", "wb"))
         # pickle.dump(constrained_model, open(self.custom_name+"/model/"+str(self.custom_name)+'_'+out_features+"_xgb_constrained_final_Best_Model.pickle.dat", "wb"))
-        pickle.dump(voting_model, open(self.custom_name+"/model/"+str(self.custom_name)+'_'+out_features+"_final_Voting_Model.pickle.dat", "wb"))
-        pickle.dump(meta_model, open(self.custom_name+"/model/"+str(self.custom_name)+'_'+out_features+"_final_Meta_Model.pickle.dat", "wb"))
+        if ensemble:
+            pickle.dump(voting_model, open(self.custom_name+"/model/"+str(self.custom_name)+'_'+out_features+"_final_Voting_Model.pickle.dat", "wb"))
+            pickle.dump(meta_model, open(self.custom_name+"/model/"+str(self.custom_name)+'_'+out_features+"_final_Meta_Model.pickle.dat", "wb"))
 
         return 
 
@@ -707,6 +709,7 @@ class RunMlModel:
         if sample_type == "All" and pca:
             sample_type = "All_pca"
         importance = False # whether to calculate feature importance or not
+        ensemble = False # whether to run ensemble models or not
         # List of traget varaibles
         # temp        = json.load(open('data/ml_model_feature_names.json'))
         # del temp
@@ -755,7 +758,7 @@ class RunMlModel:
                                                                                     space=space, weighted=weighted)
             best_model_orig = best_model
             ml_model, constrained_model, voting_model, meta_model, train_columns, train_x, train_y, _, _, = model.runMlModel(best_model=best_model, best_params=best_params, 
-                                        xgb_params=xgb_params, best_models=best_models, weighted=weighted, out_features=target_name, nthreads=nthreads)
+                                        xgb_params=xgb_params, best_models=best_models, weighted=weighted, out_features=target_name, ensemble=ensemble, nthreads=nthreads)
             
             print('\n----------------- Results for best model -------------------\n')
             # # ___________________________________________________
@@ -777,35 +780,36 @@ class RunMlModel:
                                         out_feature=target_name, custom_name=custom_name, SI=SI)
             save_obj.processData()
 
-            print('\n----------------- Results for vote model -------------------\n')
-            # ___________________________________________________
-            # save best model fit
-            best_model = 'vote'
-            save_obj = sd.SaveOutput(train_id=model.train_sub_id, eval_id=model.eval_id, test_id=model.test_id,
-                                        x_train=x_train, x_eval=x_eval, test_x=test_x, train_columns=train_columns,
-                                        m_x_train = model.x_train, m_x_eval = model.x_eval, m_x_test = model.test_x,
-                                        y_train=model.y_train, y_eval=model.y_eval, test_y=model.test_y,
-                                        target_data_path = model.target_data_path, best_model=best_model, loaded_model=voting_model, 
-                                        x_transform=x_transform, y_transform=y_transform, t_type=t_type,
-                                        out_feature=target_name, custom_name=custom_name, SI=SI)
-            save_obj.processData()
+            if ensemble:
+                print('\n----------------- Results for vote model -------------------\n')
+                # ___________________________________________________
+                # save best model fit
+                best_model = 'vote'
+                save_obj = sd.SaveOutput(train_id=model.train_sub_id, eval_id=model.eval_id, test_id=model.test_id,
+                                            x_train=x_train, x_eval=x_eval, test_x=test_x, train_columns=train_columns,
+                                            m_x_train = model.x_train, m_x_eval = model.x_eval, m_x_test = model.test_x,
+                                            y_train=model.y_train, y_eval=model.y_eval, test_y=model.test_y,
+                                            target_data_path = model.target_data_path, best_model=best_model, loaded_model=voting_model, 
+                                            x_transform=x_transform, y_transform=y_transform, t_type=t_type,
+                                            out_feature=target_name, custom_name=custom_name, SI=SI)
+                save_obj.processData()
 
-            print('\n----------------- Results for meta model -------------------\n')
-            # # ___________________________________________________
-            # # plot meta model fit
-            best_model = 'meta'
-            save_obj = sd.SaveOutput(train_id=model.train_sub_id, eval_id=model.eval_id, test_id=model.test_id,
-                                        x_train=x_train, x_eval=x_eval, test_x=test_x, train_columns=train_columns,
-                                        m_x_train = model.x_train, m_x_eval = model.x_eval, m_x_test = model.test_x,
-                                        y_train=model.y_train, y_eval=model.y_eval, test_y=model.test_y,
-                                        target_data_path = model.target_data_path, best_model=best_model, loaded_model=meta_model, 
-                                        x_transform=x_transform, y_transform=y_transform, t_type=t_type,
-                                        out_feature=target_name, custom_name=custom_name, SI=SI)
-            save_obj.processData()
+                print('\n----------------- Results for meta model -------------------\n')
+                # # ___________________________________________________
+                # # plot meta model fit
+                best_model = 'meta'
+                save_obj = sd.SaveOutput(train_id=model.train_sub_id, eval_id=model.eval_id, test_id=model.test_id,
+                                            x_train=x_train, x_eval=x_eval, test_x=test_x, train_columns=train_columns,
+                                            m_x_train = model.x_train, m_x_eval = model.x_eval, m_x_test = model.test_x,
+                                            y_train=model.y_train, y_eval=model.y_eval, test_y=model.test_y,
+                                            target_data_path = model.target_data_path, best_model=best_model, loaded_model=meta_model, 
+                                            x_transform=x_transform, y_transform=y_transform, t_type=t_type,
+                                            out_feature=target_name, custom_name=custom_name, SI=SI)
+                save_obj.processData()
             
             # ___________________________________________________
             # Final training
-            model.finalFits(ml_model, constrained_model, voting_model, meta_model, target_name, best_model_orig)
+            model.finalFits(ml_model, constrained_model, voting_model, meta_model, target_name, best_model_orig, ensemble)
 
             print('\n----------------- Feature importance -------------------\n')
             # ___________________________________________________
