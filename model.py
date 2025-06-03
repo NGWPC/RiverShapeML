@@ -174,8 +174,10 @@ class MlModel:
             data_path = self.target_data_path = 'data/nwm_width_pred_tar_up.parquet'
         elif train_type == "NWM" and "Y_" in out_feature:
             data_path = self.target_data_path = 'data/nwm_depth_pred_tar_up.parquet'
+        auxiliary_data_path = 'data/auxiliary_data.parquet'
 
         data_loader = dataloader.DataLoader(data_path=data_path,
+                                            auxiliary_data_path=auxiliary_data_path,
                                             target_data_path=self.target_data_path,
                                             rand_state=self.rand_state, 
                                             out_feature=out_feature, 
@@ -693,7 +695,7 @@ class RunMlModel:
         R2_thresh    = float(argv[4])
         count_thresh = int(argv[5])
         space        = 'actual_space' # actual_space / test_space
-        SI           = False # SI system
+        SI           = False  # SI system -> Redunt, currently set to SI keep as False
         sample_type  = "Sub" #"All", "Sub", "test"
         weighted     = False
         sub_trans    = True
@@ -704,7 +706,7 @@ class RunMlModel:
             sample_type = "Sub_pca"
         if sample_type == "All" and pca:
             sample_type = "All_pca"
-
+        importance = False # whether to calculate feature importance or not
         # List of traget varaibles
         # temp        = json.load(open('data/ml_model_feature_names.json'))
         # del temp
@@ -716,7 +718,7 @@ class RunMlModel:
         temp        = json.load(open('data/model_feature_names.json'))
         target_list = temp.get('out_features')
         del temp
-        # target_list=['Y_in']
+        target_list=['Y_bf', 'TW_bf']
         for target_name in tqdm(target_list):
             if target_name == "Y_bf": 
                 R2_thresh    = 0.01 #---------# #NWM 0.6 #NWIS 0.85
@@ -808,15 +810,16 @@ class RunMlModel:
             print('\n----------------- Feature importance -------------------\n')
             # ___________________________________________________
             # plot feature importance
-            try:
-                fimp_object = fimp.FeatureImportance(custom_name, best_model)
-                fimp_object.plotImportance(model=ml_model, out_features=target_name,
-                                            train_x=train_x, train_y=train_y)
-                fimp_object.plotShapImportance(model=ml_model, out_features=target_name, 
-                                                train_x=train_x)
-            except Exception as e:       
-                print("An exception occurred due to shap internal errors!")  
-                print(e)      
+            if importance:
+                try:
+                    fimp_object = fimp.FeatureImportance(custom_name, best_model)
+                    fimp_object.plotImportance(model=ml_model, out_features=target_name,
+                                                train_x=train_x, train_y=train_y)
+                    fimp_object.plotShapImportance(model=ml_model, out_features=target_name, 
+                                                    train_x=train_x)
+                except Exception as e:       
+                    print("An exception occurred due to shap internal errors!")  
+                    print(e)      
             print('\n**************** modeling parameter {0} ends here ****************\n'.format(target_name))
             print('end')
 

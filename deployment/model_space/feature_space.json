@@ -1,8 +1,8 @@
 {
     "test": {
         "TW_bf_feats": [
-            "elevation_ave",
-            "elevation_diff"
+            "ftype",
+            "flowline_type"
         ],
         "TW_in_feats": [
             "elevation_ave",
@@ -13,8 +13,8 @@
             "elevation_diff"
         ],
         "Y_bf_feats": [
-            "elevation_ave",
-            "elevation_diff"
+            "ftype",
+            "flowline_type"
         ]
     },
     "All": {
@@ -125,7 +125,9 @@
             "PopDen2010Ws",
             "RdCrsWs",
             "RdCrsSlpWtdWs",
-            "RdDensWs"
+            "RdDensWs",
+            "ftype",
+            "flowline_type"
         ],
         "TW_in_feats": [
             "Sinuosity",
@@ -343,7 +345,9 @@
             "PopDen2010Ws",
             "RdCrsWs",
             "RdCrsSlpWtdWs",
-            "RdDensWs"
+            "RdDensWs",
+            "ftype",
+            "flowline_type"
         ],
         "Y_in_feats": [
             "Sinuosity",
@@ -493,7 +497,9 @@
             "snowfall",
             "snowmelt",
             "Wind_ave",
-            "bf_ff"
+            "bf_ff",
+            "ftype",
+            "flowline_type"
         ],
         "TW_in_feats": [
             "CHILI",
@@ -582,7 +588,9 @@
             "NDVI_ave",
             "NDVI_max",
             "NDVI_min",
-            "bf_ff"
+            "bf_ff",
+            "ftype",
+            "flowline_type"
         ],
         "Y_in_feats": [
             "CHILI",
@@ -630,7 +638,6 @@
         "TW_bf_feats": [
             "bf_ff", 
             "NWM_2",
-            "rp_100",
             "TotDASqKM",
             "ArbolateSu",
             "StreamOrde",
@@ -640,7 +647,9 @@
             "roughness",
             "qsb_tavg",
             "BFIWs",
-            "Sinuosity"
+            "Sinuosity",
+            "ftype",
+            "flowline_type"
         ],
         "TW_bf_pc_feats": [
             "Topo_pc_0",
@@ -652,7 +661,6 @@
             "TotDASqKM",
             "in_ff", 
             "NWM_1.5",
-            "rp_100",
             "BFIWs",
             "qsb_tavg",
             "ArbolateSu", 
@@ -670,14 +678,15 @@
             "Sinuosity",
             "bf_ff", 
             "NWM_2",
-            "rp_100",
             "BFIWs",
             "ArbolateSu", 
             "TotDASqKM",
             "slope",
             "StreamOrde",
             "LAI",
-            "elevation_diff"
+            "elevation_diff",
+            "ftype",
+            "flowline_type"
         ],
         "Y_bf_pc_feats": [
             "Topo_pc_0",
@@ -688,7 +697,6 @@
             "Sinuosity",
             "in_ff",
             "NWM_1.5", 
-            "rp_100",
             "TotDASqKM",
             "ArbolateSu", 
             "Pathlength",
