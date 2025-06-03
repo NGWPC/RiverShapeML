@@ -64,11 +64,12 @@ class DataLoader:
         sample_type = 'All', train_type = 'NWIS')
         
     """
-    def __init__(self, data_path: str, target_data_path: str, rand_state: int, out_feature: str, 
+    def __init__(self, data_path: str, auxiliary_data_path:str, target_data_path: str, rand_state: int, out_feature: str, 
                  custom_name: str, sample_type: str, x_transform: bool = False, y_transform: bool = False, 
                  R2_thresh: float = 0.0, count_thresh: int = 3, train_type: str = 'NWIS') -> None:
         pd.options.display.max_columns  = 60
         self.data_path                  = data_path
+        self.auxiliary_data_path        = auxiliary_data_path
         self.target_data_path           = target_data_path
         self.data                       = pd.DataFrame([])
         self.data_target                = pd.DataFrame([])
@@ -87,6 +88,7 @@ class DataLoader:
         self.R2_thresh                  = R2_thresh
         self.count_thresh               = count_thresh
         self.train_type                 = train_type
+        self.aux_flag                   = False
         
         # ___________________________________________________
         # Check directories
@@ -102,6 +104,11 @@ class DataLoader:
         """
         try:
             self.data = pd.read_parquet(self.data_path, engine='pyarrow')
+            # If auxiliary data is provided, read it
+            if os.path.exists(self.auxiliary_data_path):
+                self.aux_flag = True
+                self.aux_data = pd.read_parquet(self.auxiliary_data_path, engine='pyarrow')
+          
             self.data.astype({'siteID': 'string'})
             # self.data_target = pd.read_parquet(self.target_data_path, engine='pyarrow')
             # self.data_target.astype({'siteID': 'string'})
@@ -159,6 +166,15 @@ class DataLoader:
             # Mississippi River, which reaches 50000 feet width at some points
             self.data = self.data.loc[(self.data[self.out_feature] <= 50000) & 
                                       (self.data[self.out_feature] > 0)]
+            
+        # Apply some filtering
+        if "TW_" in self.out_feature: 
+            # The widest navigable section in the shipping channel of the Mississippi is Lake Pepin, where the channel is approximately 2 miles wide
+            # here we consider 3 miles or 15840 ft
+            self.data = self.data.loc[self.data[str(self.out_feature)] < 15840]
+        else:
+            # The deepest river in the U.S. is the Hudson River which reaches a maximum depth of 216 ft.
+            self.data = self.data.loc[self.data[str(self.out_feature)] < 216] 
         # ___________________________________________________
         # Filter bad stations
         #target_df = pd.read_parquet(self.target_data_path, engine='pyarrow')
@@ -203,9 +219,17 @@ class DataLoader:
         stations = good_stations['siteID'].tolist()
         del good_stations
         self.data = self.data[self.data['siteID'].isin(stations)].reset_index(drop=True)
+
+         # Unit Conversion --> ft to m
+        self.data[self.out_feature] = self.data[self.out_feature] * 0.3048
+        if self.aux_flag:
+            # Add auxiliary data (expected to be in meters)
+            # Supplement with extra columns
+            self.aux_data.loc[:, ['Count', 'siteID', 'stream_wdth_va', 'mean_depth_va', 'R2', 'flag', 'COMID', 'exp', 'coe', 'meas_q_va']] = np.nan
+            self.data = pd.concat([self.data, self.aux_data[self.data.columns]], ignore_index=True)
+
         print("Shape of data after filter: {0}".format(self.data.shape))
 
-       
         return 
 
  # --------------------------- Dimension Reduction --------------------------- #
@@ -446,14 +470,7 @@ class DataLoader:
 
         del temp, temp_o, temp_pc
         
-        # Apply some filtering
-        if "TW_" in self.out_feature: 
-            # The widest navigable section in the shipping channel of the Mississippi is Lake Pepin, where the channel is approximately 2 miles wide
-            # here we consider 3 miles or 15840 ft
-            self.data = self.data.loc[self.data[str(self.out_feature)] < 15840]
-        else:
-            # The deepest river in the U.S. is the Hudson River which reaches a maximum depth of 216 ft.
-            self.data = self.data.loc[self.data[str(self.out_feature)] < 216] 
+        
        
        # Drop NWM features as input for NWM training only
         if self.train_type == "NWM":
@@ -722,6 +739,9 @@ class DataLoader:
 
         train_x.to_parquet(self.custom_name+'/metrics/'+'train_x'+'_'+self.out_feature+'.parquet')
         pd.DataFrame({self.out_feature: train_y}).to_parquet(self.custom_name+'/metrics/'+'train_y'+'_'+self.out_feature+'.parquet')
+        # Convert column to string
+        train_id['siteID'] = train_id['siteID'].astype(str)  
+        test_id['siteID'] = test_id['siteID'].astype(str) 
         train_id.to_parquet(self.custom_name+'/metrics/'+'train_id'+'_'+self.out_feature+'.parquet')
         test_x.to_parquet(self.custom_name+'/metrics/'+'test_x'+'_'+self.out_feature+'.parquet')
         pd.DataFrame({self.out_feature: test_y}).to_parquet(self.custom_name+'/metrics/'+'test_y'+'_'+self.out_feature+'.parquet')

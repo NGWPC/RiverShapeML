@@ -57,6 +57,8 @@
         "rp_100",
         "NWM_2",
         "NWM_1.5",
+        "ftype",
+        "flowline_type",
         "nwm_dummy",
         "vaa_dummy",
         "scat_dummy"
