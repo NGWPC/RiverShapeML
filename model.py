@@ -10,7 +10,7 @@ import data_loader as dataloader
 import feature_importance as fimp
 import save_output as sd
 # import comp_plot as pcml
-from sklearn.model_selection import train_test_split, RepeatedKFold, GridSearchCV
+from sklearn.model_selection import train_test_split, RepeatedKFold, GridSearchCV, RandomizedSearchCV
 from sklearn.ensemble import ExtraTreesRegressor, BaggingRegressor, RandomForestRegressor, HistGradientBoostingRegressor, StackingRegressor, VotingRegressor
 from sklearn.svm import SVR
 from sklearn.neighbors import KNeighborsRegressor
@@ -295,7 +295,9 @@ class MlModel:
 
         # ___________________________________________________
         # Do a k-fold cross validation on models
-        cv = RepeatedKFold(n_splits = 5, n_repeats = 3, random_state = self.rand_state)
+        # Optimum n_splits = 5, n_repeats = 3
+        # for larger datasets n_splits = 3, n_repeats = 1, cpu = 5
+        cv = RepeatedKFold(n_splits = 3, n_repeats = 1, random_state = self.rand_state)
         for model_key in models.keys():
             print('Running GridSearchCV for model: %s.' % model_key)
             model = models[model_key]
@@ -312,8 +314,10 @@ class MlModel:
                     temp.append(deval_f(x))
                 param[k] = temp
                 del temp
-            grid_search = GridSearchCV(estimator=model, param_grid=param, n_jobs = nthreads, cv = cv,
-                                       scoring="neg_mean_squared_error") # neg_root_mean_squared_error
+            grid_search = RandomizedSearchCV(estimator=model, param_distributions=param,
+                                 n_iter=40, cv=cv, scoring="neg_mean_squared_error", n_jobs=5)
+            # grid_search = GridSearchCV(estimator=model, param_grid=param, n_jobs = nthreads, cv = cv,
+            #                            scoring="neg_mean_squared_error") # neg_root_mean_squared_error
             if model_key == 'ard' or model_key == 'knr' or model_key == 'mlp':
                 grid_search.fit(self.train_x, self.train_y)
             else:
