@@ -88,9 +88,9 @@ class SaveOutput:
         # for i in range(min_length):
         #     print(f'{self.loaded_model.feature_names_in_[i]}  {self.train_columns[i]}')
 
-        self.predictions_train = self.loaded_model.predict(self.x_train)
-        self.predictions_valid = self.loaded_model.predict(self.x_eval)
-        self.predictions_test = self.loaded_model.predict(self.test_x)
+        self.predictions_train = self.loaded_model.predict(self.m_x_train)
+        self.predictions_valid = self.loaded_model.predict(self.m_x_eval)
+        self.predictions_test = self.loaded_model.predict(self.m_x_test)
 
         pc_columns = [col for col in self.x_train.columns if '_pc' in col]
         pc_columns = pc_columns + ["R2", "siteID"]
@@ -141,9 +141,9 @@ class SaveOutput:
 
         # ___________________________________________________
         # Build complete dataframe
-        train_attr = self.x_train.copy()
-        eval_attr = self.x_eval.copy()
-        test_attr = self.test_x.copy()
+        train_attr = self.m_x_train.copy()
+        eval_attr = self.m_x_eval.copy()
+        test_attr = self.m_x_test.copy()
 
         train_attr['split'] = 'train'
         eval_attr['split'] = 'eval'

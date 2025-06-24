@@ -13,6 +13,7 @@ import json
 import pandas as pd
 import numpy as np
 import os
+import glob
 import sys 
 from tqdm import tqdm
 from joblib import Parallel, delayed
@@ -83,42 +84,38 @@ class DPModel:
             model = pickle.load(open('models/'+file+'_'+out_feature+'_final_Voting_Model.pickle.dat', "rb"))
             best_model = pickle.load(open('models/'+file+'_'+out_feature+'_'+model_type+'_final_Best_Model.pickle.dat', "rb"))
         elif best_flag:
-            model = best_model = pickle.load(open('models/'+file+'_'+out_feature+'_'+model_type+'_final_Best_Model.pickle.dat', "rb"))
+            model = best_model = pickle.load(open(f"models/trained_xgboost_model_update_{out_feature}_final.pickle.dat", "rb"))
         
-        # Extract feature names
-        json_trans_path = 'model_space/trans_feats'+'_'+out_feature+"_"+'.json'
-        json_model_path = 'model_space/model_feats'+'_'+out_feature+'_'+'.json'
+        # # Extract feature names
+        # json_trans_path = 'model_space/trans_feats'+'_'+out_feature+"_"+'.json'
+        # json_model_path = 'model_space/model_feats'+'_'+out_feature+'_'+'.json'
 
-        # Read the JSON file and convert its contents into a Python list
-        with open(json_trans_path, 'r') as json_file:
-            trans_list = json.load(json_file)
-        with open(json_model_path, 'r') as json_file:
-            model_list = json.load(json_file)
+        # # Read the JSON file and convert its contents into a Python list
+        # with open(json_trans_path, 'r') as json_file:
+        #     trans_list = json.load(json_file)
+        # with open(json_model_path, 'r') as json_file:
+        #     model_list = json.load(json_file)
 
-        # Function to reconstruct the original list from the serialized format
-        def restore_order(item):
-            return item['value']
+        # # Function to reconstruct the original list from the serialized format
+        # def restore_order(item):
+        #     return item['value']
 
-        # Reconstruct the original list while preserving the order
-        trans_feats = [restore_order(item) for item in trans_list]
-        model_feats = [restore_order(item) for item in model_list]
+        # # Reconstruct the original list while preserving the order
+        # trans_feats = [restore_order(item) for item in trans_list]
+        # model_feats = [restore_order(item) for item in model_list]
  
-        return model, trans_feats, model_feats
+        return model
     
-    def process_target(self, dl_obj, target_name: str, vote_flag: bool=False, meta_flag: bool=False, 
-                        best_flag: bool=True, file: str='bf', model_type: str='xgb') -> Tuple[str, np.array]:
+    def process_target(self, dl_obj, CHUNK_SIZE: int, COMID_COL_NAME: str, target_name: str, final_model_features_from_file: list,
+                        vote_flag: bool=False, meta_flag: bool=False, best_flag: bool=True, file: str='bf', model_type: str='xgb') -> None:
         
-        # dl_obj.addExtraFeatures(target_name) # already included in data
-        
-        if target_name == 'Y_bf':
+        PREDICTIONS_OUTPUT_DIR = f'data/{target_name}_out/'
+        os.makedirs(PREDICTIONS_OUTPUT_DIR, exist_ok=True)
+        if target_name == 'TW_bf':
             model_type = 'xgb'
             x_transform = False
             y_transform = True
-        elif target_name == 'Y_in':
-            model_type = 'xgb'
-            x_transform = False
-            y_transform = True
-        elif target_name == 'TW_bf':
+        elif target_name == 'Y_bf':
             model_type = 'xgb'
             x_transform = False
             y_transform = True
@@ -127,29 +124,64 @@ class DPModel:
             x_transform = False
             y_transform = True
 
-        model, trans_feats, model_feats = self.loadModel(target_name, vote_flag=False, meta_flag=False, 
+        model = self.loadModel(target_name, vote_flag=False, meta_flag=False, 
                                       best_flag=True, file='NWM', model_type=model_type)
 
-        dl_obj.transformXData(out_feature=target_name, trans_feats=trans_feats,
-                                t_type='power', x_transform=x_transform)
+        # dl_obj.transformXData(out_feature=target_name, trans_feats=trans_feats,
+        #                         t_type='power', x_transform=x_transform)
         # has_missing_y = np.isnan(dl_obj.data).any()
         rows_with_nan = dl_obj.data[dl_obj.data.isnull().any(axis=1)]
         # if has_missing_y:
         print("Part2 Rows with NaN values:")
         print(rows_with_nan)
 
-        data_in = dl_obj.buildPCA(target_name)
+        # data_in = dl_obj.buildPCA(target_name)
 
-        y_pred_label = 'owp_' + target_name
-        if target_name.endswith("in"):
-            y_pred_label = y_pred_label+'chan'
-        y_pred_label = y_pred_label.lower()
-        data_in = data_in[model_feats] # [model.feature_names_in_]# [model_feats]
-        preds_all = model.predict(data_in)
-        preds_all = dl_obj.transformYData(out_feature=target_name, data=preds_all, t_type='power', 
-                                           y_transform=y_transform)
-        
-        return y_pred_label, preds_all
+        print(f"Starting prediction in chunks of {CHUNK_SIZE} rows...")
+        chunk_num_counter = 0
+        chunk_files_to_cleanup = []
+
+        for i in range(0, len(dl_obj.data), CHUNK_SIZE):
+            chunk_df = dl_obj.data.iloc[i : i + CHUNK_SIZE]
+
+            if chunk_df.empty:
+                continue
+
+            print(f"  Processing chunk {chunk_num_counter + 1} ({len(chunk_df)} rows)...")
+
+
+            comids = chunk_df[COMID_COL_NAME].copy()
+
+            X_predict = chunk_df[final_model_features_from_file]
+            
+            log_predictions = model.predict(X_predict)
+
+            predictions_original_scale = np.abs(np.expm1(log_predictions))
+            result_chunk_df = pd.DataFrame({
+                COMID_COL_NAME: comids,
+                'prediction': predictions_original_scale 
+            })
+
+            # 3e. Save the results chunk to a Parquet file
+            output_filename = os.path.join(PREDICTIONS_OUTPUT_DIR, f"predictions_chunk_{chunk_num_counter}.parquet")
+            result_chunk_df.to_parquet(output_filename, index=False, engine='pyarrow')
+            chunk_files_to_cleanup.append(output_filename)
+            print(f"  Saved {output_filename} ({len(result_chunk_df)} rows)")
+            
+            chunk_num_counter += 1
+
+        # Read and concatenate all files
+        df_concat = pd.concat([pd.read_parquet(file) for file in chunk_files_to_cleanup], ignore_index=True)
+
+        df_concat.to_parquet(f"{PREDICTIONS_OUTPUT_DIR}/{target_name}_predictions.parquet", index=False, engine='pyarrow')
+        for file_path in chunk_files_to_cleanup:
+            try:
+                os.remove(file_path)
+            except OSError as e:
+                print(f"  Error removing file {file_path}: {e}")
+        print(f"\nFinished processing. Predictions saved in '{PREDICTIONS_OUTPUT_DIR}'. Total chunks processed: {chunk_num_counter}")
+
+        return
     
     def checkBounds(self, df):
         mask = df['owp_tw_inchan'] > df['owp_tw_bf']
@@ -171,17 +203,18 @@ class RunDeploy:
             taken from bash script
         """
         nthreads     = int(argv[0])
-        SI           = True
+        SI           = True # all in SI by default
         rand_state   = 105
-        os.chdir('/mnt/d/Lynker/FEMA_HECRAS/bankfull_W_D/deployment')
 
-        # Load data
-        start = 0#2500000
-        end = 500000#2647455
-        print(end)
-        dl_obj = dataloader.DataLoader(rand_state)
-        dl_obj.readFiles(start, end)
-        dl_obj.imputeData()
+        # Additional parameters
+        vote_flag           = False
+        meta_flag           = False
+        best_flag           = True
+        file                = 'bf'
+        model_type          = 'xgb'
+        log_y_t             = True
+        CHUNK_SIZE          = 250000
+        COMID_COL_NAME      = 'FEATUREID'
 
         # Load targets
         temp        = json.load(open('data/model_feature_names.json'))
@@ -189,42 +222,22 @@ class RunDeploy:
         # target_list = ['TW_bf', 'TW_in']
         out_vars    = []
         del temp
+        for target_name in tqdm(target_list):
+            print(f"\n{'$'*75}")
+            print(f" Processing: {target_name}")
+            print(f"{'$'*75}")
+            # Load data
+            dl_obj = dataloader.DataLoader(rand_state, target_name)
+            dl_obj.readFiles()
+            dl_obj.imputeData()
+            dl_obj.engineer_features()
+            final_model_features_from_file = dl_obj.clean_predictors(COMID_COL_NAME)
 
-        # Additional parameters
-        vote_flag   = False
-        meta_flag   = False
-        best_flag   = True
-        file        = 'bf'
-        model_type  = 'xgb'
-        log_y_t     = False
-        
-        deploy_obj = DPModel(rand_state)
-        
-        results = []
+            deploy_obj = DPModel(rand_state)
+            
+            deploy_obj.process_target(dl_obj, CHUNK_SIZE, COMID_COL_NAME, target_name, final_model_features_from_file, vote_flag, meta_flag, best_flag, file, model_type)
 
-        # Parallelize the for loop
-        # for target_name in tqdm(target_list):
-        #     # Call the deploy_obj.process_target function with the specified arguments
-        #     result = deploy_obj.process_target(dl_obj, target_name, vote_flag, meta_flag, best_flag, file, model_type)
-        #     # Append the result to the results list
-        #     results.append(result)
-        results = Parallel(n_jobs=nthreads, backend="multiprocessing")(delayed(deploy_obj.process_target)(dl_obj, target_name, vote_flag, meta_flag, best_flag, file, model_type) for target_name in tqdm(target_list))
-        
-        # Unpack the results
-        for y_pred_label, preds_all in results:
-            out_vars.append(y_pred_label)
-            if log_y_t:
-                dl_obj.data[y_pred_label] = np.exp(preds_all)
-            else:
-                dl_obj.data[y_pred_label] = preds_all
-            if SI:
-                dl_obj.data[y_pred_label] = dl_obj.data[y_pred_label] * 0.3048
-    
-        out_vars.append('FEATUREID')
-        out_df = dl_obj.data[out_vars]
-        out_df = deploy_obj.checkBounds(out_df)
-        out_df.to_parquet('data/new_exports'+str(end)+'.parquet')
-        print("\n ------------- ML estimates complete ----------- \n")
+        print("\n ------------- ML inference complete ----------- \n")
         return
 
 if __name__ == "__main__":
