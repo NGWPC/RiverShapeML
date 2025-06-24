@@ -171,10 +171,10 @@ class MlModel:
         elif train_type == "NWIS" and "Y_" in out_feature:
             data_path = self.target_data_path = 'data/nwis_depth_pred_tar_up.parquet'
         elif train_type == "NWM" and "TW_" in out_feature:
-            data_path = self.target_data_path = 'data/nwm_width_pred_tar_up.parquet'
+            data_path = self.target_data_path = 'data/ripple/nwm_width_pred_tar_up.parquet'
         elif train_type == "NWM" and "Y_" in out_feature:
-            data_path = self.target_data_path = 'data/nwm_depth_pred_tar_up.parquet'
-        auxiliary_data_path = 'data/auxiliary_data.parquet'
+            data_path = self.target_data_path = 'data/ripple/nwm_depth_pred_tar_up.parquet'
+        auxiliary_data_path = 'data/ripple/auxiliary_data.parquet'
 
         data_loader = dataloader.DataLoader(data_path=data_path,
                                             auxiliary_data_path=auxiliary_data_path,
@@ -295,8 +295,6 @@ class MlModel:
 
         # ___________________________________________________
         # Do a k-fold cross validation on models
-        # Optimum n_splits = 5, n_repeats = 3
-        # for larger datasets n_splits = 3, n_repeats = 1, cpu = 5
         cv = RepeatedKFold(n_splits = 3, n_repeats = 1, random_state = self.rand_state)
         for model_key in models.keys():
             print('Running GridSearchCV for model: %s.' % model_key)
@@ -314,10 +312,9 @@ class MlModel:
                     temp.append(deval_f(x))
                 param[k] = temp
                 del temp
-            grid_search = RandomizedSearchCV(estimator=model, param_distributions=param,
-                                 n_iter=40, cv=cv, scoring="neg_mean_squared_error", n_jobs=5)
-            # grid_search = GridSearchCV(estimator=model, param_grid=param, n_jobs = nthreads, cv = cv,
-            #                            scoring="neg_mean_squared_error") # neg_root_mean_squared_error
+            grid_search = RandomizedSearchCV(estimator=model, param_distributions=param, n_iter=40, cv=cv, scoring="neg_mean_squared_error", n_jobs=5)
+            #grid_search = GridSearchCV(estimator=model, param_grid=param, n_jobs = 3, cv = cv,
+            #                           scoring="neg_mean_squared_error") # neg_root_mean_squared_error
             if model_key == 'ard' or model_key == 'knr' or model_key == 'mlp':
                 grid_search.fit(self.train_x, self.train_y)
             else:
