@@ -6,6 +6,7 @@ import os
 import json
 import re
 import fnmatch
+from pyproj import Transformer
 from sklearn.preprocessing import PowerTransformer, QuantileTransformer, StandardScaler, RobustScaler, MinMaxScaler, MaxAbsScaler, FunctionTransformer
 
 
@@ -26,8 +27,9 @@ class DataLoader:
         
     """
     # ml_inputs  nwm_conus_input
-    def __init__(self, rand_state: int, data_path: str = 'data/ml_inputs.parquet') -> None:
+    def __init__(self, rand_state: int, out_feature: str, data_path: str = 'data/ml_inputs.parquet') -> None:
         pd.options.display.max_columns  = 60
+        self.out_feature                = out_feature
         self.data_path                  = data_path
         self.data                       = pd.DataFrame([])
         self.rand_state                 = rand_state
@@ -41,50 +43,56 @@ class DataLoader:
         if not os.path.isdir(os.path.join(os.getcwd(),'model_space/')):
             os.mkdir(os.path.join(os.getcwd(),'model_space/'))
 
-    def readFiles(self, start, end) -> None:
+    def readFiles(self) -> None:
         """ Read files from the directories
         """
         try:
             self.data = pd.read_parquet(self.data_path, engine='pyarrow')
-            self.data = self.data.iloc[start:end] # self.data = self.data.iloc[2500000:2647455]
             self.data.reset_index(drop=True, inplace=True)
         except:
             print('Wrong address or data format. Please use correct parquet file.')
         
-        self.data = self.data[set(self.data.columns.to_list()) - set(['geometry','NHDFlowline','full_cats',
-                                                                      'gridcode','number_unique_peaks','non_zero_years',
-                                                                      'toCOMID','Hydroseq','RPUID','FromNode',
-                                                                      'ToNode','VPUID','hy_cats','geometry_poly',
-                                                                      'REACHCODE','sourcefc','comid'])]
-        # Find string columns (debug)
-        # string_columns = []
-        # # Iterate through each column and check if it contains string values
-        # for col in self.data.columns:
-        #     if self.data[col].dtype == 'O':  # 'O' represents object type (strings) in Pandas
-        #         string_columns.append(col)  
-        # print(string_columns)
         return
 
-    # --------------------------- Add Binary Features --------------------------- #
-    def addExtraFeatures(self, target_name: str) -> None:
-        # Add VAA dummy
-        self.data['vaa_dummy'] = self.data['roughness'].isnull().values
-        self.data['vaa_dummy'] = self.data['vaa_dummy'] * 1
+    # --------------------------- Add Features --------------------------- #
+    def engineer_features(self, center_x=-22894.21, center_y=-281.82):
+        """
+        Applies all feature engineering steps to the input DataFrame.
+        This includes creating interaction terms, log transforms, and one-hot encoding.
+        """
+        epsilon = 1e-6 
 
-        # Add Scat dummy
-        self.data['scat_dummy'] = self.data['BFICat'].isnull().values
-        self.data['scat_dummy'] = self.data['scat_dummy'] * 1
+        self.data['StreamPower_Index'] = self.data['nwm_max'] * self.data['slope']
+        self.data['unit_discharge'] = self.data['bf_ff'] / (self.data['TotDASqKM'] + epsilon)
+        self.data['vegetation_stability_index'] = self.data['LAI'] / (self.data['slope'] + epsilon)
+        self.data['rock_resistance_index'] = self.data['RckDepWs'] * self.data['slope']
+        self.data['log_discharge'] = np.log1p(self.data['bf_ff'])
+        self.data['log_drainage_area'] = np.log1p(self.data['TotDASqKM'])
+        self.data['slope_squared'] = self.data['slope']**2
+        self.data['Runoff_Stability_Index'] = self.data['qsb_tavg'] / (self.data['bf_ff'] + epsilon)
+        self.data['Runoff_Stability_Index'] = self.data['Runoff_Stability_Index'].clip(0, 1)
+        self.data['BankStability_Index'] = self.data['LAI'] / (self.data['StreamPower_Index'] + epsilon)
+        self.data['Erodibility_Index'] = self.data['StreamPower_Index'] * self.data['RckDepWs']
+        self.data['Sinuosity_Slope_Ratio'] = self.data['Sinuosity'] / (self.data['slope'] + epsilon)
 
-        # Add discharge dummy
-        if target_name.endswith("bf"):
-            self.data['bf_ff'] = np.nan
-            self.data['NWM'] = self.data['rp_2']
-            self.data['discharge_dummy'] = 3
+        # --- One-hot encode categorical features ---
+        print("One-hot encoding 'flowline_type'...")
+        self.data = pd.get_dummies(self.data, columns=['flowline_type'], prefix='flowline')
+
+        if 'lat' in self.data.columns and 'long' in self.data.columns:
+            print("  -> Engineering spatial features from lat/lon...")
+            transformer = Transformer.from_crs("EPSG:4326", "EPSG:5070", always_xy=True)
+            easting, northing = transformer.transform(self.data['long'].values, self.data['lat'].values)
+            self.data['projected_x'] = easting
+            self.data['projected_y'] = northing
+            
+            if center_x is not None and center_y is not None:
+                self.data['dist_from_center'] = np.sqrt((self.data['projected_x'] - center_x)**2 + (self.data['projected_y'] - center_y)**2)
+                self.data['angle_from_center'] = np.arctan2(self.data['projected_y'] - center_y, self.data['projected_x'] - center_x)
         else:
-            self.data['in_ff'] = np.nan
-            self.data['NWM'] = self.data['rp_1.5']
-            self.data['discharge_dummy'] = 3
-        return
+            print("  -> WARNING: 'latitude' or 'longitude' columns not found. Skipping spatial feature engineering.")
+        
+        return self.data
 
     # --------------------------- Imputation --------------------------- #
     def imputeData(self) -> None:
@@ -93,12 +101,34 @@ class DataLoader:
         if impute == "zero":
             self.data = self.data.fillna(-1) # a temporary brute force way to deal with NAN
         if impute == "median":
-            median_values_df = pd.read_parquet('models/median_imput.parquet')
-            for col in self.data.columns:
-                if col in median_values_df.index:
-                    median_value = median_values_df.loc[col, 'Median']
-                    self.data[col].fillna(median_value, inplace=True)
+            IMPUTATION_VALUES_PATH = f"model_space/metrics/median_imput_{self.out_feature}.parquet" 
+            try:
+                median_values_df = pd.read_parquet(IMPUTATION_VALUES_PATH)
+                median_values_to_impute = median_values_df['Median'].to_dict()
+                print(f"Successfully loaded median values for {len(median_values_to_impute)} features.")
+            except FileNotFoundError:
+                print(f"CRITICAL ERROR: Imputation file not found at '{IMPUTATION_VALUES_PATH}'. Exiting.")
+                exit()
+            print(f"Imputing missing values using saved medians...")
+            self.data.fillna(value=median_values_to_impute, inplace=True)
+
         return
+    
+    #---------------------------  Feature Selection ---------------------------- #
+    def clean_predictors(self, COMID_COL_NAME) -> list:
+        FEATURE_ORDER_PATH = f"model_space/final_model_features_{self.out_feature}.json"
+        with open(FEATURE_ORDER_PATH, 'r') as f:
+            final_model_features_from_file = json.load(f)
+        print(f"Loaded model expecting {len(final_model_features_from_file)} features in a specific order.")
+
+        required_cols = final_model_features_from_file + [COMID_COL_NAME]
+        for col in required_cols:
+            if col not in self.data.columns:
+                print(f"  WARNING: Column '{col}' not found in input data. Adding it and filling with 0.")
+                self.data[col] = 0
+        print("Feature engineering and column alignment complete.")
+
+        return final_model_features_from_file
 
     # --------------------------- Dimention Reduction --------------------------- #     
     # PCA model

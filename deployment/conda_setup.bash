@@ -77,11 +77,11 @@ if [ $? -eq 0 ]; then
             conda env list | grep "${@}" >/dev/null 2>/dev/null
         }
 
-        if find_in_conda_env ".*WD-model.*" ; then
+        if find_in_conda_env ".*WD-env.*" ; then
             echo "Environment found..."
             conda info --envs
-            conda activate WD-model
-            echo "(WD-model) environment activated"
+            conda activate WD-env
+            echo "(WD-env) environment activated"
             echo "Running scripts..."
 
             # Main ml estimations

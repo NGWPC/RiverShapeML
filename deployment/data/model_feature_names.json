@@ -179,9 +179,8 @@
     ],
     "out_features": [
         "Y_bf",
-        "Y_in",
         "TW_bf",
-        "TW_in"
+        "r"
     ],
     "id_features": [
         "siteID",
