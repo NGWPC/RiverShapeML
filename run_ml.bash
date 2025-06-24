@@ -100,7 +100,7 @@ echo "R2 treshold to cut = ${r}"
 echo "count treshold to cut = ${t}"
 
 start=`date +%s`
-python3 model.py $c $n $x $y $r $t > "${c}_Ml_output.out"
+python3 model.py $c $n $x $y $r $t > "${c}_Ml_output.out" 2> "${c}_Ml_error.out"
 end=`date +%s`
 echo Execution time was `expr $end - $start` seconds.
 

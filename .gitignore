@@ -11,6 +11,7 @@ __pycache__/
 !deployment/model_space/metrics/median_imput_r.parquet
 !deployment/model_space/metrics/median_imput_TW_bf.parquet
 !deployment/model_space/metrics/median_imput_Y_bf.parquet
+notes.md
 *.csv
 *test*.py
 *test*.ipynb
